@@ -37,8 +37,8 @@
         <button id="authBtn" onclick="togglePrivateView()">Unlock Owner</button>
     </div>
 
-    <!-- 1. INPUT OPERASIONAL HARIAN (PUBLIK UNTUK SRI / TIM) -->
-    <h2>Form Input Operasional Harian</h2>
+    <!-- 1. INPUT OPERASIONAL HARIAN & JOBLIST (PUBLIK) -->
+    <h2>Form Input & Operasional Tim</h2>
     <div class="grid" style="margin-top: 15px;">
         <!-- Form Transaksi Kas -->
         <div class="card">
@@ -46,13 +46,13 @@
             <form id="cashForm" onsubmit="saveTransaction(event)">
                 <label style="font-size:12px;">Jenis Transaksi:</label>
                 <select id="txType">
-                    <option value="masuk">Pemasukan (Omzet/Servis)</option>
-                    <option value="keluar">Pengeluaran (Operasional)</option>
+                    <option value="masuk">Pemasukan (Omzet/Servis/Affiliate)</option>
+                    <option value="keluar">Pengeluaran (Operasional/Sparepart)</option>
                 </select>
                 <label style="font-size:12px;">Nominal (Rp):</label>
                 <input type="number" id="txAmount" placeholder="Contoh: 150000" required>
                 <label style="font-size:12px;">Keterangan:</label>
-                <input type="text" id="txDesc" placeholder="Servis Laptop / Beli Sparepart" required>
+                <input type="text" id="txDesc" placeholder="Contoh: servis laptop / affiliate tiktok" required>
                 <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">Simpan Ke Database</button>
             </form>
         </div>
@@ -69,58 +69,71 @@
             </select>
 
             <div id="joblistContainer">
-                <!-- Joblist Sri -->
                 <div class="job-item" data-employee="sri">
                     <ul class="task-list">
-                        <li style="border-left-color: #38bdf8;">
-                            <strong style="color: #38bdf8;">Sri:</strong> Catat arus kas masuk & keluar PSC harian secara disiplin di aplikasi ini.
-                        </li>
-                        <li style="border-left-color: #38bdf8;">
-                            <strong style="color: #38bdf8;">Sri:</strong> Monitor & rekap stok sparepart bekas/baru PSC yang terpakai.
-                        </li>
-                        <li style="border-left-color: #38bdf8;">
-                            <strong style="color: #38bdf8;">Sri:</strong> Minta review Bintang 5 Google Maps ke setiap pelanggan servis di tempat.
-                        </li>
+                        <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Catat arus kas masuk & keluar PSC harian secara disiplin di aplikasi ini.</li>
+                        <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Monitor & rekap stok sparepart bekas/baru PSC yang terpakai.</li>
+                        <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Minta review Bintang 5 Google Maps ke setiap pelanggan servis di tempat.</li>
                     </ul>
                 </div>
-
-                <!-- Joblist Wina -->
                 <div class="job-item" data-employee="wina">
                     <ul class="task-list">
-                        <li style="border-left-color: #ec4899;">
-                            <strong style="color: #ec4899;">Wina:</strong> Fokus buat konten *hyper-local* target Mahasiswa Jatinangor (Unpad/ITB/IPDN).
-                        </li>
-                        <li style="border-left-color: #ec4899;">
-                            <strong style="color: #ec4899;">Wina:</strong> Promosikan Paket "Thermal Paste & Pembersihan Laptop Rp75rb".
-                        </li>
-                        <li style="border-left-color: #ec4899;">
-                            <strong style="color: #ec4899;">Wina:</strong> Pastikan setiap video TikTok/IG menyantumkan lokasi PSC & Link WA.
-                        </li>
+                        <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Fokus buat konten *hyper-local* target Mahasiswa Jatinangor (Unpad/ITB/IPDN).</li>
+                        <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Promosikan Paket "Thermal Paste & Pembersihan Laptop Rp75rb".</li>
+                        <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Bantu buat video affiliate elektronik/laptop untuk PSD.</li>
                     </ul>
                 </div>
-
-                <!-- Joblist Amar -->
                 <div class="job-item" data-employee="amar">
                     <ul class="task-list">
-                        <li style="border-left-color: #eab308;">
-                            <strong style="color: #eab308;">Amar:</strong> Kecepatan & ketepatan pengerjaan servis laptop (Turnaround Time cepat).
-                        </li>
-                        <li style="border-left-color: #eab308;">
-                            <strong style="color: #eab308;">Amar:</strong> Saat jam servis sepi, wajib dampingi Wina buat konten edukasi teknis laptop.
-                        </li>
-                        <li style="border-left-color: #eab308;">
-                            <strong style="color: #eab308;">Amar:</strong> Bantu gerilya promosi jasa servis di grup-grup Facebook lokal.
-                        </li>
+                        <li style="border-left-color: #eab308;"><strong style="color: #eab308;">Amar:</strong> Kecepatan & ketepatan pengerjaan servis laptop (Turnaround Time cepat).</li>
+                        <li style="border-left-color: #eab308;"><strong style="color: #eab308;">Amar:</strong> Saat jam servis sepi, wajib dampingi Wina buat konten edukasi teknis laptop.</li>
+                        <li style="border-left-color: #eab308;"><strong style="color: #eab308;">Amar:</strong> Bantu gerilya promosi jasa servis di grup-grup Facebook lokal.</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. TAMPILAN RAHASIA (OWNER ONLY) -->
+    <!-- 3. TABEL RIWAYAT TRANSAKSI & KOMISI (PUBLIK UNTUK DIAKSES SIAPAPUN) -->
+    <div class="card" style="margin-bottom: 25px;">
+        <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">📊 Riwayat Arus Kas & Estimasi Komisi Karyawan</h3>
+        <div style="overflow-x: auto;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Jenis</th>
+                        <th>Keterangan</th>
+                        <th>Nominal</th>
+                    </tr>
+                </thead>
+                <tbody id="publicTxTableBody">
+                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Memuat data transaksi...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Panel Komisi Otomatis -->
+        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px;">
+            <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155;">
+                <h4 style="color: #38bdf8; font-size: 13px;">Komisi Sri (1% Omzet)</h4>
+                <div id="komisiSri" style="font-size: 18px; font-weight: bold; color: #4ade80; margin-top: 5px;">Rp 0</div>
+            </div>
+            <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155;">
+                <h4 style="color: #eab308; font-size: 13px;">Komisi Amar (5% Servis + 20% Affiliate)</h4>
+                <div id="komisiAmar" style="font-size: 18px; font-weight: bold; color: #4ade80; margin-top: 5px;">Rp 0</div>
+            </div>
+            <div style="background: #0f172a; padding: 12px; border-radius: 6px; border: 1px solid #334155;">
+                <h4 style="color: #ec4899; font-size: 13px;">Komisi Wina (5% Servis + 20% Affiliate)</h4>
+                <div id="komisiWina" style="font-size: 18px; font-weight: bold; color: #4ade80; margin-top: 5px;">Rp 0</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TAMPILAN RAHASIA (OWNER ONLY) -->
     <div id="privateSection" class="hidden">
         
-        <h2 style="color: #4ade80; margin-top: 20px;">1. Posisi Kas & Rekap Transaksi Real-Time (Owner Only)</h2>
+        <h2 style="color: #4ade80; margin-top: 20px;">1. Posisi Kas Operasional Usaha (Owner Only)</h2>
         <div class="grid" style="margin-top: 10px;">
             <div class="card">
                 <h3>KAS OPERASIONAL (JAGO)</h3>
@@ -134,23 +147,6 @@
                 <h3>SETORAN COD SPX (BRI)</h3>
                 <div class="amount" style="color:#fbbf24;">KHUSUS KURIR</div>
             </div>
-        </div>
-
-        <div class="card" style="margin-bottom: 20px;">
-            <h3 style="color: #38bdf8;">Riwayat Transaksi Masuk Database (Firebase)</h3>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Waktu</th>
-                        <th>Jenis</th>
-                        <th>Keterangan</th>
-                        <th>Nominal</th>
-                    </tr>
-                </thead>
-                <tbody id="txTableBody">
-                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Menghubungkan ke database...</td></tr>
-                </tbody>
-            </table>
         </div>
 
         <h2 style="color: #22c55e; margin-top: 20px;">2. Agenda Strategis Komisaris</h2>
@@ -187,7 +183,7 @@
     </div>
 
     <script>
-        // CONFIG FIREBASE TERUPDATE DARI AKUN PAK KOMISARIS
+        // CONFIG FIREBASE
         const firebaseConfig = {
           apiKey: "AIzaSyBwFTcdXMdHbGLE5HsMtOiYs06WfZAuNs0",
           authDomain: "psi-app-e9ccc.firebaseapp.com",
@@ -198,13 +194,16 @@
           measurementId: "G-2Y7XJDT3F6"
         };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
         const PIN_KOMISARIS = "1234";
 
-        // Filter Joblist berdasarkan Dropdown
+        // Jalankan listener data publik secara real-time saat halaman dibuka
+        window.onload = function() {
+            loadPublicTransactions();
+        };
+
         function filterJoblist() {
             const selected = document.getElementById('employeeSelect').value;
             const items = document.querySelectorAll('.job-item');
@@ -228,7 +227,6 @@
                     privateSec.classList.remove('hidden');
                     authBtn.innerText = "Lock Owner";
                     authBtn.style.background = "#dc2626";
-                    loadTransactions();
                 } else if (inputPin !== null) {
                     alert("PIN Salah! Akses ditolak.");
                 }
@@ -239,7 +237,7 @@
             }
         }
 
-        // Simpan Transaksi ke Firebase Firestore
+        // Simpan Transaksi dan Clear Form Otomatis
         function saveTransaction(e) {
             e.preventDefault();
             const type = document.getElementById('txType').value;
@@ -253,27 +251,51 @@
                 timestamp: firebase.firestore.FieldValue.serverTimestamp()
             })
             .then(() => {
-                alert("Transaksi Berhasil Disimpan Ke Database!");
-                document.getElementById('cashForm').reset();
+                alert("Transaksi Berhasil Disimpan!");
+                // Clear form kembali bersih
+                document.getElementById('txAmount').value = '';
+                document.getElementById('txDesc').value = '';
+                document.getElementById('txType').selectedIndex = 0;
             })
             .catch((error) => {
                 alert("Gagal menyimpan data: " + error.message);
             });
         }
 
-        // Load Transaksi Real-time untuk Owner
-        function loadTransactions() {
+        // Load Tabel Publik & Hitung Komisi Otomatis
+        function loadPublicTransactions() {
             db.collection("transactions").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
-                const tbody = document.getElementById('txTableBody');
+                const tbody = document.getElementById('publicTxTableBody');
                 tbody.innerHTML = "";
+                
                 if(snapshot.empty) {
-                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Belum ada transaksi diinput.</td></tr>`;
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Belum ada transaksi tercatat.</td></tr>`;
+                    document.getElementById('komisiSri').innerText = "Rp 0";
+                    document.getElementById('komisiAmar').innerText = "Rp 0";
+                    document.getElementById('komisiWina').innerText = "Rp 0";
                     return;
                 }
+
+                let totalPemasukan = 0;
+                let totalKomisiServis = 0;
+                let totalKomisiAffiliate = 0;
+
                 snapshot.forEach((doc) => {
                     const data = doc.data();
                     const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString('id-ID') : 'Baru saja';
                     const color = data.type === 'masuk' ? '#4ade80' : '#f87171';
+                    
+                    if(data.type === 'masuk') {
+                        totalPemasukan += data.amount;
+                        const ket = data.desc.toLowerCase();
+                        if(ket.includes('servis')) {
+                            totalKomisiServis += data.amount;
+                        }
+                        if(ket.includes('affiliate') || ket.includes('video')) {
+                            totalKomisiAffiliate += data.amount;
+                        }
+                    }
+
                     const row = `<tr>
                         <td>${date}</td>
                         <td style="color:${color}; font-weight:bold;">${data.type.toUpperCase()}</td>
@@ -282,8 +304,19 @@
                     </tr>`;
                     tbody.innerHTML += row;
                 });
+
+                // Hitung komisi sesuai aturan
+                // Sri: 1% dari total semua pemasukan
+                const komisiSriVal = totalPemasukan * 0.01;
+                // Amar & Wina: 5% dari servis + 20% dari affiliate/video
+                const komisiTeknisiVal = (totalKomisiServis * 0.05) + (totalKomisiAffiliate * 0.20);
+
+                document.getElementById('komisiSri').innerText = "Rp " + Math.round(komisiSriVal).toLocaleString('id-ID');
+                document.getElementById('komisiAmar').innerText = "Rp " + Math.round(komisiTeknisiVal).toLocaleString('id-ID');
+                document.getElementById('komisiWina').innerText = "Rp " + Math.round(komisiTeknisiVal).toLocaleString('id-ID');
+
             }, (error) => {
-                console.error("Error loading transactions:", error);
+                console.error("Error loading public transactions:", error);
             });
         }
     </script>
