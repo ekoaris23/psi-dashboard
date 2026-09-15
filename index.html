@@ -53,7 +53,7 @@
     <!-- 1. AREA DINAMIS KIRI & KANAN -->
     <div class="grid">
         
-        <!-- CARD KIRI (DINAMIS Sesuai Pilihan Dropdown) -->
+        <!-- CARD KIRI -->
         <div class="card" id="leftCard">
             <div id="leftDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
                 Silakan pilih nama karyawan di atas untuk membuka area kerja.
@@ -84,7 +84,7 @@
                 </div>
             </div>
 
-            <!-- Khusus Wina: Checklist & Focus Work -->
+            <!-- Khusus Wina -->
             <div id="winaLeftContent" class="hidden">
                 <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 10px;">🎬 Area Kerja Content Creator (Wina)</h3>
                 <h4 style="color: #ec4899; font-size: 13px; margin-bottom: 8px;">Checklist Tugas Harian Wina:</h4>
@@ -99,7 +99,7 @@
                 </div>
             </div>
 
-            <!-- Khusus Amar: Checklist & Technical Work -->
+            <!-- Khusus Amar -->
             <div id="amarLeftContent" class="hidden">
                 <h3 style="color: #eab308; font-size: 15px; margin-bottom: 10px;">🛠️ Area Kerja Teknisi (Amar)</h3>
                 <h4 style="color: #eab308; font-size: 13px; margin-bottom: 8px;">Checklist Tugas Harian Amar:</h4>
@@ -115,14 +115,13 @@
             </div>
         </div>
 
-        <!-- CARD KANAN (Joblist Spesifik Sesuai Pilihan) -->
+        <!-- CARD KANAN -->
         <div class="card" id="rightCard">
             <div id="rightDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
                 Joblist spesifik akan tampil setelah nama karyawan dipilih.
             </div>
 
             <div id="joblistContainer" class="hidden">
-                <!-- Joblist Sri -->
                 <div class="job-item hidden" data-employee="sri">
                     <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Sri</h3>
                     <ul class="task-list">
@@ -131,8 +130,6 @@
                         <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Minta review Bintang 5 Google Maps ke setiap pelanggan servis di tempat.</li>
                     </ul>
                 </div>
-
-                <!-- Joblist Wina -->
                 <div class="job-item hidden" data-employee="wina">
                     <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Wina</h3>
                     <ul class="task-list">
@@ -141,8 +138,6 @@
                         <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Bantu buat video affiliate elektronik/laptop untuk PSD.</li>
                     </ul>
                 </div>
-
-                <!-- Joblist Amar -->
                 <div class="job-item hidden" data-employee="amar">
                     <h3 style="color: #eab308; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Amar</h3>
                     <ul class="task-list">
@@ -265,22 +260,18 @@
             loadPublicTransactions();
         };
 
-        // KONTROL DINAMIS SESUAI DROPDOWN NAMA KARYAWAN
         function filterJoblist() {
             const selected = document.getElementById('employeeSelect').value;
 
-            // Element Kiri
             const leftDefault = document.getElementById('leftDefaultMsg');
             const sriLeft = document.getElementById('sriLeftContent');
             const winaLeft = document.getElementById('winaLeftContent');
             const amarLeft = document.getElementById('amarLeftContent');
 
-            // Element Kanan
             const rightDefault = document.getElementById('rightDefaultMsg');
             const joblistContainer = document.getElementById('joblistContainer');
             const jobItems = document.querySelectorAll('.job-item');
 
-            // Reset semua tampilan dulu
             leftDefault.classList.add('hidden');
             sriLeft.classList.add('hidden');
             winaLeft.classList.add('hidden');
@@ -304,7 +295,6 @@
                     amarLeft.classList.remove('hidden');
                 }
 
-                // Tampilkan Joblist Kanan Spesifik
                 const activeJob = document.querySelector(`.job-item[data-employee="${selected}"]`);
                 if (activeJob) activeJob.classList.remove('hidden');
             }
@@ -330,31 +320,35 @@
             }
         }
 
+        // Simpan Transaksi (PERBAIKAN: Format Waktu Lokal & Form Clear Sempurna)
         function saveTransaction(e) {
             e.preventDefault();
             const type = document.getElementById('txType').value;
             const amount = Number(document.getElementById('txAmount').value);
             const desc = document.getElementById('txDesc').value;
+            const now = new Date();
+            const formattedTime = now.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
             db.collection("transactions").add({
                 type: type,
                 amount: amount,
                 desc: desc,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                timeStr: formattedTime,
+                createdAt: Date.now()
             })
             .then(() => {
-                alert("Transaksi Berhasil Disimpan!");
-                document.getElementById('txAmount').value = '';
-                document.getElementById('txDesc').value = '';
-                document.getElementById('txType').selectedIndex = 0;
+                alert("Transaksi Berhasil Disimpan Ke Database!");
+                // Clear Form Secara Total
+                document.getElementById('cashForm').reset();
             })
             .catch((error) => {
                 alert("Gagal menyimpan data: " + error.message);
             });
         }
 
+        // Load Tabel Publik Real-time (PERBAIKAN: Tanpa kendala query timestamp)
         function loadPublicTransactions() {
-            db.collection("transactions").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+            db.collection("transactions").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('publicTxTableBody');
                 tbody.innerHTML = "";
                 
@@ -370,15 +364,19 @@
                 let totalKomisiServis = 0;
                 let totalKomisiAffiliate = 0;
 
-                snapshot.forEach((doc) => {
-                    const data = doc.data();
-                    const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString('id-ID') : 'Baru saja';
+                // Sortir transaksi dari yang terbaru ke terlama
+                let docsArr = [];
+                snapshot.forEach(doc => docsArr.push(doc.data()));
+                docsArr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                docsArr.forEach((data) => {
+                    const date = data.timeStr || 'Baru saja';
                     const color = data.type === 'masuk' ? '#4ade80' : '#f87171';
                     
                     if(data.type === 'masuk') {
                         totalPemasukan += data.amount;
                         const ket = data.desc.toLowerCase();
-                        if(ket.includes('servis')) {
+                        if(ket.includes('servis') || ket.includes('service')) {
                             totalKomisiServis += data.amount;
                         }
                         if(ket.includes('affiliate') || ket.includes('video')) {
