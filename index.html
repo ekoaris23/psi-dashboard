@@ -25,6 +25,8 @@
         .task-list { list-style: none; margin-top: 10px; }
         .task-list li { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #38bdf8; font-size: 13px; }
         input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; }
+        .checkbox-item { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #38bdf8; font-size: 13px; }
+        .checkbox-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -37,53 +39,112 @@
         <button id="authBtn" onclick="togglePrivateView()">Unlock Owner</button>
     </div>
 
-    <!-- 1. INPUT OPERASIONAL HARIAN & JOBLIST (PUBLIK) -->
-    <h2>Form Input & Operasional Tim</h2>
-    <div class="grid" style="margin-top: 15px;">
-        <!-- Form Transaksi Kas -->
-        <div class="card">
-            <h3 style="color: #38bdf8; font-size: 15px;">💰 Input Arus Kas (Sri)</h3>
-            <form id="cashForm" onsubmit="saveTransaction(event)">
-                <label style="font-size:12px;">Jenis Transaksi:</label>
-                <select id="txType">
-                    <option value="masuk">Pemasukan (Omzet/Servis/Affiliate)</option>
-                    <option value="keluar">Pengeluaran (Operasional/Sparepart)</option>
-                </select>
-                <label style="font-size:12px;">Nominal (Rp):</label>
-                <input type="number" id="txAmount" placeholder="Contoh: 150000" required>
-                <label style="font-size:12px;">Keterangan:</label>
-                <input type="text" id="txDesc" placeholder="Contoh: servis laptop / affiliate tiktok" required>
-                <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">Simpan Ke Database</button>
-            </form>
+    <!-- PILIH AKUN / IDENTITAS KARYAWAN -->
+    <div class="card" style="margin-bottom: 15px; border-color: #38bdf8;">
+        <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
+        <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
+            <option value="none">-- Pilih Nama Karyawan --</option>
+            <option value="sri">Sri (HRD / Asisten)</option>
+            <option value="wina">Wina (Content Creator)</option>
+            <option value="amar">Amar (Teknisi)</option>
+        </select>
+    </div>
+
+    <!-- 1. AREA DINAMIS KIRI & KANAN -->
+    <div class="grid">
+        
+        <!-- CARD KIRI (DINAMIS Sesuai Pilihan Dropdown) -->
+        <div class="card" id="leftCard">
+            <div id="leftDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
+                Silakan pilih nama karyawan di atas untuk membuka area kerja.
+            </div>
+
+            <!-- Khusus Sri: Form Input + Checklist -->
+            <div id="sriLeftContent" class="hidden">
+                <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">💰 Input Arus Kas & Checklist (Sri)</h3>
+                <form id="cashForm" onsubmit="saveTransaction(event)">
+                    <label style="font-size:12px;">Jenis Transaksi:</label>
+                    <select id="txType">
+                        <option value="masuk">Pemasukan (Omzet/Servis/Affiliate)</option>
+                        <option value="keluar">Pengeluaran (Operasional/Sparepart)</option>
+                    </select>
+                    <label style="font-size:12px;">Nominal (Rp):</label>
+                    <input type="number" id="txAmount" placeholder="Contoh: 150000" required>
+                    <label style="font-size:12px;">Keterangan:</label>
+                    <input type="text" id="txDesc" placeholder="Contoh: servis laptop / beli sparepart" required>
+                    <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">Simpan Ke Database</button>
+                </form>
+
+                <h4 style="color: #38bdf8; font-size: 13px; margin-top: 15px; margin-bottom: 8px;">Checklist Tugas Harian Sri:</h4>
+                <div class="checkbox-item" style="border-left-color: #38bdf8;">
+                    <input type="checkbox" id="sriCheck1"> <label for="sriCheck1">Cek & Rekap transaksi kas harian</label>
+                </div>
+                <div class="checkbox-item" style="border-left-color: #38bdf8;">
+                    <input type="checkbox" id="sriCheck2"> <label for="sriCheck2">Update stok sparepart yang terpakai</label>
+                </div>
+            </div>
+
+            <!-- Khusus Wina: Checklist & Focus Work -->
+            <div id="winaLeftContent" class="hidden">
+                <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 10px;">🎬 Area Kerja Content Creator (Wina)</h3>
+                <h4 style="color: #ec4899; font-size: 13px; margin-bottom: 8px;">Checklist Tugas Harian Wina:</h4>
+                <div class="checkbox-item" style="border-left-color: #ec4899;">
+                    <input type="checkbox" id="winaCheck1"> <label for="winaCheck1">Upload 1 Video Promo Thermal Paste Mahasiswa</label>
+                </div>
+                <div class="checkbox-item" style="border-left-color: #ec4899;">
+                    <input type="checkbox" id="winaCheck2"> <label for="winaCheck2">Buat 1 Konten Video Affiliate Produk PSD</label>
+                </div>
+                <div class="checkbox-item" style="border-left-color: #ec4899;">
+                    <input type="checkbox" id="winaCheck3"> <label for="winaCheck3">Pastikan Tag Lokasi & Link WA Aktif</label>
+                </div>
+            </div>
+
+            <!-- Khusus Amar: Checklist & Technical Work -->
+            <div id="amarLeftContent" class="hidden">
+                <h3 style="color: #eab308; font-size: 15px; margin-bottom: 10px;">🛠️ Area Kerja Teknisi (Amar)</h3>
+                <h4 style="color: #eab308; font-size: 13px; margin-bottom: 8px;">Checklist Tugas Harian Amar:</h4>
+                <div class="checkbox-item" style="border-left-color: #eab308;">
+                    <input type="checkbox" id="amarCheck1"> <label for="amarCheck1">Selesaikan unit servis laptop yang masuk tepat waktu</label>
+                </div>
+                <div class="checkbox-item" style="border-left-color: #eab308;">
+                    <input type="checkbox" id="amarCheck2"> <label for="amarCheck2">Dampingi Wina buat konten edukasi teknis</label>
+                </div>
+                <div class="checkbox-item" style="border-left-color: #eab308;">
+                    <input type="checkbox" id="amarCheck3"> <label for="amarCheck3">Gerilya promosi jasa di grup Facebook lokal Jatinangor</label>
+                </div>
+            </div>
         </div>
 
-        <!-- Joblist Tim dengan Dropdown -->
-        <div class="card">
-            <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 8px;">📋 Joblist Tim Operasional</h3>
-            <label style="font-size:12px; color:#94a3b8;">Pilih Nama Karyawan:</label>
-            <select id="employeeSelect" onchange="filterJoblist()" style="border-color: #ec4899;">
-                <option value="all">-- Tampilkan Semua Joblist --</option>
-                <option value="sri">Sri (HRD / Asisten)</option>
-                <option value="wina">Wina (Content Creator)</option>
-                <option value="amar">Amar (Teknisi)</option>
-            </select>
+        <!-- CARD KANAN (Joblist Spesifik Sesuai Pilihan) -->
+        <div class="card" id="rightCard">
+            <div id="rightDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
+                Joblist spesifik akan tampil setelah nama karyawan dipilih.
+            </div>
 
-            <div id="joblistContainer">
-                <div class="job-item" data-employee="sri">
+            <div id="joblistContainer" class="hidden">
+                <!-- Joblist Sri -->
+                <div class="job-item hidden" data-employee="sri">
+                    <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Sri</h3>
                     <ul class="task-list">
                         <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Catat arus kas masuk & keluar PSC harian secara disiplin di aplikasi ini.</li>
                         <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Monitor & rekap stok sparepart bekas/baru PSC yang terpakai.</li>
                         <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Minta review Bintang 5 Google Maps ke setiap pelanggan servis di tempat.</li>
                     </ul>
                 </div>
-                <div class="job-item" data-employee="wina">
+
+                <!-- Joblist Wina -->
+                <div class="job-item hidden" data-employee="wina">
+                    <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Wina</h3>
                     <ul class="task-list">
                         <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Fokus buat konten *hyper-local* target Mahasiswa Jatinangor (Unpad/ITB/IPDN).</li>
                         <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Promosikan Paket "Thermal Paste & Pembersihan Laptop Rp75rb".</li>
                         <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Bantu buat video affiliate elektronik/laptop untuk PSD.</li>
                     </ul>
                 </div>
-                <div class="job-item" data-employee="amar">
+
+                <!-- Joblist Amar -->
+                <div class="job-item hidden" data-employee="amar">
+                    <h3 style="color: #eab308; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Amar</h3>
                     <ul class="task-list">
                         <li style="border-left-color: #eab308;"><strong style="color: #eab308;">Amar:</strong> Kecepatan & ketepatan pengerjaan servis laptop (Turnaround Time cepat).</li>
                         <li style="border-left-color: #eab308;"><strong style="color: #eab308;">Amar:</strong> Saat jam servis sepi, wajib dampingi Wina buat konten edukasi teknis laptop.</li>
@@ -92,9 +153,10 @@
                 </div>
             </div>
         </div>
+
     </div>
 
-    <!-- 3. TABEL RIWAYAT TRANSAKSI & KOMISI (PUBLIK UNTUK DIAKSES SIAPAPUN) -->
+    <!-- 2. TABEL RIWAYAT TRANSAKSI & KOMISI (PUBLIK) -->
     <div class="card" style="margin-bottom: 25px;">
         <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">📊 Riwayat Arus Kas & Estimasi Komisi Karyawan</h3>
         <div style="overflow-x: auto;">
@@ -130,7 +192,7 @@
         </div>
     </div>
 
-    <!-- 4. TAMPILAN RAHASIA (OWNER ONLY) -->
+    <!-- 3. TAMPILAN RAHASIA (OWNER ONLY) -->
     <div id="privateSection" class="hidden">
         
         <h2 style="color: #4ade80; margin-top: 20px;">1. Posisi Kas Operasional Usaha (Owner Only)</h2>
@@ -199,22 +261,53 @@
 
         const PIN_KOMISARIS = "1234";
 
-        // Jalankan listener data publik secara real-time saat halaman dibuka
         window.onload = function() {
             loadPublicTransactions();
         };
 
+        // KONTROL DINAMIS SESUAI DROPDOWN NAMA KARYAWAN
         function filterJoblist() {
             const selected = document.getElementById('employeeSelect').value;
-            const items = document.querySelectorAll('.job-item');
 
-            items.forEach(item => {
-                if (selected === 'all' || item.getAttribute('data-employee') === selected) {
-                    item.classList.remove('hidden');
-                } else {
-                    item.classList.add('hidden');
+            // Element Kiri
+            const leftDefault = document.getElementById('leftDefaultMsg');
+            const sriLeft = document.getElementById('sriLeftContent');
+            const winaLeft = document.getElementById('winaLeftContent');
+            const amarLeft = document.getElementById('amarLeftContent');
+
+            // Element Kanan
+            const rightDefault = document.getElementById('rightDefaultMsg');
+            const joblistContainer = document.getElementById('joblistContainer');
+            const jobItems = document.querySelectorAll('.job-item');
+
+            // Reset semua tampilan dulu
+            leftDefault.classList.add('hidden');
+            sriLeft.classList.add('hidden');
+            winaLeft.classList.add('hidden');
+            amarLeft.classList.add('hidden');
+
+            rightDefault.classList.add('hidden');
+            joblistContainer.classList.add('hidden');
+            jobItems.forEach(item => item.classList.add('hidden'));
+
+            if (selected === 'none') {
+                leftDefault.classList.remove('hidden');
+                rightDefault.classList.remove('hidden');
+            } else {
+                joblistContainer.classList.remove('hidden');
+                
+                if (selected === 'sri') {
+                    sriLeft.classList.remove('hidden');
+                } else if (selected === 'wina') {
+                    winaLeft.classList.remove('hidden');
+                } else if (selected === 'amar') {
+                    amarLeft.classList.remove('hidden');
                 }
-            });
+
+                // Tampilkan Joblist Kanan Spesifik
+                const activeJob = document.querySelector(`.job-item[data-employee="${selected}"]`);
+                if (activeJob) activeJob.classList.remove('hidden');
+            }
         }
 
         function togglePrivateView() {
@@ -237,7 +330,6 @@
             }
         }
 
-        // Simpan Transaksi dan Clear Form Otomatis
         function saveTransaction(e) {
             e.preventDefault();
             const type = document.getElementById('txType').value;
@@ -252,7 +344,6 @@
             })
             .then(() => {
                 alert("Transaksi Berhasil Disimpan!");
-                // Clear form kembali bersih
                 document.getElementById('txAmount').value = '';
                 document.getElementById('txDesc').value = '';
                 document.getElementById('txType').selectedIndex = 0;
@@ -262,7 +353,6 @@
             });
         }
 
-        // Load Tabel Publik & Hitung Komisi Otomatis
         function loadPublicTransactions() {
             db.collection("transactions").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('publicTxTableBody');
@@ -305,10 +395,7 @@
                     tbody.innerHTML += row;
                 });
 
-                // Hitung komisi sesuai aturan
-                // Sri: 1% dari total semua pemasukan
                 const komisiSriVal = totalPemasukan * 0.01;
-                // Amar & Wina: 5% dari servis + 20% dari affiliate/video
                 const komisiTeknisiVal = (totalKomisiServis * 0.05) + (totalKomisiAffiliate * 0.20);
 
                 document.getElementById('komisiSri').innerText = "Rp " + Math.round(komisiSriVal).toLocaleString('id-ID');
