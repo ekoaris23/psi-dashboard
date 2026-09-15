@@ -320,12 +320,15 @@
             }
         }
 
-        // Simpan Transaksi (PERBAIKAN: Format Waktu Lokal & Form Clear Sempurna)
+        // SIMPAN TRANSAKSI & RESET KOLOM NOMINAL DAN KETERANGAN SECARA PASTI
         function saveTransaction(e) {
             e.preventDefault();
             const type = document.getElementById('txType').value;
-            const amount = Number(document.getElementById('txAmount').value);
-            const desc = document.getElementById('txDesc').value;
+            const amountInput = document.getElementById('txAmount');
+            const descInput = document.getElementById('txDesc');
+            
+            const amount = Number(amountInput.value);
+            const desc = descInput.value;
             const now = new Date();
             const formattedTime = now.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
 
@@ -338,15 +341,16 @@
             })
             .then(() => {
                 alert("Transaksi Berhasil Disimpan Ke Database!");
-                // Clear Form Secara Total
-                document.getElementById('cashForm').reset();
+                // PENGOSONGAN LANGSUNG DENGAN TARGET ELEMENT VALUE
+                amountInput.value = '';
+                descInput.value = '';
+                document.getElementById('txType').selectedIndex = 0;
             })
             .catch((error) => {
                 alert("Gagal menyimpan data: " + error.message);
             });
         }
 
-        // Load Tabel Publik Real-time (PERBAIKAN: Tanpa kendala query timestamp)
         function loadPublicTransactions() {
             db.collection("transactions").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('publicTxTableBody');
@@ -364,7 +368,6 @@
                 let totalKomisiServis = 0;
                 let totalKomisiAffiliate = 0;
 
-                // Sortir transaksi dari yang terbaru ke terlama
                 let docsArr = [];
                 snapshot.forEach(doc => docsArr.push(doc.data()));
                 docsArr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
