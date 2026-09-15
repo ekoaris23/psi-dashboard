@@ -57,14 +57,63 @@
             </form>
         </div>
 
-        <!-- Target & Tugas Tim -->
+        <!-- Joblist Tim dengan Dropdown -->
         <div class="card">
-            <h3 style="color: #ec4899; font-size: 15px;">🎬 Task Wina & Amar</h3>
-            <ul class="task-list">
-                <li><strong>Wina:</strong> Konten Promo Thermal Paste Rp75rb target Mahasiswa Jatinangor.</li>
-                <li><strong>Amar:</strong> Turnaround servis cepat & dampingi Wina buat konten teknis.</li>
-                <li><strong>Sri:</strong> Minta review Bintang 5 Google Maps ke setiap customer servis.</li>
-            </ul>
+            <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 8px;">📋 Joblist Tim Operasional</h3>
+            <label style="font-size:12px; color:#94a3b8;">Pilih Nama Karyawan:</label>
+            <select id="employeeSelect" onchange="filterJoblist()" style="border-color: #ec4899;">
+                <option value="all">-- Tampilkan Semua Joblist --</option>
+                <option value="sri">Sri (HRD / Asisten)</option>
+                <option value="wina">Wina (Content Creator)</option>
+                <option value="amar">Amar (Teknisi)</option>
+            </select>
+
+            <div id="joblistContainer">
+                <!-- Joblist Sri -->
+                <div class="job-item" data-employee="sri">
+                    <ul class="task-list">
+                        <li style="border-left-color: #38bdf8;">
+                            <strong style="color: #38bdf8;">Sri:</strong> Catat arus kas masuk & keluar PSC harian secara disiplin di aplikasi ini.
+                        </li>
+                        <li style="border-left-color: #38bdf8;">
+                            <strong style="color: #38bdf8;">Sri:</strong> Monitor & rekap stok sparepart bekas/baru PSC yang terpakai.
+                        </li>
+                        <li style="border-left-color: #38bdf8;">
+                            <strong style="color: #38bdf8;">Sri:</strong> Minta review Bintang 5 Google Maps ke setiap pelanggan servis di tempat.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Joblist Wina -->
+                <div class="job-item" data-employee="wina">
+                    <ul class="task-list">
+                        <li style="border-left-color: #ec4899;">
+                            <strong style="color: #ec4899;">Wina:</strong> Fokus buat konten *hyper-local* target Mahasiswa Jatinangor (Unpad/ITB/IPDN).
+                        </li>
+                        <li style="border-left-color: #ec4899;">
+                            <strong style="color: #ec4899;">Wina:</strong> Promosikan Paket "Thermal Paste & Pembersihan Laptop Rp75rb".
+                        </li>
+                        <li style="border-left-color: #ec4899;">
+                            <strong style="color: #ec4899;">Wina:</strong> Pastikan setiap video TikTok/IG menyantumkan lokasi PSC & Link WA.
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Joblist Amar -->
+                <div class="job-item" data-employee="amar">
+                    <ul class="task-list">
+                        <li style="border-left-color: #eab308;">
+                            <strong style="color: #eab308;">Amar:</strong> Kecepatan & ketepatan pengerjaan servis laptop (Turnaround Time cepat).
+                        </li>
+                        <li style="border-left-color: #eab308;">
+                            <strong style="color: #eab308;">Amar:</strong> Saat jam servis sepi, wajib dampingi Wina buat konten edukasi teknis laptop.
+                        </li>
+                        <li style="border-left-color: #eab308;">
+                            <strong style="color: #eab308;">Amar:</strong> Bantu gerilya promosi jasa servis di grup-grup Facebook lokal.
+                        </li>
+                    </ul>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -154,6 +203,20 @@
         const db = firebase.firestore();
 
         const PIN_KOMISARIS = "1234";
+
+        // Filter Joblist berdasarkan Dropdown
+        function filterJoblist() {
+            const selected = document.getElementById('employeeSelect').value;
+            const items = document.querySelectorAll('.job-item');
+
+            items.forEach(item => {
+                if (selected === 'all' || item.getAttribute('data-employee') === selected) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
 
         function togglePrivateView() {
             const privateSec = document.getElementById('privateSection');
