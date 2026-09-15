@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>PSI Operational System</title>
+    <!-- Firebase SDK (CDN Compat Version) -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
@@ -21,6 +24,7 @@
         .hidden { display: none !important; }
         .task-list { list-style: none; margin-top: 10px; }
         .task-list li { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #38bdf8; font-size: 13px; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -28,51 +32,46 @@
     <div class="header">
         <div>
             <h1>Paramount Star Indonesia</h1>
-            <p style="color: #94a3b8; font-size: 12px;">System Operational & Monitoring Hari Ini</p>
+            <p style="color: #94a3b8; font-size: 12px;">System Operational & Monitoring Real-Time</p>
         </div>
         <button id="authBtn" onclick="togglePrivateView()">Unlock Owner</button>
     </div>
 
-    <!-- 1. TARGET & TUGAS HARIAN TIM (PUBLIK - HANYA UNTUK KARYAWAN) -->
-    <h2>Target & Instruksi Operasional Tim</h2>
+    <!-- 1. INPUT OPERASIONAL HARIAN (PUBLIK UNTUK SRI / TIM) -->
+    <h2>Form Input Operasional Harian</h2>
     <div class="grid" style="margin-top: 15px;">
-        
-        <!-- Tugas Sri -->
+        <!-- Form Transaksi Kas -->
         <div class="card">
-            <h3 style="color: #38bdf8; font-size: 15px;">📋 SRI (HRD / ASISTEN)</h3>
-            <ul class="task-list">
-                <li>Catat arus kas masuk & keluar PSC harian secara disiplin di Google Sheets.</li>
-                <li>Monitor & rekap stok sparepart bekas/baru PSC yang terpakai.</li>
-                <li>Minta ulasan bintang 5 Google Maps ke setiap pelanggan servis yang selesai di tempat.</li>
-            </ul>
+            <h3 style="color: #38bdf8; font-size: 15px;">💰 Input Arus Kas (Sri)</h3>
+            <form id="cashForm" onsubmit="saveTransaction(event)">
+                <label style="font-size:12px;">Jenis Transaksi:</label>
+                <select id="txType">
+                    <option value="masuk">Pemasukan (Omzet/Servis)</option>
+                    <option value="keluar">Pengeluaran (Operasional)</option>
+                </select>
+                <label style="font-size:12px;">Nominal (Rp):</label>
+                <input type="number" id="txAmount" placeholder="Contoh: 150000" required>
+                <label style="font-size:12px;">Keterangan:</label>
+                <input type="text" id="txDesc" placeholder="Servis Laptop / Beli Sparepart" required>
+                <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">Simpan Ke Database</button>
+            </form>
         </div>
 
-        <!-- Tugas Wina -->
+        <!-- Target & Tugas Tim -->
         <div class="card">
-            <h3 style="color: #ec4899; font-size: 15px;">🎬 WINA (CONTENT CREATOR)</h3>
+            <h3 style="color: #ec4899; font-size: 15px;">🎬 Task Wina & Amar</h3>
             <ul class="task-list">
-                <li>Fokus buat konten *hyper-local* target Mahasiswa Jatinangor (Unpad/ITB/IPDN).</li>
-                <li>Promosikan Paket "Thermal Paste & Pembersihan Laptop Rp75rb".</li>
-                <li>Pastikan setiap video TikTok/IG menyantumkan lokasi PSC & Link WA.</li>
+                <li><strong>Wina:</strong> Konten Promo Thermal Paste Rp75rb target Mahasiswa Jatinangor.</li>
+                <li><strong>Amar:</strong> Turnaround servis cepat & dampingi Wina buat konten teknis.</li>
+                <li><strong>Sri:</strong> Minta review Bintang 5 Google Maps ke setiap customer servis.</li>
             </ul>
         </div>
-
-        <!-- Tugas Amar -->
-        <div class="card">
-            <h3 style="color: #eab308; font-size: 15px;">🛠️ AMAR (TEKNISI)</h3>
-            <ul class="task-list">
-                <li>Kecepatan & ketepatan pengerjaan servis laptop (Turnaround Time cepat).</li>
-                <li>Saat jam servis sepi, wajib dampingi Wina buat konten edukasi teknis laptop.</li>
-                <li>Bantu gerilya promosi jasa servis di grup-grup Facebook lokal.</li>
-            </ul>
-        </div>
-
     </div>
 
-    <!-- 2. TAMPILAN RAHASIA (KHUSUS ANDA & SAYA) -->
+    <!-- 2. TAMPILAN RAHASIA (OWNER ONLY) -->
     <div id="privateSection" class="hidden">
         
-        <h2 style="color: #4ade80; margin-top: 20px;">1. Posisi Kas Operasional Usaha (Owner Only)</h2>
+        <h2 style="color: #4ade80; margin-top: 20px;">1. Posisi Kas & Rekap Transaksi Real-Time (Owner Only)</h2>
         <div class="grid" style="margin-top: 10px;">
             <div class="card">
                 <h3>KAS OPERASIONAL (JAGO)</h3>
@@ -88,25 +87,34 @@
             </div>
         </div>
 
+        <div class="card" style="margin-bottom: 20px;">
+            <h3 style="color: #38bdf8;">Riwayat Transaksi Masuk Database (Firebase)</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Waktu</th>
+                        <th>Jenis</th>
+                        <th>Keterangan</th>
+                        <th>Nominal</th>
+                    </tr>
+                </thead>
+                <tbody id="txTableBody">
+                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Menghubungkan ke database...</td></tr>
+                </tbody>
+            </table>
+        </div>
+
         <h2 style="color: #22c55e; margin-top: 20px;">2. Agenda Strategis Komisaris</h2>
         <div class="card" style="margin-top: 10px; border-color: #22c55e;">
             <h3 style="color: #22c55e; font-size: 15px;">👑 PAK KOMISARIS</h3>
             <ul class="task-list">
                 <li style="border-left-color: #22c55e;">Ambil jatah harian dapur (Rp100rb - Rp150rb) secara konsisten dari kas harian.</li>
                 <li style="border-left-color: #22c55e;">Antar/jemput barang SPX HUB ke Basecamp tepat waktu & awasi akun dari fraud.</li>
-                <li style="border-left-color: #22c55e;">Tutup aksinya di malam hari, istirahat cukup, jangan overwork narik Gocar.</li>
             </ul>
         </div>
 
         <h2 style="color: #ef4444; margin-top: 20px;">3. Radar Keuangan Rahasia & Utang (Owner Only)</h2>
-        <div class="grid" style="margin-top: 10px;">
-            <div class="card" style="border-color: #ef4444;">
-                <h3>REKENING PRIBADI / BCA (TERKUNCI)</h3>
-                <div class="amount" style="color:#f87171;">Aman & Terpisah</div>
-            </div>
-        </div>
-
-        <div class="card" style="margin-bottom: 25px;">
+        <div class="card" style="margin-bottom: 25px; border-color: #ef4444;">
             <table>
                 <thead>
                     <tr>
@@ -130,6 +138,21 @@
     </div>
 
     <script>
+        // CONFIG FIREBASE TERUPDATE DARI AKUN PAK KOMISARIS
+        const firebaseConfig = {
+          apiKey: "AIzaSyBwFTcdXMdHbGLE5HsMtOiYs06WfZAuNs0",
+          authDomain: "psi-app-e9ccc.firebaseapp.com",
+          projectId: "psi-app-e9ccc",
+          storageBucket: "psi-app-e9ccc.firebasestorage.app",
+          messagingSenderId: "185461868673",
+          appId: "1:185461868673:web:328af96a1ecbfa3e8ae580",
+          measurementId: "G-2Y7XJDT3F6"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const PIN_KOMISARIS = "1234";
 
         function togglePrivateView() {
@@ -142,6 +165,7 @@
                     privateSec.classList.remove('hidden');
                     authBtn.innerText = "Lock Owner";
                     authBtn.style.background = "#dc2626";
+                    loadTransactions();
                 } else if (inputPin !== null) {
                     alert("PIN Salah! Akses ditolak.");
                 }
@@ -150,6 +174,54 @@
                 authBtn.innerText = "Unlock Owner";
                 authBtn.style.background = "#0284c7";
             }
+        }
+
+        // Simpan Transaksi ke Firebase Firestore
+        function saveTransaction(e) {
+            e.preventDefault();
+            const type = document.getElementById('txType').value;
+            const amount = Number(document.getElementById('txAmount').value);
+            const desc = document.getElementById('txDesc').value;
+
+            db.collection("transactions").add({
+                type: type,
+                amount: amount,
+                desc: desc,
+                timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                alert("Transaksi Berhasil Disimpan Ke Database!");
+                document.getElementById('cashForm').reset();
+            })
+            .catch((error) => {
+                alert("Gagal menyimpan data: " + error.message);
+            });
+        }
+
+        // Load Transaksi Real-time untuk Owner
+        function loadTransactions() {
+            db.collection("transactions").orderBy("timestamp", "desc").onSnapshot((snapshot) => {
+                const tbody = document.getElementById('txTableBody');
+                tbody.innerHTML = "";
+                if(snapshot.empty) {
+                    tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#94a3b8;">Belum ada transaksi diinput.</td></tr>`;
+                    return;
+                }
+                snapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const date = data.timestamp ? new Date(data.timestamp.toDate()).toLocaleString('id-ID') : 'Baru saja';
+                    const color = data.type === 'masuk' ? '#4ade80' : '#f87171';
+                    const row = `<tr>
+                        <td>${date}</td>
+                        <td style="color:${color}; font-weight:bold;">${data.type.toUpperCase()}</td>
+                        <td>${data.desc}</td>
+                        <td style="color:${color};">Rp ${data.amount.toLocaleString('id-ID')}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            }, (error) => {
+                console.error("Error loading transactions:", error);
+            });
         }
     </script>
 
