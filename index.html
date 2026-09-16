@@ -80,15 +80,20 @@
             </div>
         </div>
         <ul class="sidebar-menu">
+            <!-- MENU PUBLIK (1, 2, 3) -->
             <li><a href="#" class="active" onclick="switchTab('joblistTab', this)">📋 1. Joblist Harian <span class="menu-badge badge-public">Publik</span></a></li>
             <li><a href="#" onclick="switchTab('kpiTab', this)">🎯 2. KPI Karyawan <span class="menu-badge badge-public">Publik</span></a></li>
             <li><a href="#" onclick="switchTab('cashTab', this)">📊 3. Arus Kas & Komisi <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Absensi & Lembur <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 9. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
+            
+            <!-- MENU HRD & OWNER (4, 5, 6, 7, 8) -->
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Absensi & Lembur <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
+            
+            <!-- MENU OWNER ONLY (9) -->
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 9. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
         </ul>
     </div>
 
@@ -391,14 +396,10 @@
 
             <!-- TAB 9: DASHBOARD OWNER (OWNER ONLY) -->
             <div id="ownerDashboardTab" class="tab-content hidden">
-                <div id="ownerLockMsg" style="text-align: center; color: #ef4444; padding: 50px 20px; font-weight: bold; background: #1e293b; border-radius: 8px;">
-                    🔒 MODUL RAHASIA KUSUS OWNER. Silakan klik "Unlock Owner" di pojok kanan atas untuk membuka.
-                </div>
-
-                <div id="ownerFullContent" class="hidden">
+                <div id="ownerFullContent">
                     <h2 style="color: #4ade80; margin-bottom: 15px;">👑 Executive Dashboard & Financial Control</h2>
 
-                    <!-- BAGAN GRAFIK KPI & KEUTANGAN -->
+                    <!-- BAGAN GRAFIK KPI & KEUANGAN -->
                     <div class="grid">
                         <div class="card">
                             <h3>📊 Bagan Capaian KPI Karyawan (%)</h3>
@@ -496,6 +497,7 @@
             loadCustomJobs();
             initChecklists();
             loadOwnerAgendas();
+            updateSidebarVisibility();
         };
 
         // BURGER TOGGLE
@@ -507,38 +509,32 @@
             wrapper.classList.toggle('full-width');
         }
 
-        // SWITCH TAB
+        // CONTROL SIDEBAR MENU VISIBILITY
+        function updateSidebarVisibility() {
+            const hrdItems = document.querySelectorAll('.hrd-menu-item');
+            const ownerItems = document.querySelectorAll('.owner-menu-item');
+
+            // Show HRD menus (4,5,6,7,8) if HRD OR Owner unlocked
+            hrdItems.forEach(item => {
+                if (isHrdUnlocked || isOwnerUnlocked) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+
+            // Show Owner menu (9) ONLY if Owner unlocked
+            ownerItems.forEach(item => {
+                if (isOwnerUnlocked) {
+                    item.classList.remove('hidden');
+                } else {
+                    item.classList.add('hidden');
+                }
+            });
+        }
+
+        // SWITCH TAB FUNCTION
         function switchTab(tabId, element) {
-            // Check Access Permissions for HRD / Owner Tabs
-            if (['employeeTab', 'assetTab', 'productTab', 'attendanceTab', 'payrollTab'].includes(tabId)) {
-                if (!isHrdUnlocked && !isOwnerUnlocked) {
-                    let pinInput = prompt("Modul ini memerlukan akses HRD / Owner. Masukkan PIN HRD / Owner:");
-                    if (pinInput === PIN_HRD) {
-                        isHrdUnlocked = true;
-                        updateAuthBtnState();
-                    } else if (pinInput === PIN_KOMISARIS) {
-                        isOwnerUnlocked = true;
-                        updateAuthBtnState();
-                    } else {
-                        if(pinInput !== null) alert("PIN Salah! Akses ditolak.");
-                        return;
-                    }
-                }
-            }
-
-            if (tabId === 'ownerDashboardTab') {
-                if (!isOwnerUnlocked) {
-                    let pinInput = prompt("Modul Executive Owner. Masukkan PIN Owner:");
-                    if (pinInput === PIN_KOMISARIS) {
-                        isOwnerUnlocked = true;
-                        updateAuthBtnState();
-                    } else {
-                        if(pinInput !== null) alert("PIN Owner Salah!");
-                        return;
-                    }
-                }
-            }
-
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
 
@@ -567,6 +563,8 @@
                 btn.innerText = "Unlock HRD";
                 btn.style.background = "#0284c7";
                 toggleHrdOwnerElements();
+                // If on HRD-only tab, return to public tab
+                switchTab('joblistTab', document.querySelector('.sidebar-menu a'));
             }
         }
 
@@ -591,6 +589,8 @@
                 authBtn.style.background = "#059669";
                 toggleOwnerColumns(false);
                 toggleHrdOwnerElements();
+                // If on Owner tab, return to public tab
+                switchTab('joblistTab', document.querySelector('.sidebar-menu a'));
             }
         }
 
@@ -624,15 +624,7 @@
                 else el.classList.add('hidden');
             });
 
-            const ownerLockMsg = document.getElementById('ownerLockMsg');
-            const ownerFullContent = document.getElementById('ownerFullContent');
-            if (isOwnerUnlocked) {
-                ownerLockMsg.classList.add('hidden');
-                ownerFullContent.classList.remove('hidden');
-            } else {
-                ownerLockMsg.classList.remove('hidden');
-                ownerFullContent.classList.add('hidden');
-            }
+            updateSidebarVisibility();
 
             db.collection("default_checklists").get().then(renderChecklists);
             loadCustomJobs();
