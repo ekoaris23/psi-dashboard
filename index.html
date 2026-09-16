@@ -26,7 +26,7 @@
         th { color: #94a3b8; }
         .hidden { display: none !important; }
         .task-list { list-style: none; margin-top: 10px; }
-        .task-list li { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #38bdf8; font-size: 13px; }
+        .task-list li { background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #38bdf8; font-size: 13px; position: relative; }
         input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; }
         .checkbox-item { display: flex; align-items: center; gap: 10px; background: #0f172a; padding: 10px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid #38bdf8; font-size: 13px; }
         .checkbox-item input[type="checkbox"] { width: auto; margin: 0; cursor: pointer; }
@@ -36,6 +36,7 @@
         .progress-bar-bg { background: #1e293b; height: 10px; border-radius: 5px; overflow: hidden; border: 1px solid #334155; }
         .progress-bar-fill { background: linear-gradient(90deg, #22c55e, #4ade80); height: 100%; width: 0%; transition: width 0.3s ease; }
         .badge-kpi { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 12px; color: white; }
+        .tag-job { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px; }
     </style>
 </head>
 <body>
@@ -174,7 +175,7 @@
             </div>
         </div>
 
-        <!-- CARD KANAN -->
+        <!-- CARD KANAN (Panduan Joblist & Form Input Tugas Baru oleh Sri) -->
         <div class="card" id="rightCard">
             <div id="rightDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
                 Joblist spesifik akan tampil setelah nama karyawan dipilih.
@@ -183,22 +184,62 @@
             <div id="joblistContainer" class="hidden">
                 <div class="job-item hidden" data-employee="sri">
                     <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Sri</h3>
-                    <ul class="task-list">
+                    <ul class="task-list" id="sriTaskList">
                         <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Catat arus kas masuk & keluar PSC harian secara disiplin di aplikasi ini.</li>
                         <li style="border-left-color: #38bdf8;"><strong style="color: #38bdf8;">Sri:</strong> Minta review Bintang 5 Google Maps ke setiap pelanggan servis.</li>
                     </ul>
                 </div>
                 <div class="job-item hidden" data-employee="wina">
                     <h3 style="color: #ec4899; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Wina</h3>
-                    <ul class="task-list">
+                    <ul class="task-list" id="winaTaskList">
                         <li style="border-left-color: #ec4899;"><strong style="color: #ec4899;">Wina:</strong> Promosikan Paket "Thermal Paste & Pembersihan Laptop Rp75rb".</li>
                     </ul>
                 </div>
                 <div class="job-item hidden" data-employee="amar">
                     <h3 style="color: #eab308; font-size: 15px; margin-bottom: 10px;">📋 Panduan Joblist Amar</h3>
-                    <ul class="task-list">
+                    <ul class="task-list" id="amarTaskList">
                         <li style="border-left-color: #eab308;"><strong style="color: #eab308;">Amar:</strong> Kecepatan & ketepatan pengerjaan servis laptop (Turnaround Time cepat).</li>
                     </ul>
+                </div>
+
+                <!-- FORM INPUT JOBLIST BARU (KHUSUS KHUSUS SRI / OPERASIONAL) -->
+                <div id="addJobFormSection" class="hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #334155;">
+                    <h4 style="color: #38bdf8; font-size: 13px; margin-bottom: 8px;">➕ Tambah Joblist Pekerjaan Baru (Oleh Sri)</h4>
+                    <form onsubmit="saveCustomJob(event)">
+                        <label style="font-size:11px;">Input untuk Karyawan:</label>
+                        <select id="newJobTarget" required>
+                            <option value="sri">Sri (HRD / Asisten)</option>
+                            <option value="wina">Wina (Content Creator)</option>
+                            <option value="amar">Amar (Teknisi)</option>
+                        </select>
+
+                        <label style="font-size:11px;">Deskripsi Pekerjaan:</label>
+                        <input type="text" id="newJobText" placeholder="Contoh: Belanja stok SSD NVMe ke vendor" required>
+
+                        <label style="font-size:11px;">Frekuensi Tugas:</label>
+                        <select id="newJobFreq" required>
+                            <option value="Setiap Hari">Setiap Hari (Rutin)</option>
+                            <option value="1 Kali Sahaja">1 Kali Sahaja (Tugas Khusus)</option>
+                        </select>
+
+                        <!-- CEO BONUS FIELDS -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                            <div>
+                                <label style="font-size:11px;">Prioritas (CEO Bonus):</label>
+                                <select id="newJobPriority">
+                                    <option value="Normal">Normal</option>
+                                    <option value="Tinggi">Tinggi (High)</option>
+                                    <option value="Urgent">Urgent 🔥</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label style="font-size:11px;">Deadline Batas Waktu:</label>
+                                <input type="date" id="newJobDeadline">
+                            </div>
+                        </div>
+
+                        <button type="submit" style="width:100%; margin-top:5px; background:#0284c7; font-size:12px; padding:8px;">💾 Save Joblist Baru</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -361,16 +402,15 @@
             updateSubCategoryOptions();
             loadPublicTransactions();
             loadDailyKPI();
+            loadCustomJobs();
         };
 
-        // SET DEFAULT WAKTU REALTIME SEKARANG KE INPUT DATETIME-LOCAL
         function setDefaultDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
             document.getElementById('txDateTime').value = now.toISOString().slice(0, 16);
         }
 
-        // HITUNG PROGRESS CAPAIAN TUGAS (PERCENTAGE CALCULATOR)
         function calculateProgress(employee) {
             let containerId = employee + 'LeftContent';
             let container = document.getElementById(containerId);
@@ -389,7 +429,78 @@
             document.getElementById(employee + 'ProgressBar').style.width = percent + '%';
         }
 
-        // SIMPAN KPI HARIAN KE DATABASE
+        // SIMPAN JOBLIST BARU KE FIREBASE (OLEH SRI)
+        function saveCustomJob(e) {
+            e.preventDefault();
+            const target = document.getElementById('newJobTarget').value;
+            const text = document.getElementById('newJobText').value;
+            const freq = document.getElementById('newJobFreq').value;
+            const priority = document.getElementById('newJobPriority').value;
+            const deadline = document.getElementById('newJobDeadline').value;
+
+            db.collection("custom_jobs").add({
+                target: target,
+                text: text,
+                freq: freq,
+                priority: priority,
+                deadline: deadline || 'Tidak ada',
+                createdAt: Date.now()
+            })
+            .then(() => {
+                alert(`SUCCESS! Joblist baru untuk ${target.toUpperCase()} berhasil ditambahkan.`);
+                document.getElementById('newJobText').value = "";
+                document.getElementById('newJobDeadline').value = "";
+            })
+            .catch(err => alert("Gagal menambah joblist: " + err.message));
+        }
+
+        // LOAD CUSTOM JOBLIST DARI FIREBASE REALTIME
+        function loadCustomJobs() {
+            db.collection("custom_jobs").onSnapshot((snapshot) => {
+                // Clear dynamic items
+                document.querySelectorAll('.dynamic-job').forEach(el => el.remove());
+
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const jobId = doc.id;
+                    const listEl = document.getElementById(data.target + 'TaskList');
+
+                    if(listEl) {
+                        let borderColor = "#38bdf8";
+                        if(data.target === 'wina') borderColor = "#ec4899";
+                        if(data.target === 'amar') borderColor = "#eab308";
+
+                        let priorityColor = "#22c55e";
+                        if(data.priority === 'Tinggi') priorityColor = "#f59e0b";
+                        if(data.priority === 'Urgent') priorityColor = "#ef4444";
+
+                        let deleteBtn = isOwnerUnlocked ? `<button class="btn-danger" style="float:right;" onclick="deleteCustomJob('${jobId}')">Hapus</button>` : '';
+
+                        let li = document.createElement('li');
+                        li.className = "dynamic-job";
+                        li.style.borderLeftColor = borderColor;
+                        li.innerHTML = `
+                            ${deleteBtn}
+                            <strong>${data.target.toUpperCase()}:</strong> ${data.text} 
+                            <span class="tag-job" style="background:#334155; color:#94a3b8;">${data.freq}</span>
+                            <span class="tag-job" style="background:${priorityColor}; color:white;">${data.priority}</span>
+                            ${data.deadline !== 'Tidak ada' ? `<br><small style="color:#94a3b8;">📅 Deadline: ${data.deadline}</small>` : ''}
+                        `;
+                        listEl.appendChild(li);
+                    }
+                });
+            });
+        }
+
+        function deleteCustomJob(id) {
+            if(!isOwnerUnlocked) return;
+            if(confirm("Pak Komisaris, hapus joblist ini?")) {
+                db.collection("custom_jobs").doc(id).delete()
+                .then(() => alert("Joblist dihapus."))
+                .catch(err => alert("Gagal hapus: " + err.message));
+            }
+        }
+
         function saveDailyKPI(employeeKey, employeeName) {
             let containerId = employeeKey + 'LeftContent';
             let container = document.getElementById(containerId);
@@ -427,7 +538,6 @@
             .catch(err => alert("Gagal menyimpan KPI: " + err.message));
         }
 
-        // LOAD TABEL KPI HARIAN REAL-TIME
         function loadDailyKPI() {
             db.collection("kpi_logs").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('kpiTableBody');
@@ -469,7 +579,6 @@
             });
         }
 
-        // EDIT KPI (KHUSUS OWNER)
         function editKPI(id, currentPercent) {
             if(!isOwnerUnlocked) return;
             let newPercent = prompt("Edit Persentase Capaian KPI (%):", currentPercent);
@@ -484,7 +593,6 @@
             .catch(err => alert("Gagal update KPI: " + err.message));
         }
 
-        // HAPUS KPI (KHUSUS OWNER)
         function deleteKPI(id) {
             if(!isOwnerUnlocked) return;
             if(confirm("Pak Komisaris, hapus catatan KPI ini?")) {
@@ -494,7 +602,6 @@
             }
         }
 
-        // KATEGORI DROPDOWN DINAMIS (TAMBAHAN PENJUALAN AFFILIATE)
         function updateSubCategoryOptions() {
             const type = document.getElementById('txType').value;
             const catSelect = document.getElementById('txCategory');
@@ -528,6 +635,7 @@
             const rightDefault = document.getElementById('rightDefaultMsg');
             const joblistContainer = document.getElementById('joblistContainer');
             const jobItems = document.querySelectorAll('.job-item');
+            const addJobFormSection = document.getElementById('addJobFormSection');
 
             leftDefault.classList.add('hidden');
             sriLeft.classList.add('hidden');
@@ -546,10 +654,13 @@
                 
                 if (selected === 'sri') {
                     sriLeft.classList.remove('hidden');
+                    addJobFormSection.classList.remove('hidden'); // Form Penugasan Muncul Saat Pilih Sri
                 } else if (selected === 'wina') {
                     winaLeft.classList.remove('hidden');
+                    addJobFormSection.classList.add('hidden');
                 } else if (selected === 'amar') {
                     amarLeft.classList.remove('hidden');
+                    addJobFormSection.classList.add('hidden');
                 }
 
                 const activeJob = document.querySelector(`.job-item[data-employee="${selected}"]`);
@@ -569,6 +680,7 @@
                     authBtn.innerText = "Lock Owner";
                     authBtn.style.background = "#dc2626";
                     toggleOwnerColumns(true);
+                    loadCustomJobs();
                 } else if (inputPin !== null) {
                     alert("PIN Salah! Akses ditolak.");
                 }
@@ -578,6 +690,7 @@
                 authBtn.innerText = "Unlock Owner";
                 authBtn.style.background = "#0284c7";
                 toggleOwnerColumns(false);
+                loadCustomJobs();
             }
         }
 
@@ -589,7 +702,6 @@
             });
         }
 
-        // SIMPAN TRANSAKSI DENGAN CUSTOM TANGGAL/WAKTU
         function saveTransactionRadical(e) {
             e.preventDefault();
             
@@ -626,7 +738,6 @@
             });
         }
 
-        // EDIT TRANSAKSI (KHUSUS OWNER)
         function editTransaction(id, currentAmount, currentDesc) {
             if(!isOwnerUnlocked) return;
             
@@ -650,7 +761,6 @@
             .catch(err => alert("Gagal memperbarui: " + err.message));
         }
 
-        // HAPUS TRANSAKSI (KHUSUS OWNER)
         function deleteTransaction(id) {
             if(!isOwnerUnlocked) return;
             if(confirm("Pak Komisaris, yakin ingin menghapus transaksi ini dari database?")) {
@@ -660,7 +770,6 @@
             }
         }
 
-        // LOAD TRANSAKSI REAL-TIME & HITUNG KOMISI PRESISI
         function loadPublicTransactions() {
             db.collection("transactions").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('publicTxTableBody');
@@ -692,7 +801,6 @@
                     const color = data.type === 'masuk' ? '#4ade80' : '#f87171';
                     const catName = data.category || 'Umum';
 
-                    // PERHITUNGAN KOMISI TERBARU PRESISI
                     if(data.type === 'masuk') {
                         if(catName === 'Jasa Service Internal') {
                             komisiSriVal += data.amount * 0.01;
@@ -701,13 +809,13 @@
                         } else if(catName === 'Pembelian Produk') {
                             komisiSriVal += data.amount * 0.01;
                         } else if(catName === 'Jasa Service Vendor') {
-                            komisiSriVal += data.amount * 0.005; // 0.5%
-                            komisiAmarVal += data.amount * 0.01;  // 1%
-                            komisiWinaVal += data.amount * 0.01;  // 1%
+                            komisiSriVal += data.amount * 0.005;
+                            komisiAmarVal += data.amount * 0.01;
+                            komisiWinaVal += data.amount * 0.01;
                         } else if(catName === 'Penjualan Affiliate') {
-                            komisiSriVal += data.amount * 0.01;  // 1%
-                            komisiAmarVal += data.amount * 0.20; // 20%
-                            komisiWinaVal += data.amount * 0.20; // 20%
+                            komisiSriVal += data.amount * 0.01;
+                            komisiAmarVal += data.amount * 0.20;
+                            komisiWinaVal += data.amount * 0.20;
                         } else {
                             komisiSriVal += data.amount * 0.01;
                         }
