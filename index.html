@@ -17,6 +17,7 @@
         .sidebar { width: 260px; background-color: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 100; position: fixed; top: 0; bottom: 0; left: 0; }
         .sidebar.collapsed { transform: translateX(-100%); }
         .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
+        .close-sidebar-btn { background: none; border: none; color: #94a3b8; font-size: 20px; cursor: pointer; display: none; }
         .sidebar-menu { list-style: none; padding: 10px 0; overflow-y: auto; flex-grow: 1; }
         .sidebar-menu li a { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: #94a3b8; text-decoration: none; font-size: 13px; font-weight: 600; transition: all 0.2s; border-left: 3px solid transparent; }
         .sidebar-menu li a:hover, .sidebar-menu li a.active { background-color: #0f172a; color: #38bdf8; border-left-color: #38bdf8; }
@@ -24,6 +25,10 @@
         .badge-public { background: #334155; color: #cbd5e1; }
         .badge-hrd { background: #0284c7; color: white; }
         .badge-owner { background: #dc2626; color: white; }
+
+        /* OVERLAY UNTUK HP */
+        .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 95; }
+        .sidebar-overlay.active { display: block; }
 
         /* MAIN CONTENT AREA */
         .main-wrapper { flex-grow: 1; margin-left: 260px; transition: margin-left 0.3s ease; width: calc(100% - 260px); display: flex; flex-direction: column; }
@@ -66,10 +71,14 @@
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
             .main-wrapper { margin-left: 0; width: 100%; }
+            .close-sidebar-btn { display: block; }
         }
     </style>
 </head>
 <body>
+
+    <!-- OVERLAY LAYAR HP -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarMobile()"></div>
 
     <!-- BURGER SIDEBAR NAVIGATION -->
     <div class="sidebar" id="sidebar">
@@ -78,6 +87,7 @@
                 <h1 style="font-size: 16px;">Paramount Star</h1>
                 <p style="color: #94a3b8; font-size: 10px;">Operational & HR System</p>
             </div>
+            <button class="close-sidebar-btn" onclick="closeSidebarMobile()">✕</button>
         </div>
         <ul class="sidebar-menu">
             <!-- MENU PUBLIK (1, 2, 3) -->
@@ -504,9 +514,20 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const wrapper = document.getElementById('mainWrapper');
-            sidebar.classList.toggle('collapsed');
+            const overlay = document.getElementById('sidebarOverlay');
+            
             sidebar.classList.toggle('active');
+            sidebar.classList.toggle('collapsed');
             wrapper.classList.toggle('full-width');
+            overlay.classList.toggle('active');
+        }
+
+        function closeSidebarMobile() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.remove('active');
+            sidebar.classList.add('collapsed');
+            overlay.classList.remove('active');
         }
 
         // CONTROL SIDEBAR MENU VISIBILITY
@@ -514,7 +535,6 @@
             const hrdItems = document.querySelectorAll('.hrd-menu-item');
             const ownerItems = document.querySelectorAll('.owner-menu-item');
 
-            // Show HRD menus (4,5,6,7,8) if HRD OR Owner unlocked
             hrdItems.forEach(item => {
                 if (isHrdUnlocked || isOwnerUnlocked) {
                     item.classList.remove('hidden');
@@ -523,7 +543,6 @@
                 }
             });
 
-            // Show Owner menu (9) ONLY if Owner unlocked
             ownerItems.forEach(item => {
                 if (isOwnerUnlocked) {
                     item.classList.remove('hidden');
@@ -533,7 +552,7 @@
             });
         }
 
-        // SWITCH TAB FUNCTION
+        // SWITCH TAB FUNCTION & AUTO CLOSE SIDEBAR ON MOBILE
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
@@ -543,6 +562,11 @@
 
             if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) {
                 renderOwnerCharts();
+            }
+
+            // Tutup sidebar otomatis di HP setelah menu dipilih
+            if (window.innerWidth <= 768) {
+                closeSidebarMobile();
             }
         }
 
@@ -563,7 +587,6 @@
                 btn.innerText = "Unlock HRD";
                 btn.style.background = "#0284c7";
                 toggleHrdOwnerElements();
-                // If on HRD-only tab, return to public tab
                 switchTab('joblistTab', document.querySelector('.sidebar-menu a'));
             }
         }
@@ -589,7 +612,6 @@
                 authBtn.style.background = "#059669";
                 toggleOwnerColumns(false);
                 toggleHrdOwnerElements();
-                // If on Owner tab, return to public tab
                 switchTab('joblistTab', document.querySelector('.sidebar-menu a'));
             }
         }
