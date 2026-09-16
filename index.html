@@ -61,7 +61,7 @@
         <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
         <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
             <option value="none">-- Pilih Nama Karyawan --</option>
-            <option value="sri">Sri (HRD / Asisten)</option>
+            <option value="sri">Sri (HRD / Asisten) 🔒</option>
             <option value="wina">Wina (Content Creator)</option>
             <option value="amar">Amar (Teknisi)</option>
         </select>
@@ -488,7 +488,6 @@
                 else el.classList.add('hidden');
             });
             
-            // Re-render checklist agar tombol CRUD muncul/tersembunyi secara real-time
             db.collection("default_checklists").get().then(renderChecklists);
             loadCustomJobs();
         }
@@ -807,9 +806,27 @@
             }
         }
 
+        // AKUTANSI & HAK AKSES DROPDOWN SRI (HRD / OWNER ONLY)
         function filterJoblist() {
             const selectEl = document.getElementById('employeeSelect');
             const selected = selectEl.value;
+
+            // Proteksi khusus opsi Sri
+            if (selected === 'sri' && !isHrdUnlocked && !isOwnerUnlocked) {
+                let pinInput = prompt("Masukkan PIN Akses Sri (HRD):");
+                if (pinInput === PIN_HRD) {
+                    isHrdUnlocked = true;
+                    const btn = document.getElementById('hrdAuthBtn');
+                    btn.innerText = "Lock HRD";
+                    btn.style.background = "#dc2626";
+                    toggleHrdOwnerElements();
+                } else {
+                    if (pinInput !== null) alert("PIN HRD Salah! Akses menu Sri ditolak.");
+                    selectEl.value = 'none';
+                    filterJoblist();
+                    return;
+                }
+            }
 
             const leftDefault = document.getElementById('leftDefaultMsg');
             const sriLeft = document.getElementById('sriLeftContent');
