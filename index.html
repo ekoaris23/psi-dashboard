@@ -229,8 +229,9 @@
             <!-- TAB 3: ARUS KAS & KOMISI -->
             <div id="cashTab" class="tab-content hidden">
                 <div class="grid">
-                    <div class="card">
-                        <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">💰 Input Arus Kas Transaksi</h3>
+                    <!-- INPUT ARUS KAS (KHUSUS HRD & OWNER) -->
+                    <div class="card hrd-owner-crud hidden">
+                        <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">💰 Input Arus Kas Transaksi (Akses HRD / Owner)</h3>
                         <form id="cashForm" onsubmit="saveTransactionRadical(event)">
                             <label style="font-size:12px;">Tanggal & Waktu Transaksi:</label>
                             <input type="datetime-local" id="txDateTime" required>
@@ -249,8 +250,16 @@
                         </form>
                     </div>
 
-                    <div class="card">
-                        <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">📊 Riwayat Arus Kas & Estimasi Komisi</h3>
+                    <!-- PEMBERITAHUAN TERKUNCI JIKA PUBLIK -->
+                    <div class="card" id="cashLockNotice" style="text-align: center; color: #94a3b8; padding: 40px 15px;">
+                        <span style="font-size: 32px;">🔒</span>
+                        <h4 style="color: #38bdf8; margin-top: 10px;">Form Input Arus Kas Terkunci</h4>
+                        <p style="font-size: 12px; margin-top: 5px;">Hanya Asisten / HRD & Owner yang memiliki wewenang untuk memasukkan transaksi baru.</p>
+                    </div>
+
+                    <!-- RIWAYAT ARUS KAS (AKSES PUBLIK) -->
+                    <div class="card" style="grid-column: span 1;">
+                        <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">📊 Riwayat Arus Kas & Estimasi Komisi (Publik)</h3>
                         <div style="overflow-x: auto;">
                             <table>
                                 <thead>
@@ -268,6 +277,7 @@
                             </table>
                         </div>
 
+                        <!-- KARTU KOMISI DINAMIS KARYAWAN -->
                         <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;" id="commissionCardsContainer">
                             <!-- Populated Dynamically based on active employees -->
                         </div>
@@ -569,7 +579,6 @@
         window.onload = function() {
             setDefaultDateTime();
             updateSubCategoryOptions();
-            loadPublicTransactions();
             loadDailyKPI();
             loadCustomJobs();
             initChecklists();
@@ -711,9 +720,15 @@
                 else el.classList.add('hidden');
             });
 
+            // Toggle pesan ketersediaan form kas harian
+            const cashLockNotice = document.getElementById('cashLockNotice');
+            if(isAuthorized && cashLockNotice) cashLockNotice.classList.add('hidden');
+            else if(cashLockNotice) cashLockNotice.classList.remove('hidden');
+
             updateSidebarVisibility();
             db.collection("default_checklists").get().then(renderChecklists);
             loadCustomJobs();
+            loadPublicTransactions();
         }
 
         // ====================================================
@@ -723,9 +738,8 @@
             db.collection("employees").onSnapshot((snapshot) => {
                 allEmployeesData = [];
                 if (snapshot.empty) {
-                    // Seed initial data jika database kosong
                     const initialEmployees = [
-                        { name: "SRI EPIYANI", nik: "3211125403050003", role: "HRD & Asisten Operasional", contract: "Tetap", wa: "085794964831", status: "Aktif", joinDate: "2024-01-15", address: "Jatinangor, Sumedang", emergency: "Keluarga (0813-xxxx-xxxx)", bankName: "BCA", bankAcc: "1234567890 a.n SRI EPIYANI" },
+                        { name: "SRI EPIYANI", nik: "3211125403050003", role: "HRD & Asisten Operasional", contract: "Tetap", wa: "085794964831", status: "Aktif", joinDate: "2024-01-15", address: "Jatinangor, Sumedang", emergency: "Keluarga", bankName: "BCA", bankAcc: "1234567890 a.n SRI EPIYANI" },
                         { name: "PUTRI NUR AENI", nik: "0061453273 (NISN)", role: "Admin SPX", contract: "Magang", wa: "0877-6476-0318", status: "Non-Aktif", joinDate: "2024-06-01", address: "Sumedang", emergency: "Orang Tua", bankName: "BRI", bankAcc: "00000000 a.n PUTRI" },
                         { name: "WINA", nik: "3211114905060001", role: "Content Creator", contract: "Tetap", wa: "+62 821-1703-2747", status: "Aktif", joinDate: "2024-03-01", address: "Jatinangor", emergency: "Keluarga", bankName: "BRI", bankAcc: "9876543210 a.n WINA" },
                         { name: "ROBI SETIAJI", nik: "3211112710930005", role: "Leader Mitra Kurir SPX", contract: "Kontrak", wa: "+62 813-1260-5376", status: "Aktif", joinDate: "2024-02-10", address: "Jatinangor", emergency: "Keluarga", bankName: "BCA", bankAcc: "11223344 a.n ROBI" },
@@ -742,6 +756,7 @@
                     });
                     renderEmployeeTable();
                     populateEmployeeDropdowns();
+                    loadPublicTransactions();
                 }
             });
         }
@@ -755,26 +770,22 @@
             jobTargetSelect.innerHTML = ``;
             commCards.innerHTML = ``;
 
-            // Filter HANYA karyawan AKTIF
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
 
             activeEmployees.forEach(emp => {
                 let isHRD = emp.role.toLowerCase().includes('hrd') || emp.role.toLowerCase().includes('asisten');
                 let lockIcon = isHRD ? ' 🔒' : '';
                 
-                // Populate Dropdown Joblist
                 let opt = document.createElement('option');
                 opt.value = emp.id;
                 opt.innerText = `${emp.name} (${emp.role})${lockIcon}`;
                 empSelect.appendChild(opt);
 
-                // Populate Dropdown Form Joblist Baru
                 let optJob = document.createElement('option');
                 optJob.value = emp.id;
                 optJob.innerText = `${emp.name} (${emp.role})`;
                 jobTargetSelect.appendChild(optJob);
 
-                // Populate Komisi Cards
                 commCards.innerHTML += `
                     <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
                         <h4 style="color: #38bdf8; font-size: 12px;">Komisi ${emp.name}</h4>
@@ -952,7 +963,6 @@
             const emp = allEmployeesData.find(e => e.id === empId);
             if (!emp) return;
 
-            // Meminta PIN HRD jika karyawan yang dipilih adalah HRD
             let isHRD = emp.role.toLowerCase().includes('hrd') || emp.role.toLowerCase().includes('asisten');
             if (isHRD && !isHrdUnlocked && !isOwnerUnlocked) {
                 let pinInput = prompt(`Akses Terkunci. Masukkan PIN HRD untuk membuka area ${emp.name}:`);
@@ -1165,7 +1175,9 @@
             if(confirm("Hapus KPI ini?")) db.collection("kpi_logs").doc(id).delete();
         }
 
-        // ARUS KAS & CHARTS
+        // ==========================================
+        // ARUS KAS & PERHITUNGAN KOMISI DINAMIS
+        // ==========================================
         function setDefaultDateTime() {
             const now = new Date();
             now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -1190,6 +1202,7 @@
 
         function saveTransactionRadical(e) {
             e.preventDefault();
+            if(!isHrdUnlocked && !isOwnerUnlocked) return;
             const valDateTime = new Date(document.getElementById('txDateTime').value);
             db.collection("transactions").add({
                 type: document.getElementById('txType').value,
@@ -1210,10 +1223,43 @@
                 const tbody = document.getElementById('publicTxTableBody');
                 tbody.innerHTML = "";
                 let docsArr = [];
+                
+                // Reset akumulasi komisi
+                let commissionMap = {};
+                allEmployeesData.filter(e => e.status === 'Aktif').forEach(emp => {
+                    commissionMap[emp.id] = 0;
+                });
+
                 snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; docsArr.push(d); });
                 docsArr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 docsArr.forEach((data) => {
+                    if(data.type === 'masuk') {
+                        // Kalkulasi Komisi Otomatis Berdasarkan Aturan
+                        allEmployeesData.filter(e => e.status === 'Aktif').forEach(emp => {
+                            let empNameUpper = emp.name.toUpperCase();
+                            let isSri = empNameUpper.includes('SRI');
+                            let isAmar = empNameUpper.includes('AMAR');
+                            let isWina = empNameUpper.includes('WINA');
+
+                            if(data.category === 'Jasa Service Internal') {
+                                if(isSri) commissionMap[emp.id] += data.amount * 0.01;
+                                if(isAmar) commissionMap[emp.id] += data.amount * 0.05;
+                                if(isWina) commissionMap[emp.id] += data.amount * 0.05;
+                            } else if(data.category === 'Pembelian Produk') {
+                                if(isSri) commissionMap[emp.id] += data.amount * 0.01;
+                            } else if(data.category === 'Jasa Service Vendor') {
+                                if(isSri) commissionMap[emp.id] += data.amount * 0.005;
+                                if(isAmar) commissionMap[emp.id] += data.amount * 0.01;
+                                if(isWina) commissionMap[emp.id] += data.amount * 0.01;
+                            } else if(data.category === 'Penjualan Affiliate') {
+                                if(isSri) commissionMap[emp.id] += data.amount * 0.01;
+                                if(isAmar) commissionMap[emp.id] += data.amount * 0.20;
+                                if(isWina) commissionMap[emp.id] += data.amount * 0.20;
+                            }
+                        });
+                    }
+
                     const actionBtnClass = isOwnerUnlocked ? '' : 'hidden';
                     tbody.innerHTML += `<tr>
                         <td>${data.timeStr || '-'}</td>
@@ -1225,6 +1271,14 @@
                             <button class="btn-danger" onclick="deleteTransaction('${data.id}')">Hapus</button>
                         </td>
                     </tr>`;
+                });
+
+                // Update tampilan kartu komisi di layar
+                Object.keys(commissionMap).forEach(empId => {
+                    let cardEl = document.getElementById(`komisi_${empId}`);
+                    if(cardEl) {
+                        cardEl.innerText = "Rp " + Math.round(commissionMap[empId]).toLocaleString('id-ID');
+                    }
                 });
             });
         }
