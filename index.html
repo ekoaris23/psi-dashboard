@@ -12,8 +12,11 @@
         body { background-color: #0f172a; color: #f8fafc; padding: 20px; }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #334155; padding-bottom: 15px; margin-bottom: 20px; }
         h1 { color: #38bdf8; font-size: 20px; }
+        .auth-buttons { display: flex; gap: 8px; }
         button { background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         button:hover { background: #0369a1; }
+        .btn-hrd { background: #0284c7; }
+        .btn-owner { background: #059669; }
         .btn-danger { background: #ef4444 !important; padding: 4px 8px !important; font-size: 11px !important; }
         .btn-warning { background: #f59e0b !important; color: black !important; padding: 4px 8px !important; font-size: 11px !important; margin-right: 4px; }
         .btn-save-kpi { width: 100%; margin-top: 12px; padding: 10px; font-weight: bold; border-radius: 6px; border: none; cursor: pointer; color: white; }
@@ -47,7 +50,10 @@
             <h1>Paramount Star Indonesia</h1>
             <p style="color: #94a3b8; font-size: 12px;">System Operational & Monitoring Real-Time</p>
         </div>
-        <button id="authBtn" onclick="togglePrivateView()">Unlock Owner</button>
+        <div class="auth-buttons">
+            <button id="hrdAuthBtn" class="btn-hrd" onclick="toggleHrdView()">Unlock HRD</button>
+            <button id="ownerAuthBtn" class="btn-owner" onclick="togglePrivateView()">Unlock Owner</button>
+        </div>
     </div>
 
     <!-- PILIH AKUN / IDENTITAS KARYAWAN -->
@@ -55,7 +61,7 @@
         <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
         <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
             <option value="none">-- Pilih Nama Karyawan --</option>
-            <option value="sri">Sri (HRD / Asisten) 🔒</option>
+            <option value="sri">Sri (HRD / Asisten)</option>
             <option value="wina">Wina (Content Creator)</option>
             <option value="amar">Amar (Teknisi)</option>
         </select>
@@ -191,9 +197,9 @@
                     </ul>
                 </div>
 
-                <!-- FORM INPUT JOBLIST BARU (KHUSUS SRI / MODE HRD) -->
-                <div id="addJobFormSection" class="hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #334155;">
-                    <h4 style="color: #38bdf8; font-size: 13px; margin-bottom: 8px;">➕ Tambah Joblist Pekerjaan Baru (Oleh Sri - HRD)</h4>
+                <!-- FORM INPUT JOBLIST BARU (KHUSUS HRD & OWNER) -->
+                <div id="addJobFormSection" class="hrd-owner-crud hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #334155;">
+                    <h4 style="color: #38bdf8; font-size: 13px; margin-bottom: 8px;">➕ Tambah Joblist Pekerjaan Baru (Akses HRD / Owner)</h4>
                     <form onsubmit="saveCustomJob(event)">
                         <label style="font-size:11px;">Input untuk Karyawan:</label>
                         <select id="newJobTarget" required>
@@ -383,9 +389,7 @@
         
         let isOwnerUnlocked = false;
         let isHrdUnlocked = false;
-        let lastSelectedEmployee = 'none';
 
-        // DEFAULT CHECKLIST INITIAL SEED (BILA DATABASE KOSONG)
         const initialChecklists = {
             sri: [
                 "Cek & Rekap transaksi kas harian",
@@ -418,11 +422,80 @@
             document.getElementById('txDateTime').value = now.toISOString().slice(0, 16);
         }
 
-        // INIT & LOAD DYNAMIC CHECKLISTS
+        // CONTROL UNLOCK HRD BUTTON (PIN 0000)
+        function toggleHrdView() {
+            const btn = document.getElementById('hrdAuthBtn');
+            if (!isHrdUnlocked) {
+                let inputPin = prompt("Masukkan PIN HRD:");
+                if (inputPin === PIN_HRD) {
+                    isHrdUnlocked = true;
+                    btn.innerText = "Lock HRD";
+                    btn.style.background = "#dc2626";
+                    toggleHrdOwnerElements();
+                } else if (inputPin !== null) {
+                    alert("PIN HRD Salah!");
+                }
+            } else {
+                isHrdUnlocked = false;
+                btn.innerText = "Unlock HRD";
+                btn.style.background = "#0284c7";
+                toggleHrdOwnerElements();
+            }
+        }
+
+        // CONTROL UNLOCK OWNER BUTTON (PIN admin123)
+        function togglePrivateView() {
+            const privateSec = document.getElementById('privateSection');
+            const authBtn = document.getElementById('ownerAuthBtn');
+
+            if (privateSec.classList.contains('hidden')) {
+                let inputPin = prompt("Masukkan PIN Owner:");
+                if (inputPin === PIN_KOMISARIS) {
+                    isOwnerUnlocked = true;
+                    privateSec.classList.remove('hidden');
+                    authBtn.innerText = "Lock Owner";
+                    authBtn.style.background = "#dc2626";
+                    toggleOwnerColumns(true);
+                    toggleHrdOwnerElements();
+                    loadCustomJobs();
+                } else if (inputPin !== null) {
+                    alert("PIN Owner Salah!");
+                }
+            } else {
+                isOwnerUnlocked = false;
+                privateSec.classList.add('hidden');
+                authBtn.innerText = "Unlock Owner";
+                authBtn.style.background = "#059669";
+                toggleOwnerColumns(false);
+                toggleHrdOwnerElements();
+                loadCustomJobs();
+            }
+        }
+
+        function toggleOwnerColumns(show) {
+            const ownerCols = document.querySelectorAll('.owner-col');
+            ownerCols.forEach(col => {
+                if(show) col.classList.remove('hidden');
+                else col.classList.add('hidden');
+            });
+        }
+
+        function toggleHrdOwnerElements() {
+            const isAuthorized = isHrdUnlocked || isOwnerUnlocked;
+            const crudEls = document.querySelectorAll('.hrd-owner-crud');
+            crudEls.forEach(el => {
+                if(isAuthorized) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+            
+            // Re-render checklist agar tombol CRUD muncul/tersembunyi secara real-time
+            db.collection("default_checklists").get().then(renderChecklists);
+            loadCustomJobs();
+        }
+
         function initChecklists() {
             db.collection("default_checklists").onSnapshot((snapshot) => {
                 if (snapshot.empty) {
-                    // Seed initial data
                     Object.keys(initialChecklists).forEach(emp => {
                         initialChecklists[emp].forEach(text => {
                             db.collection("default_checklists").add({
@@ -453,7 +526,7 @@
                 d.id = doc.id;
                 docsArr.push(d);
             });
-            docsArr.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+            docsArr.sort((a, b) => (a.createdAt || 0) - (a.createdAt || 0));
 
             docsArr.forEach(item => {
                 const targetContainer = containers[item.employee];
@@ -487,7 +560,6 @@
             ['sri', 'wina', 'amar'].forEach(emp => calculateProgress(emp));
         }
 
-        // CRUD CHECKLIST FUNCTIONS (HRD & OWNER ONLY)
         function addChecklistItem(employee) {
             if (!isHrdUnlocked && !isOwnerUnlocked) return;
             let text = prompt(`Tambah tugas checklist baru untuk ${employee.toUpperCase()}:`);
@@ -739,21 +811,6 @@
             const selectEl = document.getElementById('employeeSelect');
             const selected = selectEl.value;
 
-            if (selected === 'sri' && lastSelectedEmployee !== 'sri' && !isHrdUnlocked) {
-                let pinInput = prompt("Masukkan PIN Akses Sri (HRD):");
-                if (pinInput !== PIN_HRD) {
-                    alert("PIN HRD Salah! Akses menu Sri ditolak.");
-                    selectEl.value = 'none';
-                    filterJoblist();
-                    return;
-                } else {
-                    isHrdUnlocked = true;
-                    toggleHrdOwnerElements();
-                }
-            }
-
-            lastSelectedEmployee = selected;
-
             const leftDefault = document.getElementById('leftDefaultMsg');
             const sriLeft = document.getElementById('sriLeftContent');
             const winaLeft = document.getElementById('winaLeftContent');
@@ -762,7 +819,6 @@
             const rightDefault = document.getElementById('rightDefaultMsg');
             const joblistContainer = document.getElementById('joblistContainer');
             const jobItems = document.querySelectorAll('.job-item');
-            const addJobFormSection = document.getElementById('addJobFormSection');
 
             leftDefault.classList.add('hidden');
             sriLeft.classList.add('hidden');
@@ -781,65 +837,15 @@
                 
                 if (selected === 'sri') {
                     sriLeft.classList.remove('hidden');
-                    addJobFormSection.classList.remove('hidden');
                 } else if (selected === 'wina') {
                     winaLeft.classList.remove('hidden');
-                    addJobFormSection.classList.add('hidden');
                 } else if (selected === 'amar') {
                     amarLeft.classList.remove('hidden');
-                    addJobFormSection.classList.add('hidden');
                 }
 
                 const activeJob = document.querySelector(`.job-item[data-employee="${selected}"]`);
                 if (activeJob) activeJob.classList.remove('hidden');
             }
-        }
-
-        function togglePrivateView() {
-            const privateSec = document.getElementById('privateSection');
-            const authBtn = document.getElementById('authBtn');
-
-            if (privateSec.classList.contains('hidden')) {
-                let inputPin = prompt("Masukkan PIN Owner:");
-                if (inputPin === PIN_KOMISARIS) {
-                    isOwnerUnlocked = true;
-                    privateSec.classList.remove('hidden');
-                    authBtn.innerText = "Lock Owner";
-                    authBtn.style.background = "#dc2626";
-                    toggleOwnerColumns(true);
-                    toggleHrdOwnerElements();
-                    loadCustomJobs();
-                } else if (inputPin !== null) {
-                    alert("PIN Salah! Akses ditolak.");
-                }
-            } else {
-                isOwnerUnlocked = false;
-                privateSec.classList.add('hidden');
-                authBtn.innerText = "Unlock Owner";
-                authBtn.style.background = "#0284c7";
-                toggleOwnerColumns(false);
-                toggleHrdOwnerElements();
-                loadCustomJobs();
-            }
-        }
-
-        function toggleOwnerColumns(show) {
-            const ownerCols = document.querySelectorAll('.owner-col');
-            ownerCols.forEach(col => {
-                if(show) col.classList.remove('hidden');
-                else col.classList.add('hidden');
-            });
-        }
-
-        function toggleHrdOwnerElements() {
-            const isAuthorized = isHrdUnlocked || isOwnerUnlocked;
-            const crudEls = document.querySelectorAll('.hrd-owner-crud');
-            crudEls.forEach(el => {
-                if(isAuthorized) el.classList.remove('hidden');
-                else el.classList.add('hidden');
-            });
-            // Re-render checklist to update CRUD buttons
-            db.collection("default_checklists").get().then(renderChecklists);
         }
 
         function saveTransactionRadical(e) {
