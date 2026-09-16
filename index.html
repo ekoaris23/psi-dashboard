@@ -135,9 +135,6 @@
                     <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
                     <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
                         <option value="none">-- Pilih Nama Karyawan --</option>
-                        <option value="sri">Sri (HRD / Asisten) 🔒</option>
-                        <option value="wina">Wina (Content Creator)</option>
-                        <option value="amar">Amar (Teknisi)</option>
                     </select>
                 </div>
 
@@ -147,46 +144,18 @@
                             Silakan pilih nama karyawan di atas untuk membuka area kerja checklist.
                         </div>
 
-                        <!-- Sri Left -->
-                        <div id="sriLeftContent" class="hidden">
-                            <h3 style="color: #38bdf8;">Checklist Tugas Harian Sri:</h3>
+                        <!-- Content Checklist Dinamis -->
+                        <div id="dynamicLeftContent" class="hidden">
+                            <h3 id="activeEmpChecklistTitle" style="color: #38bdf8;">Checklist Tugas Harian:</h3>
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                                <button class="hrd-owner-crud hidden" style="font-size:10px; padding:3px 8px;" onclick="addChecklistItem('sri')">+ Tambah Item Checklist</button>
+                                <button class="hrd-owner-crud hidden" style="font-size:10px; padding:3px 8px;" onclick="addChecklistItem()">+ Tambah Item Checklist</button>
                             </div>
-                            <div id="sriChecklistContainer"></div>
+                            <div id="dynamicChecklistContainer"></div>
                             <div class="progress-container">
-                                <div class="progress-label"><span>Capaian Pekerjaan:</span><span id="sriProgressText">0% tercapai</span></div>
-                                <div class="progress-bar-bg"><div id="sriProgressBar" class="progress-bar-fill"></div></div>
+                                <div class="progress-label"><span>Capaian Pekerjaan:</span><span id="dynamicProgressText">0% tercapai</span></div>
+                                <div class="progress-bar-bg"><div id="dynamicProgressBar" class="progress-bar-fill"></div></div>
                             </div>
-                            <button class="btn-save-kpi" style="background: #0284c7;" onclick="saveDailyKPI('sri', 'Sri (HRD)')">📌 Simpan Checklist Harian untuk Hari Ini</button>
-                        </div>
-
-                        <!-- Wina Left -->
-                        <div id="winaLeftContent" class="hidden">
-                            <h3 style="color: #ec4899;">Checklist Tugas Harian Wina:</h3>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                                <button class="hrd-owner-crud hidden" style="font-size:10px; padding:3px 8px; background:#ec4899;" onclick="addChecklistItem('wina')">+ Tambah Item Checklist</button>
-                            </div>
-                            <div id="winaChecklistContainer"></div>
-                            <div class="progress-container">
-                                <div class="progress-label"><span style="color: #ec4899;">Capaian Pekerjaan:</span><span id="winaProgressText" style="color: #ec4899;">0% tercapai</span></div>
-                                <div class="progress-bar-bg"><div id="winaProgressBar" class="progress-bar-fill" style="background: linear-gradient(90deg, #ec4899, #f472b6);"></div></div>
-                            </div>
-                            <button class="btn-save-kpi" style="background: #ec4899;" onclick="saveDailyKPI('wina', 'Wina (Content Creator)')">📌 Simpan Checklist Harian untuk Hari Ini</button>
-                        </div>
-
-                        <!-- Amar Left -->
-                        <div id="amarLeftContent" class="hidden">
-                            <h3 style="color: #eab308;">Checklist Tugas Harian Amar:</h3>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                                <button class="hrd-owner-crud hidden" style="font-size:10px; padding:3px 8px; background:#eab308; color:black;" onclick="addChecklistItem('amar')">+ Tambah Item Checklist</button>
-                            </div>
-                            <div id="amarChecklistContainer"></div>
-                            <div class="progress-container">
-                                <div class="progress-label"><span style="color: #eab308;">Capaian Pekerjaan:</span><span id="amarProgressText" style="color: #eab308;">0% tercapai</span></div>
-                                <div class="progress-bar-bg"><div id="amarProgressBar" class="progress-bar-fill" style="background: linear-gradient(90deg, #eab308, #facc15);"></div></div>
-                            </div>
-                            <button class="btn-save-kpi" style="background: #eab308; color: black;" onclick="saveDailyKPI('amar', 'Amar (Teknisi)')">📌 Simpan Checklist Harian untuk Hari Ini</button>
+                            <button class="btn-save-kpi" style="background: #0284c7;" onclick="saveDailyKPI()">📌 Simpan Checklist Harian untuk Hari Ini</button>
                         </div>
                     </div>
 
@@ -195,28 +164,16 @@
                             Panduan joblist spesifik akan tampil setelah nama karyawan dipilih.
                         </div>
                         <div id="joblistContainer" class="hidden">
-                            <div class="job-item hidden" data-employee="sri">
-                                <h3 style="color: #38bdf8;">📋 Panduan Joblist Sri</h3>
-                                <ul class="task-list" id="sriTaskList"></ul>
-                            </div>
-                            <div class="job-item hidden" data-employee="wina">
-                                <h3 style="color: #ec4899;">📋 Panduan Joblist Wina</h3>
-                                <ul class="task-list" id="winaTaskList"></ul>
-                            </div>
-                            <div class="job-item hidden" data-employee="amar">
-                                <h3 style="color: #eab308;">📋 Panduan Joblist Amar</h3>
-                                <ul class="task-list" id="amarTaskList"></ul>
+                            <div class="job-item">
+                                <h3 id="activeEmpJoblistTitle" style="color: #38bdf8;">📋 Panduan Joblist Pekerjaan</h3>
+                                <ul class="task-list" id="dynamicTaskList"></ul>
                             </div>
 
                             <div id="addJobFormSection" class="hrd-owner-crud hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #334155;">
                                 <h4 style="color: #38bdf8; font-size: 13px; margin-bottom: 8px;">➕ Tambah Joblist Pekerjaan Baru (Akses HRD / Owner)</h4>
                                 <form onsubmit="saveCustomJob(event)">
                                     <label style="font-size:11px;">Input untuk Karyawan:</label>
-                                    <select id="newJobTarget" required>
-                                        <option value="sri">Sri (HRD / Asisten)</option>
-                                        <option value="wina">Wina (Content Creator)</option>
-                                        <option value="amar">Amar (Teknisi)</option>
-                                    </select>
+                                    <select id="newJobTarget" required></select>
                                     <label style="font-size:11px;">Deskripsi Pekerjaan:</label>
                                     <input type="text" id="newJobText" placeholder="Contoh: Belanja stok SSD NVMe ke vendor" required>
                                     <label style="font-size:11px;">Frekuensi Tugas:</label>
@@ -311,25 +268,14 @@
                             </table>
                         </div>
 
-                        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-                            <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
-                                <h4 style="color: #38bdf8; font-size: 12px;">Komisi Sri (1%)</h4>
-                                <div id="komisiSri" style="font-size: 16px; font-weight: bold; color: #4ade80;">Rp 0</div>
-                            </div>
-                            <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
-                                <h4 style="color: #eab308; font-size: 12px;">Komisi Amar (5%/20%)</h4>
-                                <div id="komisiAmar" style="font-size: 16px; font-weight: bold; color: #4ade80;">Rp 0</div>
-                            </div>
-                            <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
-                                <h4 style="color: #ec4899; font-size: 12px;">Komisi Wina (5%/20%)</h4>
-                                <div id="komisiWina" style="font-size: 16px; font-weight: bold; color: #4ade80;">Rp 0</div>
-                            </div>
+                        <div style="margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;" id="commissionCardsContainer">
+                            <!-- Populated Dynamically based on active employees -->
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 4: DATA KARYAWAN (HRD & OWNER - UPGRADED) -->
+            <!-- TAB 4: DATA KARYAWAN -->
             <div id="employeeTab" class="tab-content hidden">
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -337,7 +283,6 @@
                         <button onclick="openEmployeeModal()" style="background:#22c55e;">+ Tambah Karyawan Baru</button>
                     </div>
                     
-                    <!-- FILTER & SEARCH BAR -->
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 15px;">
                         <input type="text" id="empSearchInput" onkeyup="filterEmployees()" placeholder="🔍 Cari Nama / NIK / Jabatan..." style="margin: 0;">
                         <select id="empStatusFilter" onchange="filterEmployees()" style="margin: 0;">
@@ -522,23 +467,23 @@
                 <input type="hidden" id="empId">
                 
                 <label style="font-size:12px;">Nama Lengkap Karyawan:</label>
-                <input type="text" id="empName" placeholder="Contoh: Sri Rahayu" required>
+                <input type="text" id="empName" placeholder="Contoh: SRI EPIYANI" required>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">NIK / No. KTP:</label>
-                        <input type="text" id="empNik" placeholder="3204xxxxxxxxxxxx" required>
+                        <input type="text" id="empNik" placeholder="3211125403050003" required>
                     </div>
                     <div>
                         <label style="font-size:12px;">No. WhatsApp:</label>
-                        <input type="text" id="empWa" placeholder="081234567890" required>
+                        <input type="text" id="empWa" placeholder="085794964831" required>
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Jabatan:</label>
-                        <input type="text" id="empRole" placeholder="Contoh: HRD & Asisten" required>
+                        <input type="text" id="empRole" placeholder="Contoh: HRD & Asisten Operasional" required>
                     </div>
                     <div>
                         <label style="font-size:12px;">Status Kontrak:</label>
@@ -577,7 +522,7 @@
                     </div>
                     <div>
                         <label style="font-size:12px;">No. Rekening & A/N:</label>
-                        <input type="text" id="empBankAcc" placeholder="12345678 a.n Sri Rahayu" required>
+                        <input type="text" id="empBankAcc" placeholder="12345678 a.n SRI EPIYANI" required>
                     </div>
                 </div>
 
@@ -593,9 +538,7 @@
                 <h3 style="color:#38bdf8;">🪪 Kartu Profil Karyawan</h3>
                 <button onclick="closeDetailModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
             </div>
-            <div id="empDetailBody" style="font-size:13px; line-height:1.6;">
-                <!-- Populated via JS -->
-            </div>
+            <div id="empDetailBody" style="font-size:13px; line-height:1.6;"></div>
         </div>
     </div>
 
@@ -621,6 +564,7 @@
         let kpiChartInstance = null;
         let financeChartInstance = null;
         let allEmployeesData = [];
+        let selectedEmpId = null;
 
         window.onload = function() {
             setDefaultDateTime();
@@ -654,7 +598,6 @@
             overlay.classList.remove('active');
         }
 
-        // CONTROL SIDEBAR MENU VISIBILITY
         function updateSidebarVisibility() {
             const hrdItems = document.querySelectorAll('.hrd-menu-item');
             const ownerItems = document.querySelectorAll('.owner-menu-item');
@@ -676,7 +619,6 @@
             });
         }
 
-        // SWITCH TAB FUNCTION & AUTO CLOSE SIDEBAR ON MOBILE
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
@@ -774,18 +716,20 @@
             loadCustomJobs();
         }
 
-        // ==========================================
-        // MODUL DATA KARYAWAN (CRUD & MANAGEMENT)
-        // ==========================================
+        // ====================================================
+        // INTEGRASI DROPDOWN & KARYAWAN DINAMIS DARI DATABASE
+        // ====================================================
         function loadEmployees() {
             db.collection("employees").onSnapshot((snapshot) => {
                 allEmployeesData = [];
                 if (snapshot.empty) {
                     // Seed initial data jika database kosong
                     const initialEmployees = [
-                        { name: "Sri Rahayu", nik: "3204015509980001", role: "HRD & Asisten Operasional", contract: "Tetap", wa: "0812-3456-7890", status: "Aktif", joinDate: "2024-01-15", address: "Jatinangor, Sumedang", emergency: "Ibu Ani (0813-9999-0000)", bankName: "BCA", bankAcc: "1234567890 a.n Sri Rahayu" },
-                        { name: "Wina Amelia", nik: "3204014408000002", role: "Content Creator / Media", contract: "Tetap", wa: "0813-8888-7777", status: "Aktif", joinDate: "2024-03-01", address: "Cikeruh, Jatinangor", emergency: "Bpk Agus (0812-7777-6666)", bankName: "BRI", bankAcc: "9876543210 a.n Wina Amelia" },
-                        { name: "Amar Syahputra", nik: "3204011205970003", role: "Senior Laptop Technician", contract: "Tetap", wa: "0857-1111-2222", status: "Aktif", joinDate: "2023-11-10", address: "Hegarmanah, Jatinangor", emergency: "Istri (0857-3333-4444)", bankName: "Bank Jago", bankAcc: "50001234567 a.n Amar Syahputra" }
+                        { name: "SRI EPIYANI", nik: "3211125403050003", role: "HRD & Asisten Operasional", contract: "Tetap", wa: "085794964831", status: "Aktif", joinDate: "2024-01-15", address: "Jatinangor, Sumedang", emergency: "Keluarga (0813-xxxx-xxxx)", bankName: "BCA", bankAcc: "1234567890 a.n SRI EPIYANI" },
+                        { name: "PUTRI NUR AENI", nik: "0061453273 (NISN)", role: "Admin SPX", contract: "Magang", wa: "0877-6476-0318", status: "Non-Aktif", joinDate: "2024-06-01", address: "Sumedang", emergency: "Orang Tua", bankName: "BRI", bankAcc: "00000000 a.n PUTRI" },
+                        { name: "WINA", nik: "3211114905060001", role: "Content Creator", contract: "Tetap", wa: "+62 821-1703-2747", status: "Aktif", joinDate: "2024-03-01", address: "Jatinangor", emergency: "Keluarga", bankName: "BRI", bankAcc: "9876543210 a.n WINA" },
+                        { name: "ROBI SETIAJI", nik: "3211112710930005", role: "Leader Mitra Kurir SPX", contract: "Kontrak", wa: "+62 813-1260-5376", status: "Aktif", joinDate: "2024-02-10", address: "Jatinangor", emergency: "Keluarga", bankName: "BCA", bankAcc: "11223344 a.n ROBI" },
+                        { name: "AMAR NUR FAJRIN", nik: "3208092703970006", role: "Senior Laptop Technician", contract: "Tetap", wa: "+62 896-0675-4420", status: "Aktif", joinDate: "2023-11-10", address: "Jatinangor", emergency: "Istri", bankName: "Bank Jago", bankAcc: "50001234567 a.n AMAR" }
                     ];
                     initialEmployees.forEach(emp => {
                         db.collection("employees").add({ ...emp, createdAt: Date.now() });
@@ -797,7 +741,46 @@
                         allEmployeesData.push(d);
                     });
                     renderEmployeeTable();
+                    populateEmployeeDropdowns();
                 }
+            });
+        }
+
+        function populateEmployeeDropdowns() {
+            const empSelect = document.getElementById('employeeSelect');
+            const jobTargetSelect = document.getElementById('newJobTarget');
+            const commCards = document.getElementById('commissionCardsContainer');
+
+            empSelect.innerHTML = `<option value="none">-- Pilih Nama Karyawan --</option>`;
+            jobTargetSelect.innerHTML = ``;
+            commCards.innerHTML = ``;
+
+            // Filter HANYA karyawan AKTIF
+            const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
+
+            activeEmployees.forEach(emp => {
+                let isHRD = emp.role.toLowerCase().includes('hrd') || emp.role.toLowerCase().includes('asisten');
+                let lockIcon = isHRD ? ' 🔒' : '';
+                
+                // Populate Dropdown Joblist
+                let opt = document.createElement('option');
+                opt.value = emp.id;
+                opt.innerText = `${emp.name} (${emp.role})${lockIcon}`;
+                empSelect.appendChild(opt);
+
+                // Populate Dropdown Form Joblist Baru
+                let optJob = document.createElement('option');
+                optJob.value = emp.id;
+                optJob.innerText = `${emp.name} (${emp.role})`;
+                jobTargetSelect.appendChild(optJob);
+
+                // Populate Komisi Cards
+                commCards.innerHTML += `
+                    <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
+                        <h4 style="color: #38bdf8; font-size: 12px;">Komisi ${emp.name}</h4>
+                        <div id="komisi_${emp.id}" style="font-size: 16px; font-weight: bold; color: #4ade80;">Rp 0</div>
+                    </div>
+                `;
             });
         }
 
@@ -950,150 +933,108 @@
             document.getElementById('empDetailModal').classList.remove('active');
         }
 
-        // CHARTS FOR OWNER DASHBOARD
-        function renderOwnerCharts() {
-            const ctxKPI = document.getElementById('kpiChart').getContext('2d');
-            const ctxFinance = document.getElementById('financeChart').getContext('2d');
+        // ==========================================
+        // JOBLIST & CHECKLIST LOGIC (DINAMIS)
+        // ==========================================
+        function filterJoblist() {
+            const selectEl = document.getElementById('employeeSelect');
+            const empId = selectEl.value;
+            selectedEmpId = empId;
 
-            if(kpiChartInstance) kpiChartInstance.destroy();
-            if(financeChartInstance) financeChartInstance.destroy();
+            if (empId === 'none') {
+                document.getElementById('leftDefaultMsg').classList.remove('hidden');
+                document.getElementById('rightDefaultMsg').classList.remove('hidden');
+                document.getElementById('dynamicLeftContent').classList.add('hidden');
+                document.getElementById('joblistContainer').classList.add('hidden');
+                return;
+            }
 
-            kpiChartInstance = new Chart(ctxKPI, {
-                type: 'bar',
-                data: {
-                    labels: ['Sri (HRD)', 'Wina (Content)', 'Amar (Teknisi)'],
-                    datasets: [{
-                        label: 'Rata-Rata Capaian (%)',
-                        data: [100, 67, 100],
-                        backgroundColor: ['#38bdf8', '#ec4899', '#eab308']
-                    }]
-                },
-                options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
-            });
+            const emp = allEmployeesData.find(e => e.id === empId);
+            if (!emp) return;
 
-            financeChartInstance = new Chart(ctxFinance, {
-                type: 'line',
-                data: {
-                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
-                    datasets: [
-                        { label: 'Pemasukan (Rp)', data: [2500000, 3200000, 2900000, 4100000], borderColor: '#4ade80', fill: false },
-                        { label: 'Pengeluaran (Rp)', data: [1200000, 1500000, 1100000, 1800000], borderColor: '#ef4444', fill: false }
-                    ]
-                },
-                options: { responsive: true }
-            });
-        }
-
-        // OWNER AGENDA STRATEGIS CRUD
-        function loadOwnerAgendas() {
-            db.collection("owner_agendas").onSnapshot((snapshot) => {
-                const listEl = document.getElementById('ownerAgendaList');
-                listEl.innerHTML = "";
-                if(snapshot.empty) {
-                    listEl.innerHTML = `<li style="border-left-color:#22c55e;">Belum ada agenda strategis diset.</li>`;
+            // Meminta PIN HRD jika karyawan yang dipilih adalah HRD
+            let isHRD = emp.role.toLowerCase().includes('hrd') || emp.role.toLowerCase().includes('asisten');
+            if (isHRD && !isHrdUnlocked && !isOwnerUnlocked) {
+                let pinInput = prompt(`Akses Terkunci. Masukkan PIN HRD untuk membuka area ${emp.name}:`);
+                if (pinInput === PIN_HRD) {
+                    isHrdUnlocked = true;
+                    updateAuthBtnState();
+                } else {
+                    if (pinInput !== null) alert("PIN HRD Salah!");
+                    selectEl.value = 'none';
+                    filterJoblist();
                     return;
                 }
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    const id = doc.id;
-                    let li = document.createElement('li');
-                    li.style.borderLeftColor = "#22c55e";
-                    li.innerHTML = `
-                        ${isOwnerUnlocked ? `<button class="btn-danger" style="float:right;" onclick="deleteOwnerAgenda('${id}')">Hapus</button>` : ''}
-                        <strong>👑 Agenda Strategis:</strong> ${data.text}
-                    `;
-                    listEl.appendChild(li);
-                });
-            });
-        }
-
-        function addOwnerAgenda() {
-            if(!isOwnerUnlocked) return;
-            let text = prompt("Masukkan Agenda Strategis Baru Pak Komisaris:");
-            if(text && text.trim() !== "") {
-                db.collection("owner_agendas").add({ text: text.trim(), createdAt: Date.now() })
-                .then(() => alert("Agenda Strategis Berhasil Ditambahkan."))
-                .catch(err => alert("Gagal: " + err.message));
             }
-        }
 
-        function deleteOwnerAgenda(id) {
-            if(!isOwnerUnlocked) return;
-            if(confirm("Hapus agenda ini?")) {
-                db.collection("owner_agendas").doc(id).delete();
-            }
-        }
+            document.getElementById('leftDefaultMsg').classList.add('hidden');
+            document.getElementById('rightDefaultMsg').classList.add('hidden');
+            document.getElementById('dynamicLeftContent').classList.remove('hidden');
+            document.getElementById('joblistContainer').classList.remove('hidden');
 
-        // CHECKLIST & JOBLIST FUNCTIONS
-        function setDefaultDateTime() {
-            const now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById('txDateTime').value = now.toISOString().slice(0, 16);
+            document.getElementById('activeEmpChecklistTitle').innerText = `Checklist Tugas Harian ${emp.name}:`;
+            document.getElementById('activeEmpJoblistTitle').innerText = `📋 Panduan Joblist ${emp.name}`;
+
+            loadEmpChecklists(empId);
+            loadEmpTaskList(empId);
         }
 
         function initChecklists() {
             db.collection("default_checklists").onSnapshot((snapshot) => {
-                if (snapshot.empty) {
-                    const initialChecklists = {
-                        sri: ["Cek & Rekap transaksi kas harian", "Update stok sparepart yang terpakai"],
-                        wina: ["Upload 1 Video Promo Thermal Paste", "Buat 1 Konten Video Affiliate Produk PSD", "Pastikan Tag Lokasi & Link WA Aktif"],
-                        amar: ["Selesaikan unit servis laptop tepat waktu", "Dampingi Wina buat konten edukasi", "Gerilya promosi di grup Facebook lokal"]
-                    };
-                    Object.keys(initialChecklists).forEach(emp => {
-                        initialChecklists[emp].forEach(text => {
-                            db.collection("default_checklists").add({ employee: emp, text: text, createdAt: Date.now() });
-                        });
-                    });
-                } else {
-                    renderChecklists(snapshot);
-                }
+                if (selectedEmpId) loadEmpChecklists(selectedEmpId);
             });
         }
 
-        function renderChecklists(snapshot) {
-            const containers = {
-                sri: document.getElementById('sriChecklistContainer'),
-                wina: document.getElementById('winaChecklistContainer'),
-                amar: document.getElementById('amarChecklistContainer')
-            };
-            Object.values(containers).forEach(c => c.innerHTML = "");
-            let docsArr = [];
-            snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; docsArr.push(d); });
-            docsArr.sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
+        function loadEmpChecklists(empId) {
+            db.collection("default_checklists").where("employeeId", "==", empId).onSnapshot((snapshot) => {
+                const container = document.getElementById('dynamicChecklistContainer');
+                container.innerHTML = "";
 
-            docsArr.forEach(item => {
-                const targetContainer = containers[item.employee];
-                if (targetContainer) {
-                    let borderColor = item.employee === 'wina' ? "#ec4899" : (item.employee === 'amar' ? "#eab308" : "#38bdf8");
+                if (snapshot.empty) {
+                    container.innerHTML = `<p style="font-size:12px; color:#94a3b8;">Belum ada item checklist khusus. HRD/Owner dapat menambahkan via tombol di atas.</p>`;
+                    calculateDynamicProgress();
+                    return;
+                }
+
+                snapshot.forEach(doc => {
+                    let item = doc.data();
                     let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
                     let crudBtns = isAuthorized ? `
                         <div>
-                            <button class="btn-warning" onclick="editChecklistItem('${item.id}', '${item.text.replace(/'/g, "\\'")}')">Edit</button>
-                            <button class="btn-danger" onclick="deleteChecklistItem('${item.id}')">Hapus</button>
+                            <button class="btn-warning" onclick="editChecklistItem('${doc.id}', '${item.text.replace(/'/g, "\\'")}')">Edit</button>
+                            <button class="btn-danger" onclick="deleteChecklistItem('${doc.id}')">Hapus</button>
                         </div>
                     ` : '';
 
                     let div = document.createElement('div');
                     div.className = 'checkbox-item';
-                    div.style.borderLeftColor = borderColor;
                     div.innerHTML = `
                         <div class="checkbox-item-left">
-                            <input type="checkbox" id="${item.employee}_check_${item.id}" onchange="calculateProgress('${item.employee}')">
-                            <label for="${item.employee}_check_${item.id}">${item.text}</label>
+                            <input type="checkbox" id="check_${doc.id}" onchange="calculateDynamicProgress()">
+                            <label for="check_${doc.id}">${item.text}</label>
                         </div>
                         ${crudBtns}
                     `;
-                    targetContainer.appendChild(div);
-                }
+                    container.appendChild(div);
+                });
+                calculateDynamicProgress();
             });
-            ['sri', 'wina', 'amar'].forEach(emp => calculateProgress(emp));
         }
 
-        function addChecklistItem(employee) {
-            if (!isHrdUnlocked && !isOwnerUnlocked) return;
-            let text = prompt(`Tambah tugas checklist baru untuk ${employee.toUpperCase()}:`);
+        function calculateDynamicProgress() {
+            let container = document.getElementById('dynamicChecklistContainer');
+            let checkboxes = container.querySelectorAll('input[type="checkbox"]');
+            let percent = checkboxes.length > 0 ? Math.round((Array.from(checkboxes).filter(cb => cb.checked).length / checkboxes.length) * 100) : 0;
+            document.getElementById('dynamicProgressText').innerText = percent + '% tercapai';
+            document.getElementById('dynamicProgressBar').style.width = percent + '%';
+        }
+
+        function addChecklistItem() {
+            if (!isHrdUnlocked && !isOwnerUnlocked || !selectedEmpId) return;
+            const emp = allEmployeesData.find(e => e.id === selectedEmpId);
+            let text = prompt(`Tambah tugas checklist baru untuk ${emp ? emp.name : ''}:`);
             if (text && text.trim() !== "") {
-                db.collection("default_checklists").add({ employee: employee, text: text.trim(), createdAt: Date.now() });
+                db.collection("default_checklists").add({ employeeId: selectedEmpId, text: text.trim(), createdAt: Date.now() });
             }
         }
 
@@ -1112,55 +1053,10 @@
             }
         }
 
-        function calculateProgress(employee) {
-            let container = document.getElementById(employee + 'ChecklistContainer');
-            if (!container) return;
-            let checkboxes = container.querySelectorAll('input[type="checkbox"]');
-            let percent = checkboxes.length > 0 ? Math.round((Array.from(checkboxes).filter(cb => cb.checked).length / checkboxes.length) * 100) : 0;
-            document.getElementById(employee + 'ProgressText').innerText = percent + '% tercapai';
-            document.getElementById(employee + 'ProgressBar').style.width = percent + '%';
-        }
-
-        function filterJoblist() {
-            const selectEl = document.getElementById('employeeSelect');
-            const selected = selectEl.value;
-
-            if (selected === 'sri' && !isHrdUnlocked && !isOwnerUnlocked) {
-                let pinInput = prompt("Masukkan PIN Akses Sri (HRD):");
-                if (pinInput === PIN_HRD) {
-                    isHrdUnlocked = true;
-                    updateAuthBtnState();
-                } else {
-                    if (pinInput !== null) alert("PIN HRD Salah!");
-                    selectEl.value = 'none';
-                    filterJoblist();
-                    return;
-                }
-            }
-
-            document.getElementById('leftDefaultMsg').classList.add('hidden');
-            document.getElementById('sriLeftContent').classList.add('hidden');
-            document.getElementById('winaLeftContent').classList.add('hidden');
-            document.getElementById('amarLeftContent').classList.add('hidden');
-            document.getElementById('rightDefaultMsg').classList.add('hidden');
-            document.getElementById('joblistContainer').classList.add('hidden');
-            document.querySelectorAll('.job-item').forEach(item => item.classList.add('hidden'));
-
-            if (selected === 'none') {
-                document.getElementById('leftDefaultMsg').classList.remove('hidden');
-                document.getElementById('rightDefaultMsg').classList.remove('hidden');
-            } else {
-                document.getElementById('joblistContainer').classList.remove('hidden');
-                document.getElementById(selected + 'LeftContent').classList.remove('hidden');
-                const activeJob = document.querySelector(`.job-item[data-employee="${selected}"]`);
-                if (activeJob) activeJob.classList.remove('hidden');
-            }
-        }
-
         function saveCustomJob(e) {
             e.preventDefault();
             db.collection("custom_jobs").add({
-                target: document.getElementById('newJobTarget').value,
+                targetId: document.getElementById('newJobTarget').value,
                 text: document.getElementById('newJobText').value,
                 freq: document.getElementById('newJobFreq').value,
                 priority: document.getElementById('newJobPriority').value,
@@ -1174,24 +1070,32 @@
 
         function loadCustomJobs() {
             db.collection("custom_jobs").onSnapshot((snapshot) => {
-                document.querySelectorAll('.dynamic-job').forEach(el => el.remove());
+                if(selectedEmpId) loadEmpTaskList(selectedEmpId);
+            });
+        }
+
+        function loadEmpTaskList(empId) {
+            db.collection("custom_jobs").where("targetId", "==", empId).onSnapshot((snapshot) => {
+                const listEl = document.getElementById('dynamicTaskList');
+                listEl.innerHTML = "";
+
+                if (snapshot.empty) {
+                    listEl.innerHTML = `<li style="border-left-color:#334155; color:#94a3b8;">Belum ada panduan joblist khusus.</li>`;
+                    return;
+                }
+
                 snapshot.forEach(doc => {
                     const data = doc.data();
-                    const listEl = document.getElementById(data.target + 'TaskList');
-                    if(listEl) {
-                        let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
-                        let deleteBtn = isAuthorized ? `<button class="btn-danger" style="float:right;" onclick="deleteCustomJob('${doc.id}')">Hapus</button>` : '';
-                        let li = document.createElement('li');
-                        li.className = "dynamic-job";
-                        li.style.borderLeftColor = data.target === 'wina' ? "#ec4899" : (data.target === 'amar' ? "#eab308" : "#38bdf8");
-                        li.innerHTML = `
-                            ${deleteBtn}
-                            <strong>${data.target.toUpperCase()}:</strong> ${data.text} 
-                            <span class="tag-job" style="background:#334155;">${data.freq}</span>
-                            <span class="tag-job" style="background:${data.priority === 'Urgent' ? '#ef4444' : '#22c55e'}; color:white;">${data.priority}</span>
-                        `;
-                        listEl.appendChild(li);
-                    }
+                    let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
+                    let deleteBtn = isAuthorized ? `<button class="btn-danger" style="float:right;" onclick="deleteCustomJob('${doc.id}')">Hapus</button>` : '';
+                    let li = document.createElement('li');
+                    li.innerHTML = `
+                        ${deleteBtn}
+                        <strong>Tugas:</strong> ${data.text} 
+                        <span class="tag-job" style="background:#334155;">${data.freq}</span>
+                        <span class="tag-job" style="background:${data.priority === 'Urgent' ? '#ef4444' : '#22c55e'}; color:white;">${data.priority}</span>
+                    `;
+                    listEl.appendChild(li);
                 });
             });
         }
@@ -1201,8 +1105,10 @@
             if(confirm("Hapus joblist ini?")) db.collection("custom_jobs").doc(id).delete();
         }
 
-        function saveDailyKPI(employeeKey, employeeName) {
-            let container = document.getElementById(employeeKey + 'ChecklistContainer');
+        function saveDailyKPI() {
+            if(!selectedEmpId) return;
+            const emp = allEmployeesData.find(e => e.id === selectedEmpId);
+            let container = document.getElementById('dynamicChecklistContainer');
             let checkboxes = container.querySelectorAll('input[type="checkbox"]');
             let detailsArr = [];
             checkboxes.forEach(cb => {
@@ -1213,10 +1119,10 @@
             const now = new Date();
 
             db.collection("kpi_logs").add({
-                employeeKey: employeeKey, employeeName: employeeName, percentage: percent,
+                employeeId: selectedEmpId, employeeName: emp ? emp.name : 'Karyawan', percentage: percent,
                 details: detailsArr.join("<br>"), timeStr: now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}),
                 createdAt: Date.now()
-            }).then(() => alert(`KPI Harian ${employeeName} tersimpan (${percent}% tercapai).`));
+            }).then(() => alert(`KPI Harian ${emp ? emp.name : ''} tersimpan (${percent}% tercapai).`));
         }
 
         function loadDailyKPI() {
@@ -1259,11 +1165,18 @@
             if(confirm("Hapus KPI ini?")) db.collection("kpi_logs").doc(id).delete();
         }
 
+        // ARUS KAS & CHARTS
+        function setDefaultDateTime() {
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('txDateTime').value = now.toISOString().slice(0, 16);
+        }
+
         function updateSubCategoryOptions() {
             const type = document.getElementById('txType').value;
             const catSelect = document.getElementById('txCategory');
             catSelect.innerHTML = type === 'masuk' ? `
-                <option value="Jasa Service Internal">Jasa Service Internal (Amar Internal)</option>
+                <option value="Jasa Service Internal">Jasa Service Internal</option>
                 <option value="Pembelian Produk">Pembelian Produk (Sparepart/Aksesoris)</option>
                 <option value="Jasa Service Vendor">Jasa Service Vendor (Pihak Luar)</option>
                 <option value="Penjualan Affiliate">Penjualan Affiliate (Produk PSD)</option>
@@ -1296,18 +1209,11 @@
             db.collection("transactions").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('publicTxTableBody');
                 tbody.innerHTML = "";
-                let komisiSriVal = 0, komisiAmarVal = 0, komisiWinaVal = 0;
                 let docsArr = [];
                 snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; docsArr.push(d); });
                 docsArr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 docsArr.forEach((data) => {
-                    if(data.type === 'masuk') {
-                        if(data.category === 'Jasa Service Internal') { komisiSriVal += data.amount * 0.01; komisiAmarVal += data.amount * 0.05; komisiWinaVal += data.amount * 0.05; }
-                        else if(data.category === 'Pembelian Produk') { komisiSriVal += data.amount * 0.01; }
-                        else if(data.category === 'Jasa Service Vendor') { komisiSriVal += data.amount * 0.005; komisiAmarVal += data.amount * 0.01; komisiWinaVal += data.amount * 0.01; }
-                        else if(data.category === 'Penjualan Affiliate') { komisiSriVal += data.amount * 0.01; komisiAmarVal += data.amount * 0.20; komisiWinaVal += data.amount * 0.20; }
-                    }
                     const actionBtnClass = isOwnerUnlocked ? '' : 'hidden';
                     tbody.innerHTML += `<tr>
                         <td>${data.timeStr || '-'}</td>
@@ -1320,10 +1226,6 @@
                         </td>
                     </tr>`;
                 });
-
-                document.getElementById('komisiSri').innerText = "Rp " + Math.round(komisiSriVal).toLocaleString('id-ID');
-                document.getElementById('komisiAmar').innerText = "Rp " + Math.round(komisiAmarVal).toLocaleString('id-ID');
-                document.getElementById('komisiWina').innerText = "Rp " + Math.round(komisiWinaVal).toLocaleString('id-ID');
             });
         }
 
@@ -1339,6 +1241,78 @@
         function deleteTransaction(id) {
             if(!isOwnerUnlocked) return;
             if(confirm("Hapus transaksi ini?")) db.collection("transactions").doc(id).delete();
+        }
+
+        function renderOwnerCharts() {
+            const ctxKPI = document.getElementById('kpiChart').getContext('2d');
+            const ctxFinance = document.getElementById('financeChart').getContext('2d');
+
+            if(kpiChartInstance) kpiChartInstance.destroy();
+            if(financeChartInstance) financeChartInstance.destroy();
+
+            kpiChartInstance = new Chart(ctxKPI, {
+                type: 'bar',
+                data: {
+                    labels: ['SRI EPIYANI', 'WINA', 'AMAR NUR FAJRIN'],
+                    datasets: [{
+                        label: 'Rata-Rata Capaian (%)',
+                        data: [100, 85, 95],
+                        backgroundColor: ['#38bdf8', '#ec4899', '#eab308']
+                    }]
+                },
+                options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+
+            financeChartInstance = new Chart(ctxFinance, {
+                type: 'line',
+                data: {
+                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+                    datasets: [
+                        { label: 'Pemasukan (Rp)', data: [2500000, 3200000, 2900000, 4100000], borderColor: '#4ade80', fill: false },
+                        { label: 'Pengeluaran (Rp)', data: [1200000, 1500000, 1100000, 1800000], borderColor: '#ef4444', fill: false }
+                    ]
+                },
+                options: { responsive: true }
+            });
+        }
+
+        function loadOwnerAgendas() {
+            db.collection("owner_agendas").onSnapshot((snapshot) => {
+                const listEl = document.getElementById('ownerAgendaList');
+                listEl.innerHTML = "";
+                if(snapshot.empty) {
+                    listEl.innerHTML = `<li style="border-left-color:#22c55e;">Belum ada agenda strategis diset.</li>`;
+                    return;
+                }
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    const id = doc.id;
+                    let li = document.createElement('li');
+                    li.style.borderLeftColor = "#22c55e";
+                    li.innerHTML = `
+                        ${isOwnerUnlocked ? `<button class="btn-danger" style="float:right;" onclick="deleteOwnerAgenda('${id}')">Hapus</button>` : ''}
+                        <strong>👑 Agenda Strategis:</strong> ${data.text}
+                    `;
+                    listEl.appendChild(li);
+                });
+            });
+        }
+
+        function addOwnerAgenda() {
+            if(!isOwnerUnlocked) return;
+            let text = prompt("Masukkan Agenda Strategis Baru Pak Komisaris:");
+            if(text && text.trim() !== "") {
+                db.collection("owner_agendas").add({ text: text.trim(), createdAt: Date.now() })
+                .then(() => alert("Agenda Strategis Berhasil Ditambahkan."))
+                .catch(err => alert("Gagal: " + err.message));
+            }
+        }
+
+        function deleteOwnerAgenda(id) {
+            if(!isOwnerUnlocked) return;
+            if(confirm("Hapus agenda ini?")) {
+                db.collection("owner_agendas").doc(id).delete();
+            }
         }
     </script>
 </body>
