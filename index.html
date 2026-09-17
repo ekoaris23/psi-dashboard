@@ -79,6 +79,13 @@
         .modal-card { background: #1e293b; width: 100%; max-width: 550px; border-radius: 8px; border: 1px solid #38bdf8; padding: 20px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
 
+        /* CETAK SLIP STYLE */
+        @media print {
+            body * { visibility: hidden; }
+            #printableSlipCard, #printableSlipCard * { visibility: visible; }
+            #printableSlipCard { position: absolute; left: 0; top: 0; width: 100%; color: black !important; background: white !important; border: none !important; }
+        }
+
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
             .sidebar.active { transform: translateX(0); }
@@ -456,18 +463,32 @@
 
             <!-- TAB 8: PENGGAJIAN DAN SLIP GAJI -->
             <div id="payrollTab" class="tab-content hidden">
+                <div class="card" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="color: #38bdf8; font-size: 16px;">💵 Payroll & Penggajian Karyawan Terintegrasi</h3>
+                        <span style="font-size: 12px; color: #4ade80; font-weight: bold;">⚡ Otomatis Terhitung Real-Time Dari Database</span>
+                    </div>
+                </div>
+
                 <div class="card">
-                    <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">💵 Payroll & Slip Gaji Karyawan (HRD & Owner)</h3>
-                    <table>
-                        <thead>
-                            <tr><th>Karyawan</th><th>Gaji Pokok</th><th>Estimasi Komisi</th><th>Bonus/Lembur</th><th>Total Gaji</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>Sri</td><td>Rp 1.800.000</td><td>Calculated</td><td>Rp 150.000</td><td>Rp 1.950.000 + Komisi</td></tr>
-                            <tr><td>Wina</td><td>Rp 1.800.000</td><td>Calculated</td><td>Rp 100.000</td><td>Rp 1.900.000 + Komisi</td></tr>
-                            <tr><td>Amar</td><td>Rp 1.900.000</td><td>Calculated</td><td>Rp 200.000</td><td>Rp 2.100.000 + Komisi</td></tr>
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Karyawan</th>
+                                    <th>Gaji Pokok</th>
+                                    <th>Estimasi Komisi (Menu 3)</th>
+                                    <th>Bonus Lembur Owner (Menu 7)</th>
+                                    <th>Poin Promosi (Inisiatif)</th>
+                                    <th>Total Gaji (Take Home Pay)</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payrollTableBody">
+                                <tr><td colspan="7" style="text-align:center; color:#94a3b8;">Mengkalkulasikan data penggajian...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -642,6 +663,41 @@
 
                 <button type="submit" style="width:100%; margin-top:15px; background:#22c55e;">💾 Simpan Perubahan Data Absen</button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL SLIP GAJI DIKIRIM / PRINT -->
+    <div class="modal-bg" id="slipModal">
+        <div class="modal-card" style="max-width: 600px; background: white; color: black;" id="printableSlipCard">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 15px;">
+                <div>
+                    <h2 style="color: #0284c7; font-size: 20px;">PARAMOUNT STAR</h2>
+                    <p style="font-size: 11px; color: #475569;">Sistem Penggajian & Slip Gaji Karyawan Resmi</p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="font-size: 12px; font-weight: bold; background: #e2e8f0; padding: 4px 8px; border-radius: 4px;">CONFIDENTIAL</span>
+                </div>
+            </div>
+
+            <div id="slipContentBody"></div>
+
+            <div style="margin-top: 30px; display: flex; justify-content: space-between; text-align: center; font-size: 12px;">
+                <div>
+                    <p>Penerima Gaji,</p>
+                    <br><br>
+                    <p id="slipSignEmpName"><strong>( ..................... )</strong></p>
+                </div>
+                <div>
+                    <p>Disetujui Oleh,</p>
+                    <br><br>
+                    <p><strong>( Owner Paramount Star )</strong></p>
+                </div>
+            </div>
+
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: flex-end;" class="no-print">
+                <button onclick="window.print()" style="background: #0284c7;">🖨️ Cetak PDF / Print</button>
+                <button onclick="closeSlipModal()" style="background: #64748b;">Tutup</button>
+            </div>
         </div>
     </div>
 
@@ -837,6 +893,7 @@
 
         const PIN_HRD = "0000";
         const PIN_KOMISARIS = "admin123";
+        const RATE_LEMBUR_PER_JAM = 20000; // Rate standar Rp 20.000 / Jam lembur resmi
         
         let isOwnerUnlocked = false;
         let isHrdUnlocked = false;
@@ -847,6 +904,7 @@
         let allAssetsData = [];
         let allProductsData = [];
         let allAttendanceData = [];
+        let allTransactionsData = [];
         let selectedEmpId = null;
 
         window.onload = function() {
@@ -909,6 +967,10 @@
 
             document.getElementById(tabId).classList.remove('hidden');
             if (element) element.classList.add('active');
+
+            if (tabId === 'payrollTab') {
+                renderPayrollTable();
+            }
 
             if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) {
                 renderOwnerCharts();
@@ -1007,6 +1069,7 @@
             if (selectedEmpId) loadEmpChecklists(selectedEmpId);
             loadPublicTransactions();
             renderAttendanceTable();
+            renderPayrollTable();
         }
 
         // ====================================================
@@ -1017,11 +1080,11 @@
                 allEmployeesData = [];
                 if (snapshot.empty) {
                     const initialEmployees = [
-                        { name: "SRI EPIYANI", nik: "3211125403050003", role: "HRD & Asisten Operasional", contract: "Tetap", wa: "085794964831", status: "Aktif", joinDate: "2024-01-15", address: "Jatinangor, Sumedang", emergency: "Keluarga", bankName: "BCA", bankAcc: "1234567890 a.n SRI EPIYANI" },
-                        { name: "PUTRI NUR AENI", nik: "0061453273 (NISN)", role: "Admin SPX", contract: "Magang", wa: "0877-6476-0318", status: "Non-Aktif", joinDate: "2024-06-01", address: "Sumedang", emergency: "Orang Tua", bankName: "BRI", bankAcc: "00000000 a.n PUTRI" },
-                        { name: "WINA", nik: "3211114905060001", role: "Content Creator", contract: "Tetap", wa: "+62 821-1703-2747", status: "Aktif", joinDate: "2024-03-01", address: "Jatinangor", emergency: "Keluarga", bankName: "BRI", bankAcc: "9876543210 a.n WINA" },
-                        { name: "ROBI SETIAJI", nik: "3211112710930005", role: "Leader Mitra Kurir SPX", contract: "Kontrak", wa: "+62 813-1260-5376", status: "Aktif", joinDate: "2024-02-10", address: "Jatinangor", emergency: "Keluarga", bankName: "BCA", bankAcc: "11223344 a.n ROBI" },
-                        { name: "AMAR NUR FAJRIN", nik: "3208092703970006", role: "Senior Laptop Technician", contract: "Tetap", wa: "+62 896-0675-4420", status: "Aktif", joinDate: "2023-11-10", address: "Jatinangor", emergency: "Istri", bankName: "Bank Jago", bankAcc: "50001234567 a.n AMAR" }
+                        { name: "SRI EPIYANI", nik: "3211125403050003", role: "HRD & Asisten Operasional", contract: "Tetap", wa: "085794964831", status: "Aktif", joinDate: "2024-01-15", address: "Jatinangor, Sumedang", emergency: "Keluarga", bankName: "BCA", bankAcc: "1234567890 a.n SRI EPIYANI", baseSalary: 1800000 },
+                        { name: "PUTRI NUR AENI", nik: "0061453273 (NISN)", role: "Admin SPX", contract: "Magang", wa: "0877-6476-0318", status: "Non-Aktif", joinDate: "2024-06-01", address: "Sumedang", emergency: "Orang Tua", bankName: "BRI", bankAcc: "00000000 a.n PUTRI", baseSalary: 1200000 },
+                        { name: "WINA", nik: "3211114905060001", role: "Content Creator", contract: "Tetap", wa: "+62 821-1703-2747", status: "Aktif", joinDate: "2024-03-01", address: "Jatinangor", emergency: "Keluarga", bankName: "BRI", bankAcc: "9876543210 a.n WINA", baseSalary: 1800000 },
+                        { name: "ROBI SETIAJI", nik: "3211112710930005", role: "Leader Mitra Kurir SPX", contract: "Kontrak", wa: "+62 813-1260-5376", status: "Aktif", joinDate: "2024-02-10", address: "Jatinangor", emergency: "Keluarga", bankName: "BCA", bankAcc: "11223344 a.n ROBI", baseSalary: 1800000 },
+                        { name: "AMAR NUR FAJRIN", nik: "3208092703970006", role: "Senior Laptop Technician", contract: "Tetap", wa: "+62 896-0675-4420", status: "Aktif", joinDate: "2023-11-10", address: "Jatinangor", emergency: "Istri", bankName: "Bank Jago", bankAcc: "50001234567 a.n AMAR", baseSalary: 1900000 }
                     ];
                     initialEmployees.forEach(emp => {
                         db.collection("employees").add({ ...emp, createdAt: Date.now() });
@@ -1036,6 +1099,7 @@
                     populateEmployeeDropdowns();
                     loadPublicTransactions();
                     loadDailyKPI();
+                    renderPayrollTable();
                 }
             });
         }
@@ -1288,17 +1352,13 @@
             const todayDateStr = now.toISOString().split('T')[0];
             const timeFormatted = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
 
-            // Cari apakah sudah ada absensi hari ini untuk karyawan tsb
             db.collection("attendance")
               .where("employeeId", "==", empId)
               .where("dateStr", "==", todayDateStr)
               .get()
               .then((snapshot) => {
                   if (!snapshot.empty) {
-                      // Update data absensi yang sudah ada
                       let docId = snapshot.docs[0].id;
-                      let existing = snapshot.docs[0].data();
-
                       let updatePayload = { notes: notes };
 
                       if (status === 'Hadir') {
@@ -1306,7 +1366,6 @@
                               updatePayload.clockIn = timeFormatted;
                           } else {
                               updatePayload.clockOut = timeFormatted;
-                              // Hitung otomatis perkiraan lembur jika jam pulang > 17:00
                               let hourNum = now.getHours();
                               let overtimeCalc = hourNum > 17 ? (hourNum - 17) : 0;
                               updatePayload.overtimeHours = overtimeCalc;
@@ -1322,7 +1381,6 @@
                           closePublicAbsenModal();
                       });
                   } else {
-                      // Buat record absensi baru hari ini
                       let newPayload = {
                           employeeId: empId,
                           employeeName: emp.name,
@@ -1353,6 +1411,7 @@
                     allAttendanceData.push(d);
                 });
                 renderAttendanceTable();
+                renderPayrollTable();
             });
         }
 
@@ -1477,6 +1536,145 @@
             if (confirm("Yakin ingin menghapus record absensi ini?")) {
                 db.collection("attendance").doc(id).delete().then(() => alert("Record absensi dihapus."));
             }
+        }
+
+        // ====================================================
+        // MENU 8: PAYROLL & SLIP GAJI OTOMATIS
+        // ====================================================
+        function renderPayrollTable() {
+            const tbody = document.getElementById('payrollTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
+
+            if (activeEmployees.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Belum ada data karyawan aktif.</td></tr>`;
+                return;
+            }
+
+            activeEmployees.forEach(emp => {
+                let baseSalary = emp.baseSalary || 1800000;
+
+                // 1. Hitung Komisi dari Pemasukan (Menu 3)
+                let commTotal = 0;
+                allTransactionsData.forEach(data => {
+                    if (data.type === 'masuk') {
+                        let empNameUpper = emp.name.toUpperCase();
+                        let isSri = empNameUpper.includes('SRI');
+                        let isAmar = empNameUpper.includes('AMAR');
+                        let isWina = empNameUpper.includes('WINA');
+
+                        if(data.category === 'Jasa Service Internal') {
+                            if(isSri) commTotal += data.amount * 0.01;
+                            if(isAmar) commTotal += data.amount * 0.05;
+                            if(isWina) commTotal += data.amount * 0.05;
+                        } else if(data.category === 'Pembelian Produk') {
+                            if(isSri) commTotal += data.amount * 0.01;
+                        } else if(data.category === 'Jasa Service Vendor') {
+                            if(isSri) commTotal += data.amount * 0.005;
+                            if(isAmar) commTotal += data.amount * 0.01;
+                            if(isWina) commTotal += data.amount * 0.01;
+                        } else if(data.category === 'Penjualan Affiliate') {
+                            if(isSri) commTotal += data.amount * 0.01;
+                            if(isAmar) commTotal += data.amount * 0.20;
+                            if(isWina) commTotal += data.amount * 0.20;
+                        }
+                    }
+                });
+
+                // 2. Hitung Lembur Resmi vs Lembur Inisiatif (Menu 7)
+                let ownerOvertimeHours = 0;
+                let initiativeOvertimeHours = 0;
+
+                allAttendanceData.filter(a => a.employeeId === emp.id).forEach(att => {
+                    if (att.overtimeType === 'Owner') {
+                        ownerOvertimeHours += (att.overtimeHours || 0);
+                    } else if (att.overtimeType === 'Inisiatif') {
+                        initiativeOvertimeHours += (att.overtimeHours || 0);
+                    }
+                });
+
+                let overtimeBonus = ownerOvertimeHours * RATE_LEMBUR_PER_JAM;
+                let totalTakeHomePay = baseSalary + commTotal + overtimeBonus;
+
+                let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
+                let blurStyle = isAuthorized ? '' : 'filter: blur(4px); user-select: none;';
+
+                let row = `
+                    <tr>
+                        <td style="color:#38bdf8; font-weight:bold;">${emp.name}<br><span style="font-size:10px; color:#94a3b8;">${emp.role}</span></td>
+                        <td style="${blurStyle}">Rp ${baseSalary.toLocaleString('id-ID')}</td>
+                        <td style="color:#4ade80; font-weight:bold; ${blurStyle}">Rp ${Math.round(commTotal).toLocaleString('id-ID')}</td>
+                        <td style="color:#fbbf24; font-weight:bold; ${blurStyle}">Rp ${overtimeBonus.toLocaleString('id-ID')}<br><span style="font-size:10px; color:#94a3b8;">(${ownerOvertimeHours} Jam Resmi)</span></td>
+                        <td><span class="badge-status btn-warning">⭐ ${initiativeOvertimeHours} Jam Promosi</span></td>
+                        <td style="color:#38bdf8; font-weight:bold; font-size:14px; ${blurStyle}">Rp ${Math.round(totalTakeHomePay).toLocaleString('id-ID')}</td>
+                        <td>
+                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${ownerOvertimeHours}, ${initiativeOvertimeHours})">🧾 Cetak Slip Gaji</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function generateSlipGaji(empId, baseSalary, commTotal, overtimeBonus, ownerHours, initiativeHours) {
+            const emp = allEmployeesData.find(e => e.id === empId);
+            if (!emp) return;
+
+            const totalPay = baseSalary + commTotal + overtimeBonus;
+            const now = new Date();
+            const periodStr = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
+
+            document.getElementById('slipSignEmpName').innerText = emp.name;
+            const bodyEl = document.getElementById('slipContentBody');
+
+            bodyEl.innerHTML = `
+                <div style="font-size:13px; line-height:1.6;">
+                    <p><strong>Nama Karyawan:</strong> ${emp.name}</p>
+                    <p><strong>Jabatan / Role:</strong> ${emp.role}</p>
+                    <p><strong>Periode Penggajian:</strong> ${periodStr}</p>
+                    <p><strong>Rekening Pembayaran:</strong> ${emp.bankName || '-'} - ${emp.bankAcc || '-'}</p>
+
+                    <table style="width:100%; border-collapse:collapse; margin-top:15px; font-size:12px;">
+                        <thead>
+                            <tr style="background:#f1f5f9; color:#0f172a;">
+                                <th style="padding:8px; border:1px solid #cbd5e1; text-align:left;">Komponen Penghasilan</th>
+                                <th style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Nominal (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #cbd5e1;">Gaji Pokok (${emp.contract || 'Tetap'})</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Rp ${baseSalary.toLocaleString('id-ID')}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #cbd5e1;">Estimasi Komisi Penjualan / Servis (Omzet)</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Rp ${commTotal.toLocaleString('id-ID')}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding:8px; border:1px solid #cbd5e1;">Bonus Lembur Resmi Perintah Owner (${ownerHours} Jam)</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Rp ${overtimeBonus.toLocaleString('id-ID')}</td>
+                            </tr>
+                            <tr style="background:#f8fafc; font-weight:bold;">
+                                <td style="padding:8px; border:1px solid #cbd5e1; color:#0284c7;">TOTAL GAJI DITERIMA (TAKE HOME PAY)</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1; text-align:right; color:#0284c7; font-size:14px;">Rp ${totalPay.toLocaleString('id-ID')}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div style="margin-top:12px; background:#f8fafc; padding:10px; border-radius:4px; border-left:3px solid #f59e0b; font-size:11px;">
+                        <strong> Catatan Evaluasi Owner:</strong><br>
+                        Karyawan tercatat memiliki <strong>${initiativeHours} Jam Lembur Inisiatif Mandiri</strong>. Poin apresiasi ini tercatat dalam rekap performa untuk pertimbangan bonus & promosi jabatan.
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('slipModal').classList.add('active');
+        }
+
+        function closeSlipModal() {
+            document.getElementById('slipModal').classList.remove('active');
         }
 
         // ====================================================
@@ -2067,6 +2265,7 @@
             db.collection("transactions").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('publicTxTableBody');
                 tbody.innerHTML = "";
+                allTransactionsData = [];
                 let docsArr = [];
                 
                 let commissionMap = {};
@@ -2074,7 +2273,12 @@
                     commissionMap[emp.id] = 0;
                 });
 
-                snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; docsArr.push(d); });
+                snapshot.forEach(doc => { 
+                    let d = doc.data(); 
+                    d.id = doc.id; 
+                    docsArr.push(d); 
+                    allTransactionsData.push(d);
+                });
                 docsArr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 docsArr.forEach((data) => {
@@ -2122,6 +2326,8 @@
                         cardEl.innerText = "Rp " + Math.round(commissionMap[empId]).toLocaleString('id-ID');
                     }
                 });
+
+                renderPayrollTable();
             });
         }
 
