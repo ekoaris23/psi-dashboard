@@ -459,7 +459,7 @@
             <!-- TAB 7: JADWAL, ABSENSI, LEMBUR, & KASBON -->
             <div id="attendanceTab" class="tab-content hidden">
 
-                <!-- MODUL 1: INPUT & SETTING JADWAL KERJA KARYAWAN (PALING ATAS) -->
+                <!-- MODUL 1: INPUT & SETTING JADWAL KERJA KARYAWAN -->
                 <div class="card" style="margin-bottom: 20px; border-color: #0284c7;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
                         <div>
@@ -755,7 +755,7 @@
         </div>
     </div>
 
-    <!-- MODAL FORM INPUT JADWAL KERJA (HRD & OWNER) -->
+    <!-- MODAL FORM INPUT JADWAL KERJA -->
     <div class="modal-bg" id="scheduleFormModal">
         <div class="modal-card" style="border-color: #0284c7;">
             <div class="modal-header">
@@ -1880,7 +1880,7 @@
         function closeDetailModal() { document.getElementById('empDetailModal').classList.remove('active'); }
 
         // ====================================================
-        // SETTING JADWAL KERJA KARYAWAN (HRD & OWNER)
+        // SETTING JADWAL KERJA KARYAWAN
         // ====================================================
         function loadSchedules() {
             db.collection("schedules").onSnapshot((snapshot) => {
@@ -2042,7 +2042,7 @@
         }
 
         // ====================================================
-        // ABSENSI, FILTER TAHUN/BULAN/TGL & PAGINASI 10 DATA
+        // ABSENSI & PAGINASI
         // ====================================================
         function openPublicAbsenModal() {
             document.getElementById('publicAbsenForm').reset();
@@ -2381,11 +2381,17 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
+            // KALAU EMPLOYEES DATA MASIH KOSONG, TAMPILKAN PESAN LOADING / KOSONG
+            if (allEmployeesData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Sedang memuat data karyawan...</td></tr>`;
+                return;
+            }
+
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
             const workingDays = getWorkingDaysInCurrentMonth();
 
             if (activeEmployees.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Belum ada data karyawan aktif.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Tidak ada data karyawan dengan status 'Aktif'. Periksa Menu 4.</td></tr>`;
                 return;
             }
 
@@ -2448,7 +2454,7 @@
                         <td><span class="badge-status btn-warning">⭐ ${initiativeOvertimeHours} Jam Promosi</span></td>
                         <td style="color:#38bdf8; font-weight:bold; font-size:14px; ${blurStyle}">Rp ${Math.round(totalTakeHomePay).toLocaleString('id-ID')}</td>
                         <td>
-                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${kasbonTotal}, ${ownerOvertimeHours}, ${initiativeHours}, ${workingDays})">🧾 Cetak Slip Gaji</button>
+                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${kasbonTotal}, ${ownerOvertimeHours}, ${initiativeOvertimeHours}, ${workingDays})">🧾 Cetak Slip Gaji</button>
                         </td>
                     </tr>
                 `;
@@ -3189,7 +3195,6 @@
                 }
             });
 
-            // HITUNG TOTAL MODAL DARI PRODUK UNTUK OMSET HARI INI JIKA ADA
             let totalProdCostVal = 0;
             allProductsData.forEach(prd => totalProdCostVal += ((prd.stock || 0) * (prd.cost || 0)));
 
