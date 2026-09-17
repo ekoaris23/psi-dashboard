@@ -47,6 +47,8 @@
         .btn-excel:hover { background: #15803d !important; }
         .btn-hrd { background: #0284c7; }
         .btn-owner { background: #059669; }
+        .btn-kasbon { background: #d97706 !important; color: white !important; }
+        .btn-kasbon:hover { background: #b45309 !important; }
         .btn-absen { background: #10b981; animation: pulse 2s infinite; }
         .btn-absen:hover { background: #059669; }
         .btn-danger { background: #ef4444 !important; padding: 4px 8px !important; font-size: 11px !important; }
@@ -76,6 +78,14 @@
         .badge-active { background: #22c55e; color: white; }
         .badge-inactive { background: #ef4444; color: white; }
         .tag-job { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px; }
+
+        /* PAGINATION & FILTER CONTAINER STYLES */
+        .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
+        .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #334155; flex-wrap: wrap; gap: 10px; }
+        .pagination-btns { display: flex; gap: 5px; align-items: center; }
+        .page-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 5px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+        .page-btn.active { background: #0284c7; color: white; border-color: #0284c7; font-weight: bold; }
+        .page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
         /* MODAL STYLES */
         .modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center; padding: 15px; }
@@ -450,15 +460,56 @@
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <h3 style="color: #38bdf8; font-size: 16px;">⏰ Rekap Absensi & Lembur Karyawan (HRD & Owner)</h3>
-                        <div style="display: flex; gap: 8px;">
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
                             <button class="btn-excel" onclick="exportAttendanceToExcel()">📊 Export Excel Absensi</button>
+                            <button onclick="openKasbonModal()" class="btn-kasbon">💸 + Input Kasbon Karyawan</button>
                             <button onclick="openHrdAbsenModal()" class="btn-hrd">+ Input Manual Absen (HRD)</button>
                         </div>
                     </div>
 
-                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 15px;">
-                        <input type="text" id="attSearchInput" onkeyup="filterAttendance()" placeholder="🔍 Cari Nama Karyawan / Status..." style="margin: 0;">
-                        <input type="date" id="attDateFilter" onchange="filterAttendance()" style="margin: 0;">
+                    <!-- AREA FILTER DINAMIS & SORTING -->
+                    <div class="filter-grid">
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Pencarian Nama/Status:</label>
+                            <input type="text" id="attSearchInput" onkeyup="applyAttendanceFilter()" placeholder="🔍 Cari Nama / Status..." style="margin: 0;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Filter Tahun:</label>
+                            <select id="attYearFilter" onchange="applyAttendanceFilter()" style="margin: 0;">
+                                <option value="all">Semua Tahun</option>
+                                <option value="2026" selected>2026</option>
+                                <option value="2025">2025</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Filter Bulan:</label>
+                            <select id="attMonthFilter" onchange="applyAttendanceFilter()" style="margin: 0;">
+                                <option value="all">Semua Bulan</option>
+                                <option value="01">Januari</option>
+                                <option value="02">Februari</option>
+                                <option value="03">Maret</option>
+                                <option value="04">April</option>
+                                <option value="05">Mei</option>
+                                <option value="06">Juni</option>
+                                <option value="07">Juli</option>
+                                <option value="08">Agustus</option>
+                                <option value="09">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Tanggal Spesifik:</label>
+                            <input type="date" id="attDateFilter" onchange="applyAttendanceFilter()" style="margin: 0;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#38bdf8; font-weight:bold;">Urutan (Sort):</label>
+                            <select id="attSortOrder" onchange="applyAttendanceFilter()" style="margin: 0; border-color:#38bdf8;">
+                                <option value="desc">Terbaru → Terlama</option>
+                                <option value="asc">Terlama → Terbaru</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -482,6 +533,12 @@
                                 <tr><td colspan="9" style="text-align:center; color:#94a3b8;">Memuat data absensi...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- PAGINASI TABLE ABSENSI (10 DATA PER HALAMAN) -->
+                    <div class="pagination-container">
+                        <span id="attPaginationInfo" style="font-size:12px; color:#94a3b8;">Menampilkan 0 dari 0 data</span>
+                        <div class="pagination-btns" id="attPaginationBtns"></div>
                     </div>
                 </div>
             </div>
@@ -512,13 +569,14 @@
                                     <th>Gaji Pokok</th>
                                     <th>Estimasi Komisi (Menu 3)</th>
                                     <th>Bonus Lembur Owner (Menu 7)</th>
-                                    <th>Poin Promosi (Inisiatif)</th>
+                                    <th>Potongan Kasbon (Menu 7)</th>
+                                    <th>Poin Promosi</th>
                                     <th>Total Gaji (Take Home Pay)</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="payrollTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:#94a3b8;">Mengkalkulasikan data penggajian...</td></tr>
+                                <tr><td colspan="8" style="text-align:center; color:#94a3b8;">Mengkalkulasikan data penggajian...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -562,47 +620,26 @@
 
                     <!-- GRID BAGAN MONITORING LINI USAHA -->
                     <div class="grid">
-                        <!-- 1. BAGAN KPI -->
                         <div class="card">
                             <h3 style="color:#38bdf8;">🎯 1. Capaian KPI Karyawan (%)</h3>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="chartOwnerKpi"></canvas>
-                            </div>
+                            <div style="height: 200px; position: relative;"><canvas id="chartOwnerKpi"></canvas></div>
                         </div>
-
-                        <!-- 2. BAGAN SERVIS MASUK vs SELESAI -->
                         <div class="card">
                             <h3 style="color:#22c55e;">🛠️ 2. Servis Masuk vs Servis Selesai</h3>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="chartOwnerService"></canvas>
-                            </div>
+                            <div style="height: 200px; position: relative;"><canvas id="chartOwnerService"></canvas></div>
                         </div>
-
-                        <!-- 3. BAGAN PENGELUARAN OPERASIONAL SDM -->
                         <div class="card">
-                            <h3 style="color:#fbbf24;">👥 3. Pengeluaran Operasional & SDM</h3>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="chartOwnerSdmExpense"></canvas>
-                            </div>
+                            <h3 style="color:#fbbf24;">👥 3. Pengeluaran Operasional SDM</h3>
+                            <div style="height: 200px; position: relative;"><canvas id="chartOwnerSdmExpense"></canvas></div>
                         </div>
-
-                        <!-- 4. BAGAN BELANJA PRODUK & HARDWARE -->
                         <div class="card">
                             <h3 style="color:#ec4899;">📦 4. Belanja Produk & Sparepart (Rp)</h3>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="chartOwnerProductExpense"></canvas>
-                            </div>
+                            <div style="height: 200px; position: relative;"><canvas id="chartOwnerProductExpense"></canvas></div>
                         </div>
-
-                        <!-- 5. BAGAN PENGANTARAN SPX GASKEUN -->
                         <div class="card">
                             <h3 style="color:#a855f7;">🚚 5. Pengantaran Paket (SPX Gaskeun)</h3>
-                            <div style="height: 200px; position: relative;">
-                                <canvas id="chartOwnerSpxDelivery"></canvas>
-                            </div>
+                            <div style="height: 200px; position: relative;"><canvas id="chartOwnerSpxDelivery"></canvas></div>
                         </div>
-
-                        <!-- 6. SUMMARY VALUASI ASET & STOK PRODUK -->
                         <div class="card" style="border-color: #0284c7;">
                             <h3 style="color:#38bdf8;">💎 6. Monitoring Aset & Valuasi Produk</h3>
                             <div style="margin-top: 15px; font-size: 13px;">
@@ -633,7 +670,7 @@
                 </div>
             </div>
 
-            <!-- TAB 10: RADAR KEUANGAN, INVESTOR, UTANG & PIUTANG (MENU RAHASIA) -->
+            <!-- TAB 10: RADAR KEUANGAN (MENU RAHASIA) -->
             <div id="radarFinanceTab" class="tab-content hidden">
                 <div class="card" style="border-color: #ef4444; margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -646,7 +683,6 @@
                 </div>
 
                 <div class="grid">
-                    <!-- REKAP KARTU RADAR -->
                     <div class="card" style="border-color: #ef4444;">
                         <h3 style="color:#ef4444;">🔴 TOTAL KEWAJIBAN UTANG</h3>
                         <div class="amount" id="radarTotalDebt" style="color:#ef4444;">Rp 0</div>
@@ -661,7 +697,6 @@
                     </div>
                 </div>
 
-                <!-- TABEL RINCIAN KEUANGAN RAHASIA -->
                 <div class="card">
                     <h3 style="color:#f8fafc; margin-bottom:12px;">📋 Rincian List Finansial Rahasia (Utang, Piutang, & Investor)</h3>
                     <div style="overflow-x: auto;">
@@ -702,10 +737,8 @@
                     <option value="Piutang">Piutang (Tagihan Konsumen)</option>
                     <option value="Investor">Investor / Suntikan Modal</option>
                 </select>
-
                 <label style="font-size:12px;">Nama Lembaga / Pihak / Nama Orang:</label>
                 <input type="text" id="radarName" placeholder="Contoh: Shopee PayLater / Koperasi / Pak Ahmad" required>
-
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Jatuh Tempo / Tanggal:</label>
@@ -716,16 +749,14 @@
                         <input type="number" id="radarAmount" placeholder="Contoh: 3388374" required>
                     </div>
                 </div>
-
                 <label style="font-size:12px;">Keterangan Rincian Tambahan:</label>
                 <textarea id="radarNotes" rows="2" placeholder="Contoh: Cicilan sparepart laptop / Modal ekspansi studio"></textarea>
-
                 <button type="submit" style="width:100%; margin-top:15px; background:#ef4444;">💾 Simpan Data Radar</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL FORM ABSEN PUBLIK (KARYAWAN - REALTIME) -->
+    <!-- MODAL FORM ABSEN PUBLIK -->
     <div class="modal-bg" id="publicAbsenModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -735,14 +766,12 @@
             <form id="publicAbsenForm" onsubmit="submitPublicAbsen(event)">
                 <label style="font-size:12px;">Pilih Identitas Karyawan:</label>
                 <select id="absenEmpSelect" required></select>
-
                 <label style="font-size:12px;">Status Kehadiran:</label>
                 <select id="absenStatusSelect" onchange="toggleAbsenFields()">
                     <option value="Hadir">Hadir Bekerja</option>
                     <option value="Izin">Izin</option>
                     <option value="Sakit">Sakit</option>
                 </select>
-
                 <div id="absenTimeSection">
                     <label style="font-size:12px;">Aksi Absensi:</label>
                     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
@@ -750,26 +779,56 @@
                         <button type="button" id="btnClockOut" style="background:#334155; padding:12px; font-size:13px;" onclick="setClockType('OUT')">🚪 Clock OUT (Pulang)</button>
                     </div>
                     <input type="hidden" id="clockType" value="IN">
-
                     <label style="font-size:12px;">Poin Lembur Pekerjaan (Jika Ada):</label>
                     <div style="background:#0f172a; padding:10px; border-radius:4px; border:1px solid #334155; margin-bottom:10px;">
                         <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
                             <input type="checkbox" id="absenIsOwnerInstructed" style="width:auto; margin:0;">
                             <span>Lembur ini atas PERINTAH/INSTRUKSI OWNER</span>
                         </label>
-                        <p style="font-size:10px; color:#94a3b8; margin-top:4px;">*Jika tidak dicentang, lembur dianggap sebagai <strong>Inisiatif Mandiri (Poin Promosi Jabatan)</strong>.</p>
                     </div>
                 </div>
-
                 <label style="font-size:12px;">Catatan Pekerjaan / Alasan Izin:</label>
-                <textarea id="absenNotes" rows="2" placeholder="Contoh: Selesai rakit 2 unit laptop / Izin acara keluarga" required></textarea>
-
+                <textarea id="absenNotes" rows="2" placeholder="Contoh: Selesai rakit 2 unit laptop" required></textarea>
                 <button type="submit" style="width:100%; margin-top:10px; background:#10b981; padding:12px; font-size:14px;">💾 Kirim Absensi Sekarang</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL FORM INPUT MANUAL ABSEN HRD (BISA BEBAS PILIH TANGGAL & JAM SUSULAN) -->
+    <!-- MODAL FORM INPUT KASBON KARYAWAN -->
+    <div class="modal-bg" id="kasbonFormModal">
+        <div class="modal-card" style="border-color: #f59e0b;">
+            <div class="modal-header">
+                <h3 style="color:#fbbf24;">💸 Input Pinjaman / Kasbon Karyawan (HRD & Owner)</h3>
+                <button onclick="closeKasbonModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="kasbonForm" onsubmit="submitKasbon(event)">
+                <label style="font-size:12px;">Pilih Identitas Karyawan:</label>
+                <select id="kasbonEmpSelect" required></select>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Tanggal Kasbon:</label>
+                        <input type="date" id="kasbonDate" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Nominal Pinjaman (Rp):</label>
+                        <input type="number" id="kasbonAmount" placeholder="Contoh: 200000" required>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Keterangan / Alasan Pinjaman:</label>
+                <textarea id="kasbonNotes" rows="2" placeholder="Contoh: Pinjaman kebutuhan mendesak / DP Sparepart" required></textarea>
+
+                <p style="font-size:11px; color:#fbbf24; margin-bottom:10px;">
+                    *Nominal kasbon ini akan otomatis mengurangi Total Gaji Diterima di Menu 8 (Penggajian & Slip).
+                </p>
+
+                <button type="submit" style="width:100%; margin-top:5px; background:#d97706; padding:12px; font-size:14px;">💾 Simpan Kasbon Karyawan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FORM INPUT MANUAL ABSEN HRD -->
     <div class="modal-bg" id="hrdManualAbsenModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -810,7 +869,7 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Durasi Lembur (Jam):</label>
-                        <input type="number" step="0.5" id="hrdOvertimeHours" value="0" placeholder="0">
+                        <input type="number" step="0.5" id="hrdOvertimeHours" value="0">
                     </div>
                     <div>
                         <label style="font-size:12px;">Tipe Lembur:</label>
@@ -823,14 +882,14 @@
                 </div>
 
                 <label style="font-size:12px;">Catatan / Keterangan Pekerjaan:</label>
-                <textarea id="hrdAbsenNotes" rows="2" placeholder="Contoh: Input susulan absen kemarin / Tugas lapangan" required></textarea>
+                <textarea id="hrdAbsenNotes" rows="2" placeholder="Contoh: Input susulan absen kemarin" required></textarea>
 
                 <button type="submit" style="width:100%; margin-top:10px; background:#0284c7; padding:12px; font-size:14px;">💾 Simpan Absensi Susulan</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL EDIT / EDIT OWNER ABSENSI -->
+    <!-- MODAL EDIT ABSENSI -->
     <div class="modal-bg" id="editAbsenModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -839,7 +898,6 @@
             </div>
             <form id="editAbsenForm" onsubmit="saveEditAbsen(event)">
                 <input type="hidden" id="editAbsenId">
-                
                 <label style="font-size:12px;">Nama Karyawan:</label>
                 <input type="text" id="editAbsenEmpName" readonly style="background:#1e293b; color:#94a3b8;">
 
@@ -854,7 +912,7 @@
                             <option value="Hadir">Hadir</option>
                             <option value="Izin">Izin</option>
                             <option value="Sakit">Sakit</option>
-                            <option value="Alpha">Alpha / Tanpa Ket</option>
+                            <option value="Alpha">Alpha</option>
                         </select>
                     </div>
                 </div>
@@ -862,23 +920,23 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Jam Clock IN:</label>
-                        <input type="text" id="editClockIn" placeholder="09:00 WIB">
+                        <input type="text" id="editClockIn">
                     </div>
                     <div>
                         <label style="font-size:12px;">Jam Clock OUT:</label>
-                        <input type="text" id="editClockOut" placeholder="17:00 WIB">
+                        <input type="text" id="editClockOut">
                     </div>
                 </div>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Durasi Lembur (Jam):</label>
-                        <input type="number" step="0.5" id="editOvertimeHours" placeholder="1.5">
+                        <input type="number" step="0.5" id="editOvertimeHours">
                     </div>
                     <div>
                         <label style="font-size:12px;">Status Persetujuan Lembur:</label>
                         <select id="editOvertimeType">
-                            <option value="Owner">Perintah Owner (Resmi Diperhitungkan)</option>
+                            <option value="Owner">Perintah Owner (Resmi)</option>
                             <option value="Inisiatif">Inisiatif Karyawan (Poin Promosi)</option>
                             <option value="Tidak">Tidak Ada Lembur</option>
                         </select>
@@ -893,7 +951,7 @@
         </div>
     </div>
 
-    <!-- MODAL SLIP GAJI DIKIRIM / PRINT -->
+    <!-- MODAL SLIP GAJI -->
     <div class="modal-bg" id="slipModal">
         <div class="modal-card" style="max-width: 600px; background: white; color: black;" id="printableSlipCard">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #0f172a; padding-bottom: 10px; margin-bottom: 15px;">
@@ -901,7 +959,7 @@
                     <h2 style="color: #0284c7; font-size: 20px;">PARAMOUNT STAR</h2>
                     <p style="font-size: 11px; color: #475569;">Sistem Penggajian & Slip Gaji Karyawan Resmi</p>
                 </div>
-                <div style="text-align: right;">
+                <div>
                     <span style="font-size: 12px; font-weight: bold; background: #e2e8f0; padding: 4px 8px; border-radius: 4px;">CONFIDENTIAL</span>
                 </div>
             </div>
@@ -928,7 +986,7 @@
         </div>
     </div>
 
-    <!-- MODAL FORM INPUT / EDIT KARYAWAN -->
+    <!-- MODAL FORM INPUT KARYAWAN -->
     <div class="modal-bg" id="empFormModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -981,10 +1039,10 @@
                 </div>
 
                 <label style="font-size:12px;">Alamat Tinggal Domisili:</label>
-                <input type="text" id="empAddress" placeholder="Alamat lengkap Jatinangor / Sumedang" required>
+                <input type="text" id="empAddress" placeholder="Alamat lengkap" required>
 
-                <label style="font-size:12px;">Kontak Darurat (Keluarga/Kerabat):</label>
-                <input type="text" id="empEmergency" placeholder="Contoh: Ibu Ani (0813-xxxx-xxxx)" required>
+                <label style="font-size:12px;">Kontak Darurat:</label>
+                <input type="text" id="empEmergency" placeholder="Contoh: Ibu Ani (0813-xxxx)" required>
 
                 <div style="display:grid; grid-template-columns: 1fr 2fr; gap:10px;">
                     <div>
@@ -1023,7 +1081,7 @@
             <form id="assetForm" onsubmit="saveAsset(event)">
                 <input type="hidden" id="assetId">
                 <label style="font-size:12px;">Nama Aset / Alat:</label>
-                <input type="text" id="assetName" placeholder="Contoh: Blower & Solder Station Quick" required>
+                <input type="text" id="assetName" required>
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
@@ -1049,23 +1107,23 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Jumlah Unit:</label>
-                        <input type="text" id="assetQuantity" placeholder="Contoh: 2" required>
+                        <input type="text" id="assetQuantity" required>
                     </div>
                     <div>
                         <label style="font-size:12px;">Estimasi Harga / Unit (Rp):</label>
-                        <input type="number" id="assetPrice" placeholder="Contoh: 1200000" required>
+                        <input type="number" id="assetPrice" required>
                     </div>
                 </div>
 
                 <label style="font-size:12px;">Penanggung Jawab / Lokasi:</label>
-                <input type="text" id="assetPic" placeholder="Contoh: Amar (Area Servis)" required>
+                <input type="text" id="assetPic" required>
 
                 <button type="submit" style="width:100%; margin-top:15px; background:#22c55e;">💾 Simpan Data Aset</button>
             </form>
         </div>
     </div>
 
-    <!-- MODAL FORM INPUT / EDIT PRODUK & SPAREPART -->
+    <!-- MODAL FORM INPUT / EDIT PRODUK -->
     <div class="modal-bg" id="productFormModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -1075,7 +1133,7 @@
             <form id="productForm" onsubmit="saveProduct(event)">
                 <input type="hidden" id="productId">
                 <label style="font-size:12px;">Nama Produk / Sparepart:</label>
-                <input type="text" id="prodName" placeholder="Contoh: SSD NVMe 256GB V-GeN" required>
+                <input type="text" id="prodName" required>
 
                 <label style="font-size:12px;">Kategori Produk:</label>
                 <select id="prodCategory">
@@ -1088,16 +1146,16 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Harga Modal (Rp):</label>
-                        <input type="number" id="prodCost" placeholder="Contoh: 250000" required>
+                        <input type="number" id="prodCost" required>
                     </div>
                     <div>
                         <label style="font-size:12px;">Harga Jual Konsumen (Rp):</label>
-                        <input type="number" id="prodPrice" placeholder="Contoh: 350000" required>
+                        <input type="number" id="prodPrice" required>
                     </div>
                 </div>
 
                 <label style="font-size:12px;">Jumlah Stok (Pcs/Unit):</label>
-                <input type="number" id="prodStock" placeholder="Contoh: 10" required>
+                <input type="number" id="prodStock" required>
 
                 <button type="submit" style="width:100%; margin-top:15px; background:#22c55e;">💾 Simpan Data Produk</button>
             </form>
@@ -1136,11 +1194,17 @@
         let allAssetsData = [];
         let allProductsData = [];
         let allAttendanceData = [];
+        let allKasbonData = [];
         let allTransactionsData = [];
         let allJoblistsData = [];
         let allKpiLogsData = [];
         let allRadarData = [];
         let selectedEmpId = null;
+
+        // PAGINASI ABSENSI STATE
+        let attCurrentPage = 1;
+        const attRowsPerPage = 10;
+        let filteredAttendanceList = [];
 
         window.onload = function() {
             setDefaultDateTime();
@@ -1152,18 +1216,17 @@
             loadAssets();
             loadProducts();
             loadAttendance();
+            loadKasbon();
             loadRadarData();
             updateSidebarVisibility();
         };
 
-        // HELPER PARSE JUMLAH UNIT
         function parseQty(qtyStr) {
             if (!qtyStr) return 1;
             let num = parseInt(String(qtyStr).replace(/[^0-9]/g, ''), 10);
             return isNaN(num) || num <= 0 ? 1 : num;
         }
 
-        // HELPER EXPORT EXCEL
         function exportToExcel(dataArray, filename) {
             if (!dataArray || dataArray.length === 0) {
                 alert("Tidak ada data untuk dieksport!");
@@ -1305,29 +1368,24 @@
                 });
 
                 let ownerOvertimeHours = 0;
-                let initiativeOvertimeHours = 0;
-
                 allAttendanceData.filter(a => a.employeeId === emp.id).forEach(att => {
-                    if (att.overtimeType === 'Owner') {
-                        ownerOvertimeHours += (att.overtimeHours || 0);
-                    } else if (att.overtimeType === 'Inisiatif') {
-                        initiativeOvertimeHours += (att.overtimeHours || 0);
-                    }
+                    if (att.overtimeType === 'Owner') ownerOvertimeHours += (att.overtimeHours || 0);
                 });
 
+                let kasbonTotal = 0;
+                allKasbonData.filter(k => k.employeeId === emp.id).forEach(k => kasbonTotal += (k.amount || 0));
+
                 let overtimeBonus = Math.round(ownerOvertimeHours * hourlyOvertimeRate);
-                let totalTakeHomePay = baseSalary + commTotal + overtimeBonus;
+                let totalTakeHomePay = baseSalary + commTotal + overtimeBonus - kasbonTotal;
 
                 return {
                     "Nama Karyawan": emp.name,
                     "Jabatan": emp.role,
-                    "Hari Kerja Bulan Ini": workingDays,
                     "Gaji Pokok (Rp)": baseSalary,
-                    "Komisi Transaksi (Rp)": Math.round(commTotal),
-                    "Jam Lembur Resmi": ownerOvertimeHours,
+                    "Komisi (Rp)": Math.round(commTotal),
                     "Bonus Lembur (Rp)": overtimeBonus,
-                    "Jam Lembur Inisiatif": initiativeOvertimeHours,
-                    "Total Gaji / THP (Rp)": Math.round(totalTakeHomePay)
+                    "Potongan Kasbon (Rp)": kasbonTotal,
+                    "Total THP (Rp)": Math.round(totalTakeHomePay)
                 };
             });
 
@@ -1343,9 +1401,7 @@
 
             for (let day = 1; day <= totalDays; day++) {
                 let dayOfWeek = new Date(year, month, day).getDay();
-                if (dayOfWeek !== 0) {
-                    workingDays++;
-                }
+                if (dayOfWeek !== 0) workingDays++;
             }
             return workingDays > 0 ? workingDays : 26;
         }
@@ -1374,19 +1430,13 @@
             const ownerItems = document.querySelectorAll('.owner-menu-item');
 
             hrdItems.forEach(item => {
-                if (isHrdUnlocked || isOwnerUnlocked) {
-                    item.classList.remove('hidden');
-                } else {
-                    item.classList.add('hidden');
-                }
+                if (isHrdUnlocked || isOwnerUnlocked) item.classList.remove('hidden');
+                else item.classList.add('hidden');
             });
 
             ownerItems.forEach(item => {
-                if (isOwnerUnlocked) {
-                    item.classList.remove('hidden');
-                } else {
-                    item.classList.add('hidden');
-                }
+                if (isOwnerUnlocked) item.classList.remove('hidden');
+                else item.classList.add('hidden');
             });
         }
 
@@ -1397,21 +1447,11 @@
             document.getElementById(tabId).classList.remove('hidden');
             if (element) element.classList.add('active');
 
-            if (tabId === 'payrollTab') {
-                renderPayrollTable();
-            }
+            if (tabId === 'payrollTab') renderPayrollTable();
+            if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) renderExecutiveOwnerDashboard();
+            if (tabId === 'radarFinanceTab' && isOwnerUnlocked) renderRadarTable();
 
-            if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) {
-                renderExecutiveOwnerDashboard();
-            }
-
-            if (tabId === 'radarFinanceTab' && isOwnerUnlocked) {
-                renderRadarTable();
-            }
-
-            if (window.innerWidth <= 768) {
-                closeSidebarMobile();
-            }
+            if (window.innerWidth <= 768) closeSidebarMobile();
         }
 
         function toggleHrdView() {
@@ -1519,9 +1559,7 @@
                         { name: "ROBI SETIAJI", nik: "3211112710930005", role: "Leader Mitra Kurir SPX", contract: "Kontrak", wa: "+62 813-1260-5376", status: "Aktif", joinDate: "2024-02-10", address: "Jatinangor", emergency: "Keluarga", bankName: "BCA", bankAcc: "11223344 a.n ROBI", baseSalary: 1800000 },
                         { name: "AMAR NUR FAJRIN", nik: "3208092703970006", role: "Senior Laptop Technician", contract: "Tetap", wa: "+62 896-0675-4420", status: "Aktif", joinDate: "2023-11-10", address: "Jatinangor", emergency: "Istri", bankName: "Bank Jago", bankAcc: "50001234567 a.n AMAR", baseSalary: 1800000 }
                     ];
-                    initialEmployees.forEach(emp => {
-                        db.collection("employees").add({ ...emp, createdAt: Date.now() });
-                    });
+                    initialEmployees.forEach(emp => db.collection("employees").add({ ...emp, createdAt: Date.now() }));
                 } else {
                     snapshot.forEach(doc => {
                         let d = doc.data();
@@ -1542,12 +1580,14 @@
             const jobTargetSelect = document.getElementById('newJobTarget');
             const absenEmpSelect = document.getElementById('absenEmpSelect');
             const hrdAbsenEmpSelect = document.getElementById('hrdAbsenEmpSelect');
+            const kasbonEmpSelect = document.getElementById('kasbonEmpSelect');
             const commCards = document.getElementById('commissionCardsContainer');
 
             empSelect.innerHTML = `<option value="none">-- Pilih Nama Karyawan --</option>`;
             jobTargetSelect.innerHTML = ``;
             if (absenEmpSelect) absenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             if (hrdAbsenEmpSelect) hrdAbsenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
+            if (kasbonEmpSelect) kasbonEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             commCards.innerHTML = ``;
 
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
@@ -1578,6 +1618,13 @@
                     optHrdAbsen.value = emp.id;
                     optHrdAbsen.innerText = `${emp.name} (${emp.role})`;
                     hrdAbsenEmpSelect.appendChild(optHrdAbsen);
+                }
+
+                if (kasbonEmpSelect) {
+                    let optKasbon = document.createElement('option');
+                    optKasbon.value = emp.id;
+                    optKasbon.innerText = `${emp.name} (${emp.role})`;
+                    kasbonEmpSelect.appendChild(optKasbon);
                 }
 
                 commCards.innerHTML += `
@@ -1611,7 +1658,7 @@
 
             filtered.forEach(emp => {
                 let badgeClass = emp.status === 'Aktif' ? 'badge-active' : 'badge-inactive';
-                let row = `
+                tbody.innerHTML += `
                     <tr>
                         <td><strong>${emp.nik || '-'}</strong></td>
                         <td style="color:#38bdf8; font-weight:bold;">${emp.name}</td>
@@ -1626,7 +1673,6 @@
                         </td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
         }
 
@@ -1709,8 +1755,7 @@
             const emp = allEmployeesData.find(e => e.id === id);
             if (!emp) return;
 
-            const modalBody = document.getElementById('empDetailBody');
-            modalBody.innerHTML = `
+            document.getElementById('empDetailBody').innerHTML = `
                 <div style="background:#0f172a; padding:15px; border-radius:6px; border-left:4px solid #38bdf8; margin-bottom:12px;">
                     <h4 style="font-size:16px; color:#38bdf8;">${emp.name}</h4>
                     <p style="color:#94a3b8; font-size:12px;">${emp.role} (${emp.contract || 'Tetap'})</p>
@@ -1731,7 +1776,56 @@
         function closeDetailModal() { document.getElementById('empDetailModal').classList.remove('active'); }
 
         // ====================================================
-        // ABSENSI & LEMBUR
+        // KASBON KARYAWAN LOGIC
+        // ====================================================
+        function openKasbonModal() {
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+            document.getElementById('kasbonForm').reset();
+            document.getElementById('kasbonDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('kasbonFormModal').classList.add('active');
+        }
+
+        function closeKasbonModal() { document.getElementById('kasbonFormModal').classList.remove('active'); }
+
+        function submitKasbon(e) {
+            e.preventDefault();
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+
+            const empId = document.getElementById('kasbonEmpSelect').value;
+            const emp = allEmployeesData.find(e => e.id === empId);
+            if (!emp) { alert("Silakan pilih identitas karyawan!"); return; }
+
+            const dateStr = document.getElementById('kasbonDate').value;
+            const amount = Number(document.getElementById('kasbonAmount').value);
+            const notes = document.getElementById('kasbonNotes').value;
+
+            db.collection("kasbon").add({
+                employeeId: empId,
+                employeeName: emp.name,
+                dateStr: dateStr,
+                amount: amount,
+                notes: notes,
+                createdAt: Date.now()
+            }).then(() => {
+                alert(`Pinjaman/Kasbon sebesar Rp ${amount.toLocaleString('id-ID')} untuk ${emp.name} berhasil disimpan!`);
+                closeKasbonModal();
+            });
+        }
+
+        function loadKasbon() {
+            db.collection("kasbon").onSnapshot((snapshot) => {
+                allKasbonData = [];
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.id = doc.id;
+                    allKasbonData.push(d);
+                });
+                renderPayrollTable();
+            });
+        }
+
+        // ====================================================
+        // ABSENSI, FILTER TAHUN/BULAN/TGL & PAGINASI 10 DATA
         // ====================================================
         function openPublicAbsenModal() {
             document.getElementById('publicAbsenForm').reset();
@@ -1742,15 +1836,10 @@
 
         function closePublicAbsenModal() { document.getElementById('publicAbsenModal').classList.remove('active'); }
 
-        // MODAL ABSEN MANUAL KHUSUS HRD (BISA BEBAS ISI TANGGAL & JAM SUSULAN)
         function openHrdAbsenModal() {
             if (!isHrdUnlocked && !isOwnerUnlocked) return;
             document.getElementById('hrdManualAbsenForm').reset();
-            
-            // Default Tanggal Hari Ini
-            const todayStr = new Date().toISOString().split('T')[0];
-            document.getElementById('hrdAbsenDate').value = todayStr;
-            
+            document.getElementById('hrdAbsenDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('hrdManualAbsenModal').classList.add('active');
         }
 
@@ -1889,9 +1978,53 @@
                     d.id = doc.id;
                     allAttendanceData.push(d);
                 });
-                renderAttendanceTable();
+                applyAttendanceFilter();
                 renderPayrollTable();
             });
+        }
+
+        function applyAttendanceFilter() {
+            let searchVal = (document.getElementById('attSearchInput') ? document.getElementById('attSearchInput').value : '').toLowerCase();
+            let yearVal = document.getElementById('attYearFilter') ? document.getElementById('attYearFilter').value : 'all';
+            let monthVal = document.getElementById('attMonthFilter') ? document.getElementById('attMonthFilter').value : 'all';
+            let dateVal = document.getElementById('attDateFilter') ? document.getElementById('attDateFilter').value : '';
+            let sortVal = document.getElementById('attSortOrder') ? document.getElementById('attSortOrder').value : 'desc';
+
+            filteredAttendanceList = allAttendanceData.filter(att => {
+                let matchesSearch = (att.employeeName || '').toLowerCase().includes(searchVal) ||
+                                  (att.status || '').toLowerCase().includes(searchVal);
+                
+                let matchesDate = !dateVal || att.dateStr === dateVal;
+
+                let matchesYear = true;
+                let matchesMonth = true;
+
+                if (att.dateStr) {
+                    let parts = att.dateStr.split('-');
+                    if (parts.length === 3) {
+                        let y = parts[0];
+                        let m = parts[1];
+                        if (yearVal !== 'all' && y !== yearVal) matchesYear = false;
+                        if (monthVal !== 'all' && m !== monthVal) matchesMonth = false;
+                    }
+                }
+
+                return matchesSearch && matchesDate && matchesYear && matchesMonth;
+            });
+
+            // SORTING DATA
+            filteredAttendanceList.sort((a, b) => {
+                let dateA = a.dateStr || '';
+                let dateB = b.dateStr || '';
+                if (sortVal === 'asc') {
+                    return dateA.localeCompare(dateB) || ((a.createdAt || 0) - (b.createdAt || 0));
+                } else {
+                    return dateB.localeCompare(dateA) || ((b.createdAt || 0) - (a.createdAt || 0));
+                }
+            });
+
+            attCurrentPage = 1;
+            renderAttendanceTable();
         }
 
         function renderAttendanceTable() {
@@ -1899,66 +2032,81 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            let searchVal = (document.getElementById('attSearchInput') ? document.getElementById('attSearchInput').value : '').toLowerCase();
-            let dateVal = document.getElementById('attDateFilter') ? document.getElementById('attDateFilter').value : '';
+            let totalData = filteredAttendanceList.length;
+            let totalPages = Math.ceil(totalData / attRowsPerPage) || 1;
 
-            let filtered = allAttendanceData.filter(att => {
-                let matchesSearch = (att.employeeName || '').toLowerCase().includes(searchVal) ||
-                                  (att.status || '').toLowerCase().includes(searchVal);
-                let matchesDate = !dateVal || att.dateStr === dateVal;
-                return matchesSearch && matchesDate;
-            });
+            if (attCurrentPage > totalPages) attCurrentPage = totalPages;
 
-            filtered.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+            let startIndex = (attCurrentPage - 1) * attRowsPerPage;
+            let endIndex = startIndex + attRowsPerPage;
+            let pageData = filteredAttendanceList.slice(startIndex, endIndex);
 
-            if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8;">Belum ada data rekap absensi.</td></tr>`;
-                return;
-            }
+            if (pageData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8;">Belum ada data rekap absensi sesuai filter.</td></tr>`;
+            } else {
+                pageData.forEach(att => {
+                    let otBadge = '';
+                    if (att.overtimeType === 'Owner' && att.overtimeHours > 0) {
+                        otBadge = `<span class="badge-status badge-active">✔ Perintah Owner (${att.overtimeHours} Jam)</span>`;
+                    } else if (att.overtimeType === 'Inisiatif' && att.overtimeHours > 0) {
+                        otBadge = `<span class="badge-status btn-warning">⭐ Inisiatif (${att.overtimeHours} Jam Poin Promosi)</span>`;
+                    } else {
+                        otBadge = `<span style="color:#94a3b8;">-</span>`;
+                    }
 
-            filtered.forEach(att => {
-                let otBadge = '';
-                if (att.overtimeType === 'Owner' && att.overtimeHours > 0) {
-                    otBadge = `<span class="badge-status badge-active">✔ Perintah Owner (${att.overtimeHours} Jam)</span>`;
-                } else if (att.overtimeType === 'Inisiatif' && att.overtimeHours > 0) {
-                    otBadge = `<span class="badge-status btn-warning">⭐ Inisiatif (${att.overtimeHours} Jam Poin Promosi)</span>`;
-                } else {
-                    otBadge = `<span style="color:#94a3b8;">-</span>`;
-                }
-
-                let isOwner = isOwnerUnlocked;
-                let isHRD = isHrdUnlocked;
-
-                let actionBtns = '';
-                if (isOwner) {
-                    actionBtns = `
+                    let actionBtns = isOwnerUnlocked ? `
                         <button class="btn-warning" onclick="openEditAbsenModal('${att.id}')">Edit (Owner)</button>
                         <button class="btn-danger" onclick="deleteAbsen('${att.id}')">Hapus</button>
-                    `;
-                } else if (isHRD) {
-                    actionBtns = `<span style="font-size:11px; color:#94a3b8;">(Akses Edit Khusus Owner)</span>`;
-                } else {
-                    actionBtns = `<span style="font-size:11px; color:#94a3b8;">🔒 Terkunci</span>`;
-                }
+                    ` : (isHrdUnlocked ? `<span style="font-size:11px; color:#94a3b8;">(Akses Edit Khusus Owner)</span>` : `<span style="font-size:11px; color:#94a3b8;">🔒 Terkunci</span>`);
 
-                let row = `
-                    <tr>
-                        <td><strong>${att.dateStr || '-'}</strong></td>
-                        <td style="color:#38bdf8; font-weight:bold;">${att.employeeName}</td>
-                        <td style="color:#4ade80;">${att.clockIn || '-'}</td>
-                        <td style="color:#f87171;">${att.clockOut || '-'}</td>
-                        <td><span class="badge-status ${att.status === 'Hadir' ? 'badge-active' : 'badge-inactive'}">${att.status}</span></td>
-                        <td><strong>${att.overtimeHours || 0} Jam</strong></td>
-                        <td>${otBadge}</td>
-                        <td style="font-size:12px;">${att.notes || '-'}</td>
-                        <td>${actionBtns}</td>
-                    </tr>
-                `;
-                tbody.innerHTML += row;
-            });
+                    tbody.innerHTML += `
+                        <tr>
+                            <td><strong>${att.dateStr || '-'}</strong></td>
+                            <td style="color:#38bdf8; font-weight:bold;">${att.employeeName}</td>
+                            <td style="color:#4ade80;">${att.clockIn || '-'}</td>
+                            <td style="color:#f87171;">${att.clockOut || '-'}</td>
+                            <td><span class="badge-status ${att.status === 'Hadir' ? 'badge-active' : 'badge-inactive'}">${att.status}</span></td>
+                            <td><strong>${att.overtimeHours || 0} Jam</strong></td>
+                            <td>${otBadge}</td>
+                            <td style="font-size:12px;">${att.notes || '-'}</td>
+                            <td>${actionBtns}</td>
+                        </tr>
+                    `;
+                });
+            }
+
+            // RENDER CONTROLS PAGINASI
+            let showingStart = totalData === 0 ? 0 : startIndex + 1;
+            let showingEnd = Math.min(endIndex, totalData);
+            document.getElementById('attPaginationInfo').innerText = `Menampilkan ${showingStart} - ${showingEnd} dari total ${totalData} data absensi`;
+
+            let paginationBtns = document.getElementById('attPaginationBtns');
+            paginationBtns.innerHTML = "";
+
+            let prevBtn = document.createElement('button');
+            prevBtn.className = 'page-btn';
+            prevBtn.innerText = '◄ Prev';
+            prevBtn.disabled = attCurrentPage === 1;
+            prevBtn.onclick = () => { attCurrentPage--; renderAttendanceTable(); };
+            paginationBtns.appendChild(prevBtn);
+
+            for (let i = 1; i <= totalPages; i++) {
+                let pageBtn = document.createElement('button');
+                pageBtn.className = `page-btn ${i === attCurrentPage ? 'active' : ''}`;
+                pageBtn.innerText = i;
+                pageBtn.onclick = () => { attCurrentPage = i; renderAttendanceTable(); };
+                paginationBtns.appendChild(pageBtn);
+            }
+
+            let nextBtn = document.createElement('button');
+            nextBtn.className = 'page-btn';
+            nextBtn.innerText = 'Next ►';
+            nextBtn.disabled = attCurrentPage === totalPages;
+            nextBtn.onclick = () => { attCurrentPage++; renderAttendanceTable(); };
+            paginationBtns.appendChild(nextBtn);
         }
 
-        function filterAttendance() { renderAttendanceTable(); }
+        function filterAttendance() { applyAttendanceFilter(); }
 
         function openEditAbsenModal(id) {
             if (!isOwnerUnlocked) return;
@@ -2009,7 +2157,7 @@
         }
 
         // ====================================================
-        // PAYROLL & SLIP GAJI OTOMATIS
+        // PAYROLL & SLIP GAJI OTOMATIS + POTONGAN KASBON
         // ====================================================
         function renderPayrollTable() {
             const tbody = document.getElementById('payrollTableBody');
@@ -2020,7 +2168,7 @@
             const workingDays = getWorkingDaysInCurrentMonth();
 
             if (activeEmployees.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Belum ada data karyawan aktif.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Belum ada data karyawan aktif.</td></tr>`;
                 return;
             }
 
@@ -2058,38 +2206,35 @@
                 let initiativeOvertimeHours = 0;
 
                 allAttendanceData.filter(a => a.employeeId === emp.id).forEach(att => {
-                    if (att.overtimeType === 'Owner') {
-                        ownerOvertimeHours += (att.overtimeHours || 0);
-                    } else if (att.overtimeType === 'Inisiatif') {
-                        initiativeOvertimeHours += (att.overtimeHours || 0);
-                    }
+                    if (att.overtimeType === 'Owner') ownerOvertimeHours += (att.overtimeHours || 0);
+                    else if (att.overtimeType === 'Inisiatif') initiativeOvertimeHours += (att.overtimeHours || 0);
                 });
 
+                let kasbonTotal = 0;
+                allKasbonData.filter(k => k.employeeId === emp.id).forEach(k => kasbonTotal += (k.amount || 0));
+
                 let overtimeBonus = Math.round(ownerOvertimeHours * hourlyOvertimeRate);
-                let totalTakeHomePay = baseSalary + commTotal + overtimeBonus;
+                let totalTakeHomePay = baseSalary + commTotal + overtimeBonus - kasbonTotal;
 
                 let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
                 let blurStyle = isAuthorized ? '' : 'filter: blur(4px); user-select: none;';
 
                 let editSalaryBtn = isOwnerUnlocked ? `<button class="btn-warning" onclick="editEmployeeBaseSalary('${emp.id}', ${baseSalary})">✏️ Edit Gaji</button>` : '';
 
-                let row = `
+                tbody.innerHTML += `
                     <tr>
                         <td style="color:#38bdf8; font-weight:bold;">${emp.name}<br><span style="font-size:10px; color:#94a3b8;">${emp.role}</span></td>
-                        <td style="${blurStyle}">
-                            Rp ${baseSalary.toLocaleString('id-ID')}
-                            ${editSalaryBtn}
-                        </td>
+                        <td style="${blurStyle}">Rp ${baseSalary.toLocaleString('id-ID')} ${editSalaryBtn}</td>
                         <td style="color:#4ade80; font-weight:bold; ${blurStyle}">Rp ${Math.round(commTotal).toLocaleString('id-ID')}</td>
-                        <td style="color:#fbbf24; font-weight:bold; ${blurStyle}">Rp ${overtimeBonus.toLocaleString('id-ID')}<br><span style="font-size:10px; color:#94a3b8;">(${ownerOvertimeHours} Jam @ Rp ${Math.round(hourlyOvertimeRate).toLocaleString('id-ID')}/Jam)</span></td>
+                        <td style="color:#fbbf24; font-weight:bold; ${blurStyle}">Rp ${overtimeBonus.toLocaleString('id-ID')}<br><span style="font-size:10px; color:#94a3b8;">(${ownerOvertimeHours} Jam)</span></td>
+                        <td style="color:#ef4444; font-weight:bold; ${blurStyle}">- Rp ${kasbonTotal.toLocaleString('id-ID')}</td>
                         <td><span class="badge-status btn-warning">⭐ ${initiativeOvertimeHours} Jam Promosi</span></td>
                         <td style="color:#38bdf8; font-weight:bold; font-size:14px; ${blurStyle}">Rp ${Math.round(totalTakeHomePay).toLocaleString('id-ID')}</td>
                         <td>
-                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${ownerHours = ownerOvertimeHours}, ${initiativeHours = initiativeOvertimeHours}, ${workingDays})">🧾 Cetak Slip Gaji</button>
+                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${kasbonTotal}, ${ownerOvertimeHours}, ${initiativeOvertimeHours}, ${workingDays})">🧾 Cetak Slip Gaji</button>
                         </td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
         }
 
@@ -2097,20 +2242,16 @@
             if (!isOwnerUnlocked) return;
             let newSalary = prompt("Masukkan Nominal Gaji Pokok Baru (Rp):", currentSalary);
             if (newSalary !== null && newSalary.trim() !== "") {
-                db.collection("employees").doc(empId).update({
-                    baseSalary: Number(newSalary)
-                }).then(() => {
-                    alert("Gaji Pokok Berhasil Diperbarui oleh Owner!");
-                });
+                db.collection("employees").doc(empId).update({ baseSalary: Number(newSalary) }).then(() => alert("Gaji Pokok Berhasil Diperbarui oleh Owner!"));
             }
         }
 
-        function generateSlipGaji(empId, baseSalary, commTotal, overtimeBonus, ownerHours, initiativeHours, workingDays) {
+        function generateSlipGaji(empId, baseSalary, commTotal, overtimeBonus, kasbonTotal, ownerHours, initiativeHours, workingDays) {
             const emp = allEmployeesData.find(e => e.id === empId);
             if (!emp) return;
 
             const hourlyRate = (baseSalary / workingDays) / 8;
-            const totalPay = baseSalary + commTotal + overtimeBonus;
+            const totalPay = baseSalary + commTotal + overtimeBonus - kasbonTotal;
             const now = new Date();
             const periodStr = "25 " + now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
 
@@ -2127,7 +2268,7 @@
                     <table style="width:100%; border-collapse:collapse; margin-top:15px; font-size:12px;">
                         <thead>
                             <tr style="background:#f1f5f9; color:#0f172a;">
-                                <th style="padding:8px; border:1px solid #cbd5e1; text-align:left;">Komponen Penghasilan</th>
+                                <th style="padding:8px; border:1px solid #cbd5e1; text-align:left;">Komponen Penghasilan & Potongan</th>
                                 <th style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Nominal (Rp)</th>
                             </tr>
                         </thead>
@@ -2137,12 +2278,16 @@
                                 <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Rp ${baseSalary.toLocaleString('id-ID')}</td>
                             </tr>
                             <tr>
-                                <td style="padding:8px; border:1px solid #cbd5e1;">Estimasi Komisi Penjualan / Servis (Omzet)</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1;">Estimasi Komisi Penjualan / Servis</td>
                                 <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Rp ${commTotal.toLocaleString('id-ID')}</td>
                             </tr>
                             <tr>
-                                <td style="padding:8px; border:1px solid #cbd5e1;">Bonus Lembur Resmi Owner (${ownerHours} Jam @ Rp ${Math.round(hourlyRate).toLocaleString('id-ID')}/Jam)</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1;">Bonus Lembur Resmi Owner (${ownerHours} Jam)</td>
                                 <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">Rp ${overtimeBonus.toLocaleString('id-ID')}</td>
+                            </tr>
+                            <tr style="color:#ef4444;">
+                                <td style="padding:8px; border:1px solid #cbd5e1;">Potongan Pinjaman / Kasbon Karyawan</td>
+                                <td style="padding:8px; border:1px solid #cbd5e1; text-align:right;">- Rp ${kasbonTotal.toLocaleString('id-ID')}</td>
                             </tr>
                             <tr style="background:#f8fafc; font-weight:bold;">
                                 <td style="padding:8px; border:1px solid #cbd5e1; color:#0284c7;">TOTAL GAJI DITERIMA (TAKE HOME PAY)</td>
@@ -2152,8 +2297,8 @@
                     </table>
 
                     <div style="margin-top:12px; background:#f8fafc; padding:10px; border-radius:4px; border-left:3px solid #f59e0b; font-size:11px;">
-                        <strong> Catatan Evaluasi Owner:</strong><br>
-                        Karyawan memiliki <strong>${initiativeHours} Jam Lembur Inisiatif Mandiri</strong>. Poin keaktifan ini akan menjadi nilai tambah untuk promosi jabatan / bonus tahunan.
+                        <strong>Catatan Evaluasi Owner:</strong><br>
+                        Karyawan memiliki <strong>${initiativeHours} Jam Lembur Inisiatif Mandiri</strong>. Poin keaktifan ini menjadi poin apresiasi untuk promosi jabatan.
                     </div>
                 </div>
             `;
@@ -2164,7 +2309,7 @@
         function closeSlipModal() { document.getElementById('slipModal').classList.remove('active'); }
 
         // ====================================================
-        // DATA ASET USAHA
+        // DATA ASET USAHA & PRODUK
         // ====================================================
         function loadAssets() {
             db.collection("assets").onSnapshot((snapshot) => {
@@ -2172,18 +2317,9 @@
                 if (snapshot.empty) {
                     const initialAssets = [
                         { name: "Lenovo X220", category: "Peralatan Servis", condition: "Sangat Baik", quantity: "1", price: 2200000, pic: "Wina (Area Content)" },
-                        { name: "Etalase Besar", category: "Furniture", condition: "Baik", quantity: "1", price: 1900000, pic: "Office" },
-                        { name: "Kursi Bakso", category: "Furniture", condition: "Sangat Baik", quantity: "3", price: 78000, pic: "Office" },
-                        { name: "Lenovo X250", category: "Peralatan Kantor", condition: "Baik", quantity: "1", price: 3200000, pic: "Bapak" },
-                        { name: "Lenovo L440", category: "Peralatan Kantor", condition: "Baik", quantity: "1", price: 2700000, pic: "Sri (Meja Sri)" },
-                        { name: "TD Wall fan 16\"", category: "Peralatan Kantor", condition: "Sangat Baik", quantity: "1", price: 180000, pic: "Office (Dinding)" },
-                        { name: "Etalase kecil", category: "Furniture", condition: "Sangat Baik", quantity: "1", price: 250000, pic: "Office" },
-                        { name: "Meja", category: "Furniture", condition: "Baik", quantity: "4", price: 700000, pic: "Wina, Amar, Sri, Roby (Office & Bc)" },
                         { name: "Blower & Solder Station Quick", category: "Peralatan Servis", condition: "Sangat Baik", quantity: "2 Unit", price: 1500000, pic: "Amar (Area Servis)" }
                     ];
-                    initialAssets.forEach(ast => {
-                        db.collection("assets").add({ ...ast, createdAt: Date.now() });
-                    });
+                    initialAssets.forEach(ast => db.collection("assets").add({ ...ast, createdAt: Date.now() }));
                 } else {
                     snapshot.forEach(doc => {
                         let d = doc.data();
@@ -2221,7 +2357,7 @@
                 let unitPrice = ast.price || 0;
                 let totalPrice = qtyNum * unitPrice;
 
-                let row = `
+                tbody.innerHTML += `
                     <tr>
                         <td style="color:#38bdf8; font-weight:bold;">${ast.name}</td>
                         <td><span class="tag-job" style="background:#334155; color:white;">${ast.category}</span></td>
@@ -2236,7 +2372,6 @@
                         </td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
         }
 
@@ -2304,21 +2439,15 @@
             }
         }
 
-        // ====================================================
-        // DATA PRODUK & SPAREPART
-        // ====================================================
         function loadProducts() {
             db.collection("products").onSnapshot((snapshot) => {
                 allProductsData = [];
                 if (snapshot.empty) {
                     const initialProducts = [
                         { name: "Thermal Paste High Performance", category: "Aksesoris / Servis", cost: 45000, price: 75000, stock: 15 },
-                        { name: "SSD NVMe 256GB V-GeN / RX7", category: "Sparepart", cost: 250000, price: 350000, stock: 8 },
-                        { name: "RAM DDR4 8GB Sodimm", category: "Sparepart", cost: 200000, price: 280000, stock: 5 }
+                        { name: "SSD NVMe 256GB V-GeN", category: "Sparepart", cost: 250000, price: 350000, stock: 8 }
                     ];
-                    initialProducts.forEach(prd => {
-                        db.collection("products").add({ ...prd, createdAt: Date.now() });
-                    });
+                    initialProducts.forEach(prd => db.collection("products").add({ ...prd, createdAt: Date.now() }));
                 } else {
                     snapshot.forEach(doc => {
                         let d = doc.data();
@@ -2354,7 +2483,7 @@
                 let stockBadge = prd.stock > 5 ? 'badge-active' : (prd.stock > 0 ? 'btn-warning' : 'badge-inactive');
                 let stockStatus = prd.stock > 5 ? 'Tersedia' : (prd.stock > 0 ? 'Stok Menipis' : 'Habis');
                 
-                let row = `
+                tbody.innerHTML += `
                     <tr>
                         <td style="color:#38bdf8; font-weight:bold;">${prd.name}</td>
                         <td><span class="tag-job" style="background:#334155; color:white;">${prd.category}</span></td>
@@ -2368,7 +2497,6 @@
                         </td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
         }
 
@@ -2617,9 +2745,7 @@
                     allKpiLogsData.push(d);
 
                     let name = d.employeeName || 'Unknown';
-                    if (!kpiStats[name]) {
-                        kpiStats[name] = { total: 0, count: 0 };
-                    }
+                    if (!kpiStats[name]) kpiStats[name] = { total: 0, count: 0 };
                     kpiStats[name].total += (d.percentage || 0);
                     kpiStats[name].count += 1;
                 });
@@ -2680,16 +2806,8 @@
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 100,
-                            ticks: { color: '#94a3b8' },
-                            grid: { color: '#334155' }
-                        },
-                        x: {
-                            ticks: { color: '#f8fafc', font: { weight: 'bold' } },
-                            grid: { display: false }
-                        }
+                        y: { beginAtZero: true, max: 100, ticks: { color: '#94a3b8' }, grid: { color: '#334155' } },
+                        x: { ticks: { color: '#f8fafc', font: { weight: 'bold' } }, grid: { display: false } }
                     },
                     plugins: { legend: { labels: { color: '#f8fafc' } } }
                 }
@@ -2758,9 +2876,7 @@
                 let docsArr = [];
                 
                 let commissionMap = {};
-                allEmployeesData.filter(e => e.status === 'Aktif').forEach(emp => {
-                    commissionMap[emp.id] = 0;
-                });
+                allEmployeesData.filter(e => e.status === 'Aktif').forEach(emp => commissionMap[emp.id] = 0);
 
                 snapshot.forEach(doc => { 
                     let d = doc.data(); 
@@ -2811,9 +2927,7 @@
 
                 Object.keys(commissionMap).forEach(empId => {
                     let cardEl = document.getElementById(`komisi_${empId}`);
-                    if(cardEl) {
-                        cardEl.innerText = "Rp " + Math.round(commissionMap[empId]).toLocaleString('id-ID');
-                    }
+                    if(cardEl) cardEl.innerText = "Rp " + Math.round(commissionMap[empId]).toLocaleString('id-ID');
                 });
 
                 renderPayrollTable();
@@ -2841,116 +2955,73 @@
         function renderExecutiveOwnerDashboard() {
             if (!isOwnerUnlocked) return;
 
-            // 1. OLEH REALTIME OMSET & LABA HARI INI
             let todayStr = new Date().toLocaleDateString('id-ID');
             let todayIncome = 0;
             let todayExpense = 0;
-
-            let sdmExpenseTotal = 0;
-            let productExpenseTotal = 0;
 
             allTransactionsData.forEach(tx => {
                 if (tx.timeStr && tx.timeStr.includes(todayStr)) {
                     if (tx.type === 'masuk') todayIncome += tx.amount;
                     if (tx.type === 'keluar') todayExpense += tx.amount;
                 }
-
-                if (tx.type === 'keluar') {
-                    if (tx.category === 'Pengeluaran Operasional') {
-                        sdmExpenseTotal += tx.amount;
-                    } else if (tx.category.includes('Pembelian') || tx.category.includes('Sparepart')) {
-                        productExpenseTotal += tx.amount;
-                    }
-                }
             });
 
             document.getElementById('dashTodayOmset').innerText = `Rp ${todayIncome.toLocaleString('id-ID')}`;
-            let netProfit = todayIncome - todayExpense;
-            document.getElementById('dashTodayProfit').innerText = `Rp ${netProfit.toLocaleString('id-ID')}`;
+            document.getElementById('dashTodayProfit').innerText = `Rp ${(todayIncome - todayExpense).toLocaleString('id-ID')}`;
 
-            // 2. VALUASI ASET & PRODUK
             let totalAssetVal = 0;
-            allAssetsData.forEach(ast => {
-                let qtyNum = parseQty(ast.quantity);
-                totalAssetVal += (qtyNum * (ast.price || 0));
-            });
+            allAssetsData.forEach(ast => totalAssetVal += (parseQty(ast.quantity) * (ast.price || 0)));
             document.getElementById('dashValuationAsset').innerText = `Rp ${totalAssetVal.toLocaleString('id-ID')}`;
 
             let totalProdVal = 0;
-            allProductsData.forEach(prd => {
-                totalProdVal += ((prd.stock || 0) * (prd.cost || 0));
-            });
+            allProductsData.forEach(prd => totalProdVal += ((prd.stock || 0) * (prd.cost || 0)));
             document.getElementById('dashValuationProduct').innerText = `Rp ${totalProdVal.toLocaleString('id-ID')}`;
             document.getElementById('dashTotalProductCount').innerText = `${allProductsData.length} Jenis Produk`;
 
-            // 3. RENDER CHARTS VISUAL
-            // Bagan 1: KPI
+            // RENDER CHARTS
             const ctxKpi = document.getElementById('chartOwnerKpi').getContext('2d');
             if (chartOwnerKpiInst) chartOwnerKpiInst.destroy();
-            let kpiLabels = ['SRI EPIYANI', 'WINA', 'AMAR NUR FAJRIN', 'ROBI SETIAJI'];
             chartOwnerKpiInst = new Chart(ctxKpi, {
                 type: 'bar',
-                data: {
-                    labels: kpiLabels,
-                    datasets: [{ label: 'KPI Capaian (%)', data: [100, 90, 95, 88], backgroundColor: '#38bdf8', borderRadius: 4 }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+                data: { labels: ['SRI EPIYANI', 'WINA', 'AMAR NUR FAJRIN', 'ROBI SETIAJI'], datasets: [{ label: 'KPI (%)', data: [100, 90, 95, 88], backgroundColor: '#38bdf8' }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // Bagan 2: Servis Masuk vs Selesai
             const ctxService = document.getElementById('chartOwnerService').getContext('2d');
             if (chartOwnerServiceInst) chartOwnerServiceInst.destroy();
             chartOwnerServiceInst = new Chart(ctxService, {
                 type: 'line',
-                data: {
-                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
-                    datasets: [
-                        { label: 'Servis Masuk', data: [5, 8, 4, 9, 6, 11], borderColor: '#f59e0b', fill: false },
-                        { label: 'Servis Selesai', data: [4, 7, 5, 8, 6, 10], borderColor: '#22c55e', fill: false }
-                    ]
-                },
+                data: { labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'], datasets: [{ label: 'Masuk', data: [5, 8, 4, 9, 6, 11], borderColor: '#f59e0b' }, { label: 'Selesai', data: [4, 7, 5, 8, 6, 10], borderColor: '#22c55e' }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // Bagan 3: Operasional SDM
             const ctxSdm = document.getElementById('chartOwnerSdmExpense').getContext('2d');
             if (chartOwnerSdmExpenseInst) chartOwnerSdmExpenseInst.destroy();
             chartOwnerSdmExpenseInst = new Chart(ctxSdm, {
                 type: 'doughnut',
-                data: {
-                    labels: ['Gaji Pokok', 'Komisi Transaksi', 'Bonus Lembur', 'Kasbon / Operasional'],
-                    datasets: [{ data: [7200000, 1450000, 680000, 350000], backgroundColor: ['#0284c7', '#22c55e', '#fbbf24', '#ef4444'] }]
-                },
+                data: { labels: ['Gaji', 'Komisi', 'Lembur', 'Operasional'], datasets: [{ data: [7200000, 1450000, 680000, 350000], backgroundColor: ['#0284c7', '#22c55e', '#fbbf24', '#ef4444'] }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // Bagan 4: Belanja Produk & Sparepart
             const ctxProd = document.getElementById('chartOwnerProductExpense').getContext('2d');
             if (chartOwnerProductExpenseInst) chartOwnerProductExpenseInst.destroy();
             chartOwnerProductExpenseInst = new Chart(ctxProd, {
                 type: 'bar',
-                data: {
-                    labels: ['SSD NVMe', 'Thermal Paste', 'LCD Display', 'Unit Laptop Mati'],
-                    datasets: [{ label: 'Belanja (Rp)', data: [1200000, 450000, 850000, 2500000], backgroundColor: '#ec4899', borderRadius: 4 }]
-                },
+                data: { labels: ['SSD', 'Thermal Paste', 'LCD', 'Laptop Mati'], datasets: [{ label: 'Belanja (Rp)', data: [1200000, 450000, 850000, 2500000], backgroundColor: '#ec4899' }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // Bagan 5: SPX Delivery
             const ctxSpx = document.getElementById('chartOwnerSpxDelivery').getContext('2d');
             if (chartOwnerSpxDeliveryInst) chartOwnerSpxDeliveryInst.destroy();
             chartOwnerSpxDeliveryInst = new Chart(ctxSpx, {
                 type: 'bar',
-                data: {
-                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
-                    datasets: [{ label: 'Paket Terantar (Pcs)', data: [340, 410, 390, 480], backgroundColor: '#a855f7', borderRadius: 4 }]
-                },
+                data: { labels: ['M1', 'M2', 'M3', 'M4'], datasets: [{ label: 'Paket (Pcs)', data: [340, 410, 390, 480], backgroundColor: '#a855f7' }] },
                 options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
         // ====================================================
-        // MENU 10: RADAR KEUANGAN, INVESTOR, UTANG & PIUTANG
+        // MENU 10: RADAR KEUANGAN RAHASIA
         // ====================================================
         function loadRadarData() {
             db.collection("radar_finance").onSnapshot((snapshot) => {
@@ -2958,13 +3029,9 @@
                 if (snapshot.empty) {
                     const initialRadar = [
                         { category: "Utang", name: "Shopee PayLater (Sparepart)", dueDate: "Tgl 01 Setiap Bulan", amount: 3388374, notes: "Tagihan modal belanja sparepart" },
-                        { category: "Utang", name: "Bank Jago Modal Usaha", dueDate: "Tgl 18 Setiap Bulan", amount: 2466367, notes: "Cicilan operasional" },
-                        { category: "Investor", name: "Suntikan Modal Mitra A", dueDate: "Profit Sharing Bulanan", amount: 25000000, notes: "Investor ekspansi toko" },
-                        { category: "Piutang", name: "Servis instansi Kantor B", dueDate: "Akhir Bulan Ini", amount: 1850000, notes: "Pelunasan servis 3 unit PC" }
+                        { category: "Investor", name: "Suntikan Modal Mitra A", dueDate: "Profit Sharing", amount: 25000000, notes: "Investor ekspansi toko" }
                     ];
-                    initialRadar.forEach(rd => {
-                        db.collection("radar_finance").add({ ...rd, createdAt: Date.now() });
-                    });
+                    initialRadar.forEach(rd => db.collection("radar_finance").add({ ...rd, createdAt: Date.now() }));
                 } else {
                     snapshot.forEach(doc => {
                         let d = doc.data();
@@ -2981,9 +3048,7 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            let totalDebt = 0;
-            let totalReceivable = 0;
-            let totalInvestor = 0;
+            let totalDebt = 0, totalReceivable = 0, totalInvestor = 0;
 
             if (allRadarData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">Belum ada catatan radar keuangan rahasia.</td></tr>`;
@@ -2997,7 +3062,7 @@
 
                 let categoryBadge = item.category === 'Utang' ? 'badge-inactive' : (item.category === 'Piutang' ? 'badge-active' : 'btn-info');
 
-                let row = `
+                tbody.innerHTML += `
                     <tr>
                         <td><span class="badge-status ${categoryBadge}">${item.category}</span></td>
                         <td style="color:#38bdf8; font-weight:bold;">${item.name}</td>
@@ -3010,7 +3075,6 @@
                         </td>
                     </tr>
                 `;
-                tbody.innerHTML += row;
             });
 
             document.getElementById('radarTotalDebt').innerText = `Rp ${totalDebt.toLocaleString('id-ID')}`;
@@ -3073,20 +3137,16 @@
 
         function deleteRadar(id) {
             if (!isOwnerUnlocked) return;
-            if (confirm("Yakin ingin menghapus record radar ini?")) {
-                db.collection("radar_finance").doc(id).delete().then(() => alert("Record radar dihapus."));
-            }
+            if (confirm("Yakin ingin menghapus record radar ini?")) db.collection("radar_finance").doc(id).delete();
         }
 
-        // ==========================================
         // AGENDA STRATEGIS OWNER
-        // ==========================================
         function loadOwnerAgendas() {
             db.collection("owner_agendas").onSnapshot((snapshot) => {
                 const listEl = document.getElementById('ownerAgendaList');
                 listEl.innerHTML = "";
                 if(snapshot.empty) {
-                    listEl.innerHTML = `<li style="border-left-color:#22c55e;">Belum ada agenda strategis diset.</li>`;
+                    listEl.innerHTML = `<li style="border-left-color:#22c55e;">Belum ada agenda strategis.</li>`;
                     return;
                 }
                 snapshot.forEach(doc => {
@@ -3106,18 +3166,12 @@
         function addOwnerAgenda() {
             if(!isOwnerUnlocked) return;
             let text = prompt("Masukkan Agenda Strategis Baru Pak Komisaris:");
-            if(text && text.trim() !== "") {
-                db.collection("owner_agendas").add({ text: text.trim(), createdAt: Date.now() })
-                .then(() => alert("Agenda Strategis Berhasil Ditambahkan."))
-                .catch(err => alert("Gagal: " + err.message));
-            }
+            if(text && text.trim() !== "") db.collection("owner_agendas").add({ text: text.trim(), createdAt: Date.now() });
         }
 
         function deleteOwnerAgenda(id) {
             if(!isOwnerUnlocked) return;
-            if(confirm("Hapus agenda ini?")) {
-                db.collection("owner_agendas").doc(id).delete();
-            }
+            if(confirm("Hapus agenda ini?")) db.collection("owner_agendas").doc(id).delete();
         }
     </script>
 </body>
