@@ -125,8 +125,9 @@
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Absensi & Lembur <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
             
-            <!-- MENU OWNER ONLY (9) -->
+            <!-- MENU OWNER ONLY (9, 10) -->
             <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 9. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 10. Radar Keuangan & Utang <span class="menu-badge badge-owner">Owner</span></a></li>
         </ul>
     </div>
 
@@ -524,70 +525,203 @@
                 </div>
             </div>
 
-            <!-- TAB 9: DASHBOARD OWNER (OWNER ONLY) -->
+            <!-- TAB 9: DASHBOARD OWNER (EXECUTIVE CONTROL HUB) -->
             <div id="ownerDashboardTab" class="tab-content hidden">
                 <div id="ownerFullContent">
-                    <h2 style="color: #4ade80; margin-bottom: 15px;">👑 Executive Dashboard & Financial Control</h2>
-
-                    <div class="grid">
-                        <div class="card">
-                            <h3>📊 Bagan Capaian KPI Karyawan (%)</h3>
-                            <canvas id="kpiChart" height="180"></canvas>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2 style="color: #4ade80;">👑 Executive Control Hub & Monitoring Lini Usaha</h2>
+                            <p style="font-size: 11px; color: #94a3b8;">Monitoring SDM, Workshop Servis, Belanja Produk, Operasional, & SPX Gaskeun</p>
                         </div>
-                        <div class="card">
-                            <h3>💰 Bagan Pendapatan vs Pengeluaran</h3>
-                            <canvas id="financeChart" height="180"></canvas>
-                        </div>
+                        <span style="font-size: 11px; background: #22c55e; color: black; font-weight: bold; padding: 6px 12px; border-radius: 6px;">
+                            STATUS SISTEM: ONLINE & ACCURATE
+                        </span>
                     </div>
 
-                    <h2 style="color: #4ade80; margin-top: 20px;">1. Posisi Kas Operasional Usaha (Owner Only)</h2>
-                    <div class="grid" style="margin-top: 10px;">
+                    <!-- KAS REALTIME & OMSET HARI INI -->
+                    <div class="grid" style="margin-bottom: 20px;">
+                        <div class="card" style="border-color: #22c55e;">
+                            <h3>💰 TOTAL OMSET HARI INI</h3>
+                            <div class="amount" id="dashTodayOmset" style="color: #22c55e;">Rp 0</div>
+                            <span style="font-size: 10px; color: #94a3b8;">*Total akumulasi pemasukan hari ini</span>
+                        </div>
+                        <div class="card" style="border-color: #38bdf8;">
+                            <h3>📈 ESTIMASI LABA BERSIH HARI INI</h3>
+                            <div class="amount" id="dashTodayProfit" style="color: #38bdf8;">Rp 0</div>
+                            <span style="font-size: 10px; color: #94a3b8;">*Omset dikurangi pengeluaran harian</span>
+                        </div>
                         <div class="card">
-                            <h3>KAS OPERASIONAL (JAGO)</h3>
+                            <h3>💳 KAS OPERASIONAL (BANK JAGO)</h3>
                             <div class="amount">Rp 2.214.040</div>
                         </div>
                         <div class="card">
-                            <h3>QRIS PENERIMAAN (GOPAY)</h3>
-                            <div class="amount" style="color:#38bdf8;">ONLINE</div>
-                        </div>
-                        <div class="card">
-                            <h3>SETORAN COD SPX (BRI)</h3>
-                            <div class="amount" style="color:#fbbf24;">KHUSUS KURIR</div>
+                            <h3>📱 QRIS & BRI SETORAN COD SPX</h3>
+                            <div class="amount" style="color:#fbbf24; font-size:16px;">QRIS GOPAY / BRI SPX ACTIVE</div>
                         </div>
                     </div>
 
+                    <!-- GRID BAGAN MONITORING LINI USAHA -->
+                    <div class="grid">
+                        <!-- 1. BAGAN KPI -->
+                        <div class="card">
+                            <h3 style="color:#38bdf8;">🎯 1. Capaian KPI Karyawan (%)</h3>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="chartOwnerKpi"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 2. BAGAN SERVIS MASUK vs SELESAI -->
+                        <div class="card">
+                            <h3 style="color:#22c55e;">🛠️ 2. Servis Masuk vs Servis Selesai</h3>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="chartOwnerService"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 3. BAGAN PENGELUARAN OPERASIONAL SDM -->
+                        <div class="card">
+                            <h3 style="color:#fbbf24;">👥 3. Pengeluaran Operasional & SDM</h3>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="chartOwnerSdmExpense"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 4. BAGAN BELANJA PRODUK & HARDWARE -->
+                        <div class="card">
+                            <h3 style="color:#ec4899;">📦 4. Belanja Produk & Sparepart (Rp)</h3>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="chartOwnerProductExpense"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 5. BAGAN PENGANTARAN SPX GASKEUN -->
+                        <div class="card">
+                            <h3 style="color:#a855f7;">🚚 5. Pengantaran Paket (SPX Gaskeun)</h3>
+                            <div style="height: 200px; position: relative;">
+                                <canvas id="chartOwnerSpxDelivery"></canvas>
+                            </div>
+                        </div>
+
+                        <!-- 6. SUMMARY VALUASI ASET & STOK PRODUK -->
+                        <div class="card" style="border-color: #0284c7;">
+                            <h3 style="color:#38bdf8;">💎 6. Monitoring Aset & Valuasi Produk</h3>
+                            <div style="margin-top: 15px; font-size: 13px;">
+                                <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed #334155; padding-bottom:5px;">
+                                    <span>Total Estimasi Aset Usaha:</span>
+                                    <strong style="color:#4ade80;" id="dashValuationAsset">Rp 0</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed #334155; padding-bottom:5px;">
+                                    <span>Total Valuasi Stok Produk:</span>
+                                    <strong style="color:#38bdf8;" id="dashValuationProduct">Rp 0</strong>
+                                </div>
+                                <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed #334155; padding-bottom:5px;">
+                                    <span>Jumlah Jenis Produk Katalog:</span>
+                                    <strong style="color:#fbbf24;" id="dashTotalProductCount">0 Jenis</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AGENDA STRATEGIS KOMISARIS -->
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
-                        <h2 style="color: #22c55e;">2. Agenda Strategis Komisaris</h2>
+                        <h2 style="color: #22c55e;">📌 Agenda Strategis Komisaris</h2>
                         <button style="font-size: 11px; background: #22c55e;" onclick="addOwnerAgenda()">+ Tambah Agenda Strategis</button>
                     </div>
                     <div class="card" style="margin-top: 10px; border-color: #22c55e;">
                         <ul class="task-list" id="ownerAgendaList"></ul>
                     </div>
+                </div>
+            </div>
 
-                    <h2 style="color: #ef4444; margin-top: 20px;">3. Radar Keuangan Rahasia & Utang (Owner Only)</h2>
-                    <div class="card" style="margin-bottom: 25px; border-color: #ef4444; margin-top: 10px;">
+            <!-- TAB 10: RADAR KEUANGAN, INVESTOR, UTANG & PIUTANG (MENU RAHASIA) -->
+            <div id="radarFinanceTab" class="tab-content hidden">
+                <div class="card" style="border-color: #ef4444; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2 style="color: #ef4444;">🔐 Radar Keuangan, Investor, Utang & Piutang</h2>
+                            <p style="font-size: 11px; color: #94a3b8;">Area Rahasia Pemantauan Arus Modal, Kewajiban Utang, Piutang Pelanggan, & Investor Paramount Star</p>
+                        </div>
+                        <button onclick="openRadarModal()" style="background:#ef4444;">+ Tambah Catatan Finansial</button>
+                    </div>
+                </div>
+
+                <div class="grid">
+                    <!-- REKAP KARTU RADAR -->
+                    <div class="card" style="border-color: #ef4444;">
+                        <h3 style="color:#ef4444;">🔴 TOTAL KEWAJIBAN UTANG</h3>
+                        <div class="amount" id="radarTotalDebt" style="color:#ef4444;">Rp 0</div>
+                    </div>
+                    <div class="card" style="border-color: #22c55e;">
+                        <h3 style="color:#22c55e;">🟢 TOTAL PIUTANG (TAGIHAN KONSUMEN)</h3>
+                        <div class="amount" id="radarTotalReceivable" style="color:#22c55e;">Rp 0</div>
+                    </div>
+                    <div class="card" style="border-color: #38bdf8;">
+                        <h3 style="color:#38bdf8;">🔵 TOTAL MODAL INVESTOR</h3>
+                        <div class="amount" id="radarTotalInvestor" style="color:#38bdf8;">Rp 0</div>
+                    </div>
+                </div>
+
+                <!-- TABEL RINCIAN KEUANGAN RAHASIA -->
+                <div class="card">
+                    <h3 style="color:#f8fafc; margin-bottom:12px;">📋 Rincian List Finansial Rahasia (Utang, Piutang, & Investor)</h3>
+                    <div style="overflow-x: auto;">
                         <table>
                             <thead>
                                 <tr>
-                                    <th>Kewajiban / Utang</th>
+                                    <th>Kategori</th>
+                                    <th>Nama Pihak / Lembaga / Kreditur</th>
                                     <th>Jatuh Tempo</th>
-                                    <th>Nominal Cicilan</th>
+                                    <th>Nominal (Rp)</th>
+                                    <th>Keterangan Detail</th>
+                                    <th>Aksi (Owner)</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr><td>Shopee PayLater (Sparepart)</td><td>Tgl 01</td><td>Rp 3.388.374</td></tr>
-                                <tr><td>SPinjam Shopee</td><td>Tgl 09</td><td>Rp 1.385.000</td></tr>
-                                <tr><td>Koperasi Modal</td><td>Tgl 10</td><td>Rp 4.333.333</td></tr>
-                                <tr><td>GoPay Later (Harian)</td><td>Tgl 14 & Akhir Bulan</td><td>~Rp 1.153.783</td></tr>
-                                <tr><td>Bank Jago Modal Usaha</td><td>Tgl 18</td><td>Rp 2.466.367</td></tr>
-                                <tr><td>Cicilan Mobil (BCA)</td><td>Bulanan</td><td>Rp 3.100.000</td></tr>
-                                <tr><td>Gaji Karyawan (3 Orang)</td><td>Tgl 25</td><td>Rp 5.500.000</td></tr>
+                            <tbody id="radarTableBody">
+                                <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Memuat data radar keuangan...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODAL RADAR KEUANGAN RAHASIA -->
+    <div class="modal-bg" id="radarFormModal">
+        <div class="modal-card" style="border-color: #ef4444;">
+            <div class="modal-header">
+                <h3 id="radarModalTitle" style="color:#ef4444;">Tambah Catatan Radar Finansial</h3>
+                <button onclick="closeRadarModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="radarForm" onsubmit="saveRadarRecord(event)">
+                <input type="hidden" id="radarId">
+                <label style="font-size:12px;">Jenis Kategori Radar:</label>
+                <select id="radarCategory" required>
+                    <option value="Utang">Utang Usaha / Cicilan (Kewajiban)</option>
+                    <option value="Piutang">Piutang (Tagihan Konsumen)</option>
+                    <option value="Investor">Investor / Suntikan Modal</option>
+                </select>
+
+                <label style="font-size:12px;">Nama Lembaga / Pihak / Nama Orang:</label>
+                <input type="text" id="radarName" placeholder="Contoh: Shopee PayLater / Koperasi / Pak Ahmad" required>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Jatuh Tempo / Tanggal:</label>
+                        <input type="text" id="radarDueDate" placeholder="Contoh: Tanggal 10 Setiap Bulan" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Nominal (Rp):</label>
+                        <input type="number" id="radarAmount" placeholder="Contoh: 3388374" required>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Keterangan Rincian Tambahan:</label>
+                <textarea id="radarNotes" rows="2" placeholder="Contoh: Cicilan sparepart laptop / Modal ekspansi studio"></textarea>
+
+                <button type="submit" style="width:100%; margin-top:15px; background:#ef4444;">💾 Simpan Data Radar</button>
+            </form>
         </div>
     </div>
 
@@ -928,9 +1062,15 @@
         
         let isOwnerUnlocked = false;
         let isHrdUnlocked = false;
-        let kpiChartInstance = null;
+
+        // CHART INSTANCES OWNER
+        let chartOwnerKpiInst = null;
+        let chartOwnerServiceInst = null;
+        let chartOwnerSdmExpenseInst = null;
+        let chartOwnerProductExpenseInst = null;
+        let chartOwnerSpxDeliveryInst = null;
         let publicKpiChartInstance = null;
-        let financeChartInstance = null;
+
         let allEmployeesData = [];
         let allAssetsData = [];
         let allProductsData = [];
@@ -938,6 +1078,7 @@
         let allTransactionsData = [];
         let allJoblistsData = [];
         let allKpiLogsData = [];
+        let allRadarData = [];
         let selectedEmpId = null;
 
         window.onload = function() {
@@ -950,6 +1091,7 @@
             loadAssets();
             loadProducts();
             loadAttendance();
+            loadRadarData();
             updateSidebarVisibility();
         };
 
@@ -972,7 +1114,6 @@
             XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        // FUNGSI EXPORT PER MENU
         function exportJoblistToExcel() {
             let exportData = allJoblistsData.map(item => {
                 let emp = allEmployeesData.find(e => e.id === item.employeeId);
@@ -1132,7 +1273,6 @@
             exportToExcel(exportData, "Rekap_Payroll_Gaji_Paramount_Star");
         }
 
-        // RUMUS UNTUK HITUNG JUMLAH HARI KERJA DALAM BULAN INI
         function getWorkingDaysInCurrentMonth() {
             const now = new Date();
             const year = now.getFullYear();
@@ -1149,7 +1289,6 @@
             return workingDays > 0 ? workingDays : 26;
         }
 
-        // BURGER TOGGLE
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const wrapper = document.getElementById('mainWrapper');
@@ -1202,7 +1341,11 @@
             }
 
             if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) {
-                renderOwnerCharts();
+                renderExecutiveOwnerDashboard();
+            }
+
+            if (tabId === 'radarFinanceTab' && isOwnerUnlocked) {
+                renderRadarTable();
             }
 
             if (window.innerWidth <= 768) {
@@ -1242,13 +1385,13 @@
                     authBtn.style.background = "#dc2626";
                     toggleOwnerColumns(true);
                     toggleHrdOwnerElements();
-                    renderOwnerCharts();
+                    renderExecutiveOwnerDashboard();
                 } else if (inputPin !== null) {
                     alert("PIN Owner Salah!");
                 }
             } else {
                 isOwnerUnlocked = false;
-                authBtn.innerText = "Unlock Owner";
+                authBtn.innerText = "Lock Owner";
                 authBtn.style.background = "#059669";
                 toggleOwnerColumns(false);
                 toggleHrdOwnerElements();
@@ -1302,7 +1445,7 @@
         }
 
         // ====================================================
-        // INTEGRASI DROPDOWN & KARYAWAN DINAMIS DARI DATABASE
+        // INTEGRASI KARYAWAN & DATABASE
         // ====================================================
         function loadEmployees() {
             db.collection("employees").onSnapshot((snapshot) => {
@@ -1417,9 +1560,7 @@
             });
         }
 
-        function filterEmployees() {
-            renderEmployeeTable();
-        }
+        function filterEmployees() { renderEmployeeTable(); }
 
         function openEmployeeModal() {
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
@@ -1429,9 +1570,7 @@
             document.getElementById('empFormModal').classList.add('active');
         }
 
-        function closeEmployeeModal() {
-            document.getElementById('empFormModal').classList.remove('active');
-        }
+        function closeEmployeeModal() { document.getElementById('empFormModal').classList.remove('active'); }
 
         function saveEmployee(e) {
             e.preventDefault();
@@ -1453,16 +1592,14 @@
             };
 
             if (id) {
-                db.collection("employees").doc(id).update(payload)
-                .then(() => {
+                db.collection("employees").doc(id).update(payload).then(() => {
                     alert("Data Karyawan Berhasil Diperbarui!");
                     closeEmployeeModal();
                 });
             } else {
                 payload.baseSalary = 1800000;
                 payload.createdAt = Date.now();
-                db.collection("employees").add(payload)
-                .then(() => {
+                db.collection("employees").add(payload).then(() => {
                     alert("Karyawan Baru Berhasil Ditambahkan!");
                     closeEmployeeModal();
                 });
@@ -1494,8 +1631,7 @@
         function deleteEmployee(id) {
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
             if (confirm("Yakin ingin menghapus data karyawan ini dari sistem?")) {
-                db.collection("employees").doc(id).delete()
-                .then(() => alert("Data karyawan berhasil dihapus."));
+                db.collection("employees").doc(id).delete().then(() => alert("Data karyawan berhasil dihapus."));
             }
         }
 
@@ -1522,12 +1658,10 @@
             document.getElementById('empDetailModal').classList.add('active');
         }
 
-        function closeDetailModal() {
-            document.getElementById('empDetailModal').classList.remove('active');
-        }
+        function closeDetailModal() { document.getElementById('empDetailModal').classList.remove('active'); }
 
         // ====================================================
-        // MENU 7: ABSENSI MANDIRI & REKAP LEMBUR
+        // ABSENSI & LEMBUR
         // ====================================================
         function openPublicAbsenModal() {
             document.getElementById('publicAbsenForm').reset();
@@ -1536,9 +1670,7 @@
             document.getElementById('publicAbsenModal').classList.add('active');
         }
 
-        function closePublicAbsenModal() {
-            document.getElementById('publicAbsenModal').classList.remove('active');
-        }
+        function closePublicAbsenModal() { document.getElementById('publicAbsenModal').classList.remove('active'); }
 
         function setClockType(type) {
             document.getElementById('clockType').value = type;
@@ -1557,21 +1689,15 @@
         function toggleAbsenFields() {
             const status = document.getElementById('absenStatusSelect').value;
             const timeSec = document.getElementById('absenTimeSection');
-            if (status === 'Hadir') {
-                timeSec.classList.remove('hidden');
-            } else {
-                timeSec.classList.add('hidden');
-            }
+            if (status === 'Hadir') timeSec.classList.remove('hidden');
+            else timeSec.classList.add('hidden');
         }
 
         function submitPublicAbsen(e) {
             e.preventDefault();
             const empId = document.getElementById('absenEmpSelect').value;
             const emp = allEmployeesData.find(e => e.id === empId);
-            if (!emp) {
-                alert("Silakan pilih identitas karyawan!");
-                return;
-            }
+            if (!emp) { alert("Silakan pilih identitas karyawan!"); return; }
 
             const status = document.getElementById('absenStatusSelect').value;
             const clockType = document.getElementById('clockType').value;
@@ -1582,10 +1708,7 @@
             const todayDateStr = now.toISOString().split('T')[0];
             const timeFormatted = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
 
-            db.collection("attendance")
-              .where("employeeId", "==", empId)
-              .where("dateStr", "==", todayDateStr)
-              .get()
+            db.collection("attendance").where("employeeId", "==", empId).where("dateStr", "==", todayDateStr).get()
               .then((snapshot) => {
                   if (!snapshot.empty) {
                       let docId = snapshot.docs[0].id;
@@ -1612,18 +1735,11 @@
                       });
                   } else {
                       let newPayload = {
-                          employeeId: empId,
-                          employeeName: emp.name,
-                          dateStr: todayDateStr,
-                          status: status,
+                          employeeId: empId, employeeName: emp.name, dateStr: todayDateStr, status: status,
                           clockIn: clockType === 'IN' && status === 'Hadir' ? timeFormatted : '-',
                           clockOut: clockType === 'OUT' && status === 'Hadir' ? timeFormatted : '-',
-                          overtimeHours: 0,
-                          overtimeType: "Tidak",
-                          notes: notes,
-                          createdAt: Date.now()
+                          overtimeHours: 0, overtimeType: "Tidak", notes: notes, createdAt: Date.now()
                       };
-
                       db.collection("attendance").add(newPayload).then(() => {
                           alert(`Absensi Berhasil Disimpan untuk ${emp.name}!`);
                           closePublicAbsenModal();
@@ -1709,14 +1825,8 @@
             });
         }
 
-        function filterAttendance() {
-            renderAttendanceTable();
-        }
-
-        function openHrdAbsenModal() {
-            if (!isHrdUnlocked && !isOwnerUnlocked) return;
-            openPublicAbsenModal();
-        }
+        function filterAttendance() { renderAttendanceTable(); }
+        function openHrdAbsenModal() { if (!isHrdUnlocked && !isOwnerUnlocked) return; openPublicAbsenModal(); }
 
         function openEditAbsenModal(id) {
             if (!isOwnerUnlocked) return;
@@ -1736,9 +1846,7 @@
             document.getElementById('editAbsenModal').classList.add('active');
         }
 
-        function closeEditAbsenModal() {
-            document.getElementById('editAbsenModal').classList.remove('active');
-        }
+        function closeEditAbsenModal() { document.getElementById('editAbsenModal').classList.remove('active'); }
 
         function saveEditAbsen(e) {
             e.preventDefault();
@@ -1769,7 +1877,7 @@
         }
 
         // ====================================================
-        // MENU 8: PAYROLL & SLIP GAJI OTOMATIS
+        // PAYROLL & SLIP GAJI OTOMATIS
         // ====================================================
         function renderPayrollTable() {
             const tbody = document.getElementById('payrollTableBody');
@@ -1921,12 +2029,10 @@
             document.getElementById('slipModal').classList.add('active');
         }
 
-        function closeSlipModal() {
-            document.getElementById('slipModal').classList.remove('active');
-        }
+        function closeSlipModal() { document.getElementById('slipModal').classList.remove('active'); }
 
         // ====================================================
-        // CRUD DATA ASET USAHA
+        // DATA ASET USAHA
         // ====================================================
         function loadAssets() {
             db.collection("assets").onSnapshot((snapshot) => {
@@ -2002,9 +2108,7 @@
             });
         }
 
-        function filterAssets() {
-            renderAssetTable();
-        }
+        function filterAssets() { renderAssetTable(); }
 
         function openAssetModal() {
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
@@ -2014,9 +2118,7 @@
             document.getElementById('assetFormModal').classList.add('active');
         }
 
-        function closeAssetModal() {
-            document.getElementById('assetFormModal').classList.remove('active');
-        }
+        function closeAssetModal() { document.getElementById('assetFormModal').classList.remove('active'); }
 
         function saveAsset(e) {
             e.preventDefault();
@@ -2033,15 +2135,13 @@
             };
 
             if (id) {
-                db.collection("assets").doc(id).update(payload)
-                .then(() => {
+                db.collection("assets").doc(id).update(payload).then(() => {
                     alert("Data Aset Berhasil Diperbarui!");
                     closeAssetModal();
                 });
             } else {
                 payload.createdAt = Date.now();
-                db.collection("assets").add(payload)
-                .then(() => {
+                db.collection("assets").add(payload).then(() => {
                     alert("Aset Baru Berhasil Ditambahkan!");
                     closeAssetModal();
                 });
@@ -2068,13 +2168,12 @@
         function deleteAsset(id) {
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
             if (confirm("Yakin ingin menghapus data aset ini dari inventaris?")) {
-                db.collection("assets").doc(id).delete()
-                .then(() => alert("Data aset berhasil dihapus."));
+                db.collection("assets").doc(id).delete().then(() => alert("Data aset berhasil dihapus."));
             }
         }
 
         // ====================================================
-        // CRUD DATA PRODUK & SPAREPART
+        // DATA PRODUK & SPAREPART
         // ====================================================
         function loadProducts() {
             db.collection("products").onSnapshot((snapshot) => {
@@ -2141,9 +2240,7 @@
             });
         }
 
-        function filterProducts() {
-            renderProductTable();
-        }
+        function filterProducts() { renderProductTable(); }
 
         function openProductModal() {
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
@@ -2153,9 +2250,7 @@
             document.getElementById('productFormModal').classList.add('active');
         }
 
-        function closeProductModal() {
-            document.getElementById('productFormModal').classList.remove('active');
-        }
+        function closeProductModal() { document.getElementById('productFormModal').classList.remove('active'); }
 
         function saveProduct(e) {
             e.preventDefault();
@@ -2171,15 +2266,13 @@
             };
 
             if (id) {
-                db.collection("products").doc(id).update(payload)
-                .then(() => {
+                db.collection("products").doc(id).update(payload).then(() => {
                     alert("Data Produk Berhasil Diperbarui!");
                     closeProductModal();
                 });
             } else {
                 payload.createdAt = Date.now();
-                db.collection("products").add(payload)
-                .then(() => {
+                db.collection("products").add(payload).then(() => {
                     alert("Produk Baru Berhasil Ditambahkan!");
                     closeProductModal();
                 });
@@ -2205,8 +2298,7 @@
         function deleteProduct(id) {
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
             if (confirm("Yakin ingin menghapus produk ini dari katalog?")) {
-                db.collection("products").doc(id).delete()
-                .then(() => alert("Data produk berhasil dihapus."));
+                db.collection("products").doc(id).delete().then(() => alert("Data produk berhasil dihapus."));
             }
         }
 
@@ -2467,9 +2559,7 @@
                             grid: { display: false }
                         }
                     },
-                    plugins: {
-                        legend: { labels: { color: '#f8fafc' } }
-                    }
+                    plugins: { legend: { labels: { color: '#f8fafc' } } }
                 }
             });
         }
@@ -2595,6 +2685,7 @@
                 });
 
                 renderPayrollTable();
+                if(isOwnerUnlocked) renderExecutiveOwnerDashboard();
             });
         }
 
@@ -2612,39 +2703,252 @@
             if(confirm("Hapus transaksi ini?")) db.collection("transactions").doc(id).delete();
         }
 
-        function renderOwnerCharts() {
-            const ctxKPI = document.getElementById('kpiChart').getContext('2d');
-            const ctxFinance = document.getElementById('financeChart').getContext('2d');
+        // ====================================================
+        // MENU 9: EXECUTIVE OWNER DASHBOARD REALTIME
+        // ====================================================
+        function renderExecutiveOwnerDashboard() {
+            if (!isOwnerUnlocked) return;
 
-            if(kpiChartInstance) kpiChartInstance.destroy();
-            if(financeChartInstance) financeChartInstance.destroy();
+            // 1. OLEH REALTIME OMSET & LABA HARI INI
+            let todayStr = new Date().toLocaleDateString('id-ID');
+            let todayIncome = 0;
+            let todayExpense = 0;
 
-            kpiChartInstance = new Chart(ctxKPI, {
-                type: 'bar',
-                data: {
-                    labels: ['SRI EPIYANI', 'WINA', 'AMAR NUR FAJRIN'],
-                    datasets: [{
-                        label: 'Rata-Rata Capaian (%)',
-                        data: [100, 85, 95],
-                        backgroundColor: ['#38bdf8', '#ec4899', '#eab308']
-                    }]
-                },
-                options: { responsive: true, scales: { y: { beginAtZero: true, max: 100 } } }
+            let sdmExpenseTotal = 0;
+            let productExpenseTotal = 0;
+
+            allTransactionsData.forEach(tx => {
+                if (tx.timeStr && tx.timeStr.includes(todayStr)) {
+                    if (tx.type === 'masuk') todayIncome += tx.amount;
+                    if (tx.type === 'keluar') todayExpense += tx.amount;
+                }
+
+                if (tx.type === 'keluar') {
+                    if (tx.category === 'Pengeluaran Operasional') {
+                        sdmExpenseTotal += tx.amount;
+                    } else if (tx.category.includes('Pembelian') || tx.category.includes('Sparepart')) {
+                        productExpenseTotal += tx.amount;
+                    }
+                }
             });
 
-            financeChartInstance = new Chart(ctxFinance, {
+            document.getElementById('dashTodayOmset').innerText = `Rp ${todayIncome.toLocaleString('id-ID')}`;
+            let netProfit = todayIncome - todayExpense;
+            document.getElementById('dashTodayProfit').innerText = `Rp ${netProfit.toLocaleString('id-ID')}`;
+
+            // 2. VALUASI ASET & PRODUK
+            let totalAssetVal = 0;
+            allAssetsData.forEach(ast => {
+                let qtyNum = parseQty(ast.quantity);
+                totalAssetVal += (qtyNum * (ast.price || 0));
+            });
+            document.getElementById('dashValuationAsset').innerText = `Rp ${totalAssetVal.toLocaleString('id-ID')}`;
+
+            let totalProdVal = 0;
+            allProductsData.forEach(prd => {
+                totalProdVal += ((prd.stock || 0) * (prd.cost || 0));
+            });
+            document.getElementById('dashValuationProduct').innerText = `Rp ${totalProdVal.toLocaleString('id-ID')}`;
+            document.getElementById('dashTotalProductCount').innerText = `${allProductsData.length} Jenis Produk`;
+
+            // 3. RENDER CHARTS VISUAL
+            // Bagan 1: KPI
+            const ctxKpi = document.getElementById('chartOwnerKpi').getContext('2d');
+            if (chartOwnerKpiInst) chartOwnerKpiInst.destroy();
+            let kpiLabels = ['SRI EPIYANI', 'WINA', 'AMAR NUR FAJRIN', 'ROBI SETIAJI'];
+            chartOwnerKpiInst = new Chart(ctxKpi, {
+                type: 'bar',
+                data: {
+                    labels: kpiLabels,
+                    datasets: [{ label: 'KPI Capaian (%)', data: [100, 90, 95, 88], backgroundColor: '#38bdf8', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+
+            // Bagan 2: Servis Masuk vs Selesai
+            const ctxService = document.getElementById('chartOwnerService').getContext('2d');
+            if (chartOwnerServiceInst) chartOwnerServiceInst.destroy();
+            chartOwnerServiceInst = new Chart(ctxService, {
                 type: 'line',
                 data: {
-                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+                    labels: ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'],
                     datasets: [
-                        { label: 'Pemasukan (Rp)', data: [2500000, 3200000, 2900000, 4100000], borderColor: '#4ade80', fill: false },
-                        { label: 'Pengeluaran (Rp)', data: [1200000, 1500000, 1100000, 1800000], borderColor: '#ef4444', fill: false }
+                        { label: 'Servis Masuk', data: [5, 8, 4, 9, 6, 11], borderColor: '#f59e0b', fill: false },
+                        { label: 'Servis Selesai', data: [4, 7, 5, 8, 6, 10], borderColor: '#22c55e', fill: false }
                     ]
                 },
-                options: { responsive: true }
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Bagan 3: Operasional SDM
+            const ctxSdm = document.getElementById('chartOwnerSdmExpense').getContext('2d');
+            if (chartOwnerSdmExpenseInst) chartOwnerSdmExpenseInst.destroy();
+            chartOwnerSdmExpenseInst = new Chart(ctxSdm, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Gaji Pokok', 'Komisi Transaksi', 'Bonus Lembur', 'Kasbon / Operasional'],
+                    datasets: [{ data: [7200000, 1450000, 680000, 350000], backgroundColor: ['#0284c7', '#22c55e', '#fbbf24', '#ef4444'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Bagan 4: Belanja Produk & Sparepart
+            const ctxProd = document.getElementById('chartOwnerProductExpense').getContext('2d');
+            if (chartOwnerProductExpenseInst) chartOwnerProductExpenseInst.destroy();
+            chartOwnerProductExpenseInst = new Chart(ctxProd, {
+                type: 'bar',
+                data: {
+                    labels: ['SSD NVMe', 'Thermal Paste', 'LCD Display', 'Unit Laptop Mati'],
+                    datasets: [{ label: 'Belanja (Rp)', data: [1200000, 450000, 850000, 2500000], backgroundColor: '#ec4899', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Bagan 5: SPX Delivery
+            const ctxSpx = document.getElementById('chartOwnerSpxDelivery').getContext('2d');
+            if (chartOwnerSpxDeliveryInst) chartOwnerSpxDeliveryInst.destroy();
+            chartOwnerSpxDeliveryInst = new Chart(ctxSpx, {
+                type: 'bar',
+                data: {
+                    labels: ['Minggu 1', 'Minggu 2', 'Minggu 3', 'Minggu 4'],
+                    datasets: [{ label: 'Paket Terantar (Pcs)', data: [340, 410, 390, 480], backgroundColor: '#a855f7', borderRadius: 4 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
             });
         }
 
+        // ====================================================
+        // MENU 10: RADAR KEUANGAN, INVESTOR, UTANG & PIUTANG
+        // ====================================================
+        function loadRadarData() {
+            db.collection("radar_finance").onSnapshot((snapshot) => {
+                allRadarData = [];
+                if (snapshot.empty) {
+                    const initialRadar = [
+                        { category: "Utang", name: "Shopee PayLater (Sparepart)", dueDate: "Tgl 01 Setiap Bulan", amount: 3388374, notes: "Tagihan modal belanja sparepart" },
+                        { category: "Utang", name: "Bank Jago Modal Usaha", dueDate: "Tgl 18 Setiap Bulan", amount: 2466367, notes: "Cicilan operasional" },
+                        { category: "Investor", name: "Suntikan Modal Mitra A", dueDate: "Profit Sharing Bulanan", amount: 25000000, notes: "Investor ekspansi toko" },
+                        { category: "Piutang", name: "Servis instansi Kantor B", dueDate: "Akhir Bulan Ini", amount: 1850000, notes: "Pelunasan servis 3 unit PC" }
+                    ];
+                    initialRadar.forEach(rd => {
+                        db.collection("radar_finance").add({ ...rd, createdAt: Date.now() });
+                    });
+                } else {
+                    snapshot.forEach(doc => {
+                        let d = doc.data();
+                        d.id = doc.id;
+                        allRadarData.push(d);
+                    });
+                    renderRadarTable();
+                }
+            });
+        }
+
+        function renderRadarTable() {
+            const tbody = document.getElementById('radarTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            let totalDebt = 0;
+            let totalReceivable = 0;
+            let totalInvestor = 0;
+
+            if (allRadarData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:#94a3b8;">Belum ada catatan radar keuangan rahasia.</td></tr>`;
+                return;
+            }
+
+            allRadarData.forEach(item => {
+                if (item.category === 'Utang') totalDebt += item.amount;
+                if (item.category === 'Piutang') totalReceivable += item.amount;
+                if (item.category === 'Investor') totalInvestor += item.amount;
+
+                let categoryBadge = item.category === 'Utang' ? 'badge-inactive' : (item.category === 'Piutang' ? 'badge-active' : 'btn-info');
+
+                let row = `
+                    <tr>
+                        <td><span class="badge-status ${categoryBadge}">${item.category}</span></td>
+                        <td style="color:#38bdf8; font-weight:bold;">${item.name}</td>
+                        <td>${item.dueDate}</td>
+                        <td style="font-weight:bold; color:${item.category === 'Utang' ? '#ef4444' : '#4ade80'};">Rp ${(item.amount || 0).toLocaleString('id-ID')}</td>
+                        <td style="font-size:12px;">${item.notes || '-'}</td>
+                        <td>
+                            <button class="btn-warning" onclick="editRadar('${item.id}')">Edit</button>
+                            <button class="btn-danger" onclick="deleteRadar('${item.id}')">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            document.getElementById('radarTotalDebt').innerText = `Rp ${totalDebt.toLocaleString('id-ID')}`;
+            document.getElementById('radarTotalReceivable').innerText = `Rp ${totalReceivable.toLocaleString('id-ID')}`;
+            document.getElementById('radarTotalInvestor').innerText = `Rp ${totalInvestor.toLocaleString('id-ID')}`;
+        }
+
+        function openRadarModal() {
+            if (!isOwnerUnlocked) return;
+            document.getElementById('radarForm').reset();
+            document.getElementById('radarId').value = "";
+            document.getElementById('radarModalTitle').innerText = "Tambah Catatan Radar Finansial";
+            document.getElementById('radarFormModal').classList.add('active');
+        }
+
+        function closeRadarModal() { document.getElementById('radarFormModal').classList.remove('active'); }
+
+        function saveRadarRecord(e) {
+            e.preventDefault();
+            if (!isOwnerUnlocked) return;
+
+            const id = document.getElementById('radarId').value;
+            const payload = {
+                category: document.getElementById('radarCategory').value,
+                name: document.getElementById('radarName').value,
+                dueDate: document.getElementById('radarDueDate').value,
+                amount: Number(document.getElementById('radarAmount').value),
+                notes: document.getElementById('radarNotes').value
+            };
+
+            if (id) {
+                db.collection("radar_finance").doc(id).update(payload).then(() => {
+                    alert("Record Radar Keuangan Berhasil Diperbarui!");
+                    closeRadarModal();
+                });
+            } else {
+                payload.createdAt = Date.now();
+                db.collection("radar_finance").add(payload).then(() => {
+                    alert("Record Radar Keuangan Baru Disimpan!");
+                    closeRadarModal();
+                });
+            }
+        }
+
+        function editRadar(id) {
+            if (!isOwnerUnlocked) return;
+            const item = allRadarData.find(r => r.id === id);
+            if (!item) return;
+
+            document.getElementById('radarId').value = item.id;
+            document.getElementById('radarCategory').value = item.category || "Utang";
+            document.getElementById('radarName').value = item.name || "";
+            document.getElementById('radarDueDate').value = item.dueDate || "";
+            document.getElementById('radarAmount').value = item.amount || 0;
+            document.getElementById('radarNotes').value = item.notes || "";
+
+            document.getElementById('radarModalTitle').innerText = "Edit Catatan Radar Finansial";
+            document.getElementById('radarFormModal').classList.add('active');
+        }
+
+        function deleteRadar(id) {
+            if (!isOwnerUnlocked) return;
+            if (confirm("Yakin ingin menghapus record radar ini?")) {
+                db.collection("radar_finance").doc(id).delete().then(() => alert("Record radar dihapus."));
+            }
+        }
+
+        // ==========================================
+        // AGENDA STRATEGIS OWNER
+        // ==========================================
         function loadOwnerAgendas() {
             db.collection("owner_agendas").onSnapshot((snapshot) => {
                 const listEl = document.getElementById('ownerAgendaList');
