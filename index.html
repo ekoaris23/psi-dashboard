@@ -139,17 +139,14 @@
                 </div>
 
                 <div class="grid">
+                    <!-- CARD KIRI: CHECKLIST TUGAS HARIAN -->
                     <div class="card" id="leftCard">
                         <div id="leftDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
                             Silakan pilih nama karyawan di atas untuk membuka area kerja checklist.
                         </div>
 
-                        <!-- Content Checklist Dinamis -->
                         <div id="dynamicLeftContent" class="hidden">
-                            <h3 id="activeEmpChecklistTitle" style="color: #38bdf8;">Checklist Tugas Harian:</h3>
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 10px;">
-                                <button class="hrd-owner-crud hidden" style="font-size:10px; padding:3px 8px;" onclick="addChecklistItem()">+ Tambah Item Checklist</button>
-                            </div>
+                            <h3 id="activeEmpChecklistTitle" style="color: #38bdf8; margin-bottom: 15px;">Checklist Tugas Harian:</h3>
                             <div id="dynamicChecklistContainer"></div>
                             <div class="progress-container">
                                 <div class="progress-label"><span>Capaian Pekerjaan:</span><span id="dynamicProgressText">0% tercapai</span></div>
@@ -159,31 +156,31 @@
                         </div>
                     </div>
 
+                    <!-- CARD KANAN: FORM TAMBAH JOBLIST (HRD & OWNER) -->
                     <div class="card" id="rightCard">
                         <div id="rightDefaultMsg" style="text-align: center; color: #94a3b8; padding: 30px 10px;">
-                            Panduan joblist spesifik akan tampil setelah nama karyawan dipilih.
+                            Pilih nama karyawan di atas untuk menginputkan joblist tugas baru.
                         </div>
-                        <div id="joblistContainer" class="hidden">
-                            <div class="job-item">
-                                <h3 id="activeEmpJoblistTitle" style="color: #38bdf8;">📋 Panduan Joblist Pekerjaan</h3>
-                                <ul class="task-list" id="dynamicTaskList"></ul>
-                            </div>
 
-                            <div id="addJobFormSection" class="hrd-owner-crud hidden" style="margin-top: 20px; padding-top: 15px; border-top: 1px dashed #334155;">
-                                <h4 style="color: #38bdf8; font-size: 13px; margin-bottom: 8px;">➕ Tambah Joblist Pekerjaan Baru (Akses HRD / Owner)</h4>
+                        <div id="joblistContainer" class="hidden">
+                            <div id="addJobFormSection" class="hrd-owner-crud hidden">
+                                <h4 style="color: #38bdf8; font-size: 14px; margin-bottom: 12px;">➕ Tambah Joblist Pekerjaan Baru (Akses HRD / Owner)</h4>
                                 <form onsubmit="saveCustomJob(event)">
-                                    <label style="font-size:11px;">Input untuk Karyawan:</label>
+                                    <label style="font-size:12px;">Input untuk Karyawan:</label>
                                     <select id="newJobTarget" required></select>
-                                    <label style="font-size:11px;">Deskripsi Pekerjaan:</label>
+                                    
+                                    <label style="font-size:12px;">Deskripsi Pekerjaan:</label>
                                     <input type="text" id="newJobText" placeholder="Contoh: Belanja stok SSD NVMe ke vendor" required>
-                                    <label style="font-size:11px;">Frekuensi Tugas:</label>
+                                    
+                                    <label style="font-size:12px;">Frekuensi Tugas:</label>
                                     <select id="newJobFreq" required>
                                         <option value="Setiap Hari">Setiap Hari (Rutin)</option>
                                         <option value="1 Kali Sahaja">1 Kali Sahaja (Tugas Khusus)</option>
                                     </select>
+                                    
                                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                                         <div>
-                                            <label style="font-size:11px;">Prioritas:</label>
+                                            <label style="font-size:12px;">Prioritas:</label>
                                             <select id="newJobPriority">
                                                 <option value="Normal">Normal</option>
                                                 <option value="Tinggi">Tinggi (High)</option>
@@ -191,12 +188,19 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <label style="font-size:11px;">Deadline Batas Waktu:</label>
+                                            <label style="font-size:12px;">Deadline Batas Waktu:</label>
                                             <input type="date" id="newJobDeadline">
                                         </div>
                                     </div>
-                                    <button type="submit" style="width:100%; margin-top:5px; background:#0284c7; font-size:12px; padding:8px;">💾 Save Joblist Baru</button>
+                                    <button type="submit" style="width:100%; margin-top:10px; background:#0284c7; font-size:13px; padding:10px;">💾 Save Joblist Baru</button>
                                 </form>
+                            </div>
+
+                            <!-- PESAN PEMBERITAHUAN TERKUNCI UNTUK PUBLIK -->
+                            <div id="rightLockNotice" class="card" style="text-align: center; color: #94a3b8; padding: 30px 10px; border: none;">
+                                <span style="font-size: 28px;">🔒</span>
+                                <h4 style="color: #38bdf8; margin-top: 8px;">Area Form Input Khusus HRD / Owner</h4>
+                                <p style="font-size: 11px; margin-top: 4px;">Gunakan tombol 'Unlock HRD' atau 'Unlock Owner' di pojok atas untuk menambahkan item joblist baru.</p>
                             </div>
                         </div>
                     </div>
@@ -580,7 +584,6 @@
             setDefaultDateTime();
             updateSubCategoryOptions();
             loadDailyKPI();
-            loadCustomJobs();
             initChecklists();
             loadOwnerAgendas();
             loadEmployees();
@@ -720,14 +723,18 @@
                 else el.classList.add('hidden');
             });
 
-            // Toggle pesan ketersediaan form kas harian
+            // Toggle Lock Notice untuk Kas
             const cashLockNotice = document.getElementById('cashLockNotice');
             if(isAuthorized && cashLockNotice) cashLockNotice.classList.add('hidden');
             else if(cashLockNotice) cashLockNotice.classList.remove('hidden');
 
+            // Toggle Lock Notice untuk Right Card Joblist
+            const rightLockNotice = document.getElementById('rightLockNotice');
+            if(isAuthorized && rightLockNotice) rightLockNotice.classList.add('hidden');
+            else if(rightLockNotice) rightLockNotice.classList.remove('hidden');
+
             updateSidebarVisibility();
-            db.collection("default_checklists").get().then(renderChecklists);
-            loadCustomJobs();
+            if (selectedEmpId) loadEmpChecklists(selectedEmpId);
             loadPublicTransactions();
         }
 
@@ -945,7 +952,7 @@
         }
 
         // ==========================================
-        // JOBLIST & CHECKLIST LOGIC (DINAMIS)
+        // JOBLIST & CHECKLIST LOGIC (TERHUBUNG)
         // ==========================================
         function filterJoblist() {
             const selectEl = document.getElementById('employeeSelect');
@@ -983,10 +990,11 @@
             document.getElementById('joblistContainer').classList.remove('hidden');
 
             document.getElementById('activeEmpChecklistTitle').innerText = `Checklist Tugas Harian ${emp.name}:`;
-            document.getElementById('activeEmpJoblistTitle').innerText = `📋 Panduan Joblist ${emp.name}`;
+            
+            // Set default pilihan form kanan ke karyawan yang sedang dipilih
+            document.getElementById('newJobTarget').value = empId;
 
             loadEmpChecklists(empId);
-            loadEmpTaskList(empId);
         }
 
         function initChecklists() {
@@ -1001,7 +1009,7 @@
                 container.innerHTML = "";
 
                 if (snapshot.empty) {
-                    container.innerHTML = `<p style="font-size:12px; color:#94a3b8;">Belum ada item checklist khusus. HRD/Owner dapat menambahkan via tombol di atas.</p>`;
+                    container.innerHTML = `<p style="font-size:12px; color:#94a3b8;">Belum ada item tugas. HRD/Owner dapat menambahkan melalui form di sebelah kanan.</p>`;
                     calculateDynamicProgress();
                     return;
                 }
@@ -1021,7 +1029,11 @@
                     div.innerHTML = `
                         <div class="checkbox-item-left">
                             <input type="checkbox" id="check_${doc.id}" onchange="calculateDynamicProgress()">
-                            <label for="check_${doc.id}">${item.text}</label>
+                            <label for="check_${doc.id}">
+                                ${item.text} 
+                                ${item.freq ? `<span class="tag-job" style="background:#334155;">${item.freq}</span>` : ''}
+                                ${item.priority ? `<span class="tag-job" style="background:${item.priority === 'Urgent' ? '#ef4444' : '#22c55e'}; color:white;">${item.priority}</span>` : ''}
+                            </label>
                         </div>
                         ${crudBtns}
                     `;
@@ -1039,18 +1051,9 @@
             document.getElementById('dynamicProgressBar').style.width = percent + '%';
         }
 
-        function addChecklistItem() {
-            if (!isHrdUnlocked && !isOwnerUnlocked || !selectedEmpId) return;
-            const emp = allEmployeesData.find(e => e.id === selectedEmpId);
-            let text = prompt(`Tambah tugas checklist baru untuk ${emp ? emp.name : ''}:`);
-            if (text && text.trim() !== "") {
-                db.collection("default_checklists").add({ employeeId: selectedEmpId, text: text.trim(), createdAt: Date.now() });
-            }
-        }
-
         function editChecklistItem(id, currentText) {
             if (!isHrdUnlocked && !isOwnerUnlocked) return;
-            let newText = prompt("Edit item checklist:", currentText);
+            let newText = prompt("Edit item tugas:", currentText);
             if (newText && newText.trim() !== "") {
                 db.collection("default_checklists").doc(id).update({ text: newText.trim() });
             }
@@ -1058,61 +1061,31 @@
 
         function deleteChecklistItem(id) {
             if (!isHrdUnlocked && !isOwnerUnlocked) return;
-            if (confirm("Hapus item checklist ini?")) {
+            if (confirm("Hapus item tugas ini?")) {
                 db.collection("default_checklists").doc(id).delete();
             }
         }
 
+        // FUNGSI INPUT FORM JOBLIST BARU (LANGSUNG MASUK KE CHECKLIST KARYAWAN)
         function saveCustomJob(e) {
             e.preventDefault();
-            db.collection("custom_jobs").add({
-                targetId: document.getElementById('newJobTarget').value,
-                text: document.getElementById('newJobText').value,
-                freq: document.getElementById('newJobFreq').value,
-                priority: document.getElementById('newJobPriority').value,
-                deadline: document.getElementById('newJobDeadline').value || 'Tidak ada',
+            if(!isHrdUnlocked && !isOwnerUnlocked) return;
+
+            const targetId = document.getElementById('newJobTarget').value;
+            const textVal = document.getElementById('newJobText').value;
+            const freqVal = document.getElementById('newJobFreq').value;
+            const priorityVal = document.getElementById('newJobPriority').value;
+
+            db.collection("default_checklists").add({
+                employeeId: targetId,
+                text: textVal,
+                freq: freqVal,
+                priority: priorityVal,
                 createdAt: Date.now()
             }).then(() => {
                 document.getElementById('newJobText').value = "";
-                alert("Joblist berhasil ditambahkan.");
+                alert("Joblist Pekerjaan Berhasil Ditambahkan ke Checklist Karyawan!");
             });
-        }
-
-        function loadCustomJobs() {
-            db.collection("custom_jobs").onSnapshot((snapshot) => {
-                if(selectedEmpId) loadEmpTaskList(selectedEmpId);
-            });
-        }
-
-        function loadEmpTaskList(empId) {
-            db.collection("custom_jobs").where("targetId", "==", empId).onSnapshot((snapshot) => {
-                const listEl = document.getElementById('dynamicTaskList');
-                listEl.innerHTML = "";
-
-                if (snapshot.empty) {
-                    listEl.innerHTML = `<li style="border-left-color:#334155; color:#94a3b8;">Belum ada panduan joblist khusus.</li>`;
-                    return;
-                }
-
-                snapshot.forEach(doc => {
-                    const data = doc.data();
-                    let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
-                    let deleteBtn = isAuthorized ? `<button class="btn-danger" style="float:right;" onclick="deleteCustomJob('${doc.id}')">Hapus</button>` : '';
-                    let li = document.createElement('li');
-                    li.innerHTML = `
-                        ${deleteBtn}
-                        <strong>Tugas:</strong> ${data.text} 
-                        <span class="tag-job" style="background:#334155;">${data.freq}</span>
-                        <span class="tag-job" style="background:${data.priority === 'Urgent' ? '#ef4444' : '#22c55e'}; color:white;">${data.priority}</span>
-                    `;
-                    listEl.appendChild(li);
-                });
-            });
-        }
-
-        function deleteCustomJob(id) {
-            if(!isHrdUnlocked && !isOwnerUnlocked) return;
-            if(confirm("Hapus joblist ini?")) db.collection("custom_jobs").doc(id).delete();
         }
 
         function saveDailyKPI() {
@@ -1224,7 +1197,6 @@
                 tbody.innerHTML = "";
                 let docsArr = [];
                 
-                // Reset akumulasi komisi
                 let commissionMap = {};
                 allEmployeesData.filter(e => e.status === 'Aktif').forEach(emp => {
                     commissionMap[emp.id] = 0;
@@ -1235,7 +1207,6 @@
 
                 docsArr.forEach((data) => {
                     if(data.type === 'masuk') {
-                        // Kalkulasi Komisi Otomatis Berdasarkan Aturan
                         allEmployeesData.filter(e => e.status === 'Aktif').forEach(emp => {
                             let empNameUpper = emp.name.toUpperCase();
                             let isSri = empNameUpper.includes('SRI');
@@ -1273,7 +1244,6 @@
                     </tr>`;
                 });
 
-                // Update tampilan kartu komisi di layar
                 Object.keys(commissionMap).forEach(empId => {
                     let cardEl = document.getElementById(`komisi_${empId}`);
                     if(cardEl) {
