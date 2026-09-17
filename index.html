@@ -43,6 +43,8 @@
         button:hover { background: #0369a1; }
         .btn-hrd { background: #0284c7; }
         .btn-owner { background: #059669; }
+        .btn-absen { background: #10b981; animation: pulse 2s infinite; }
+        .btn-absen:hover { background: #059669; }
         .btn-danger { background: #ef4444 !important; padding: 4px 8px !important; font-size: 11px !important; }
         .btn-warning { background: #f59e0b !important; color: black !important; padding: 4px 8px !important; font-size: 11px !important; margin-right: 4px; }
         .btn-info { background: #0284c7 !important; color: white !important; padding: 4px 8px !important; font-size: 11px !important; margin-right: 4px; }
@@ -121,7 +123,8 @@
     <div class="main-wrapper" id="mainWrapper">
         <div class="top-navbar">
             <button class="burger-btn" onclick="toggleSidebar()">☰</button>
-            <div style="display: flex; gap: 8px;">
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button class="btn-absen" onclick="openPublicAbsenModal()">⏰ ABSEN KARYAWAN</button>
                 <button id="hrdAuthBtn" class="btn-hrd" onclick="toggleHrdView()">Unlock HRD</button>
                 <button id="ownerAuthBtn" class="btn-owner" onclick="togglePrivateView()">Unlock Owner</button>
             </div>
@@ -369,7 +372,7 @@
                 </div>
             </div>
 
-            <!-- TAB 6: DATA PRODUK (WITH CRUD) -->
+            <!-- TAB 6: DATA PRODUK -->
             <div id="productTab" class="tab-content hidden">
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -413,18 +416,41 @@
 
             <!-- TAB 7: ABSENSI DAN LEMBUR -->
             <div id="attendanceTab" class="tab-content hidden">
+                <div class="card" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <h3 style="color: #38bdf8; font-size: 16px;">⏰ Rekap Absensi & Lembur Karyawan (HRD & Owner)</h3>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="openHrdAbsenModal()" class="btn-hrd">+ Input Manual Absen (HRD)</button>
+                        </div>
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 15px;">
+                        <input type="text" id="attSearchInput" onkeyup="filterAttendance()" placeholder="🔍 Cari Nama Karyawan / Status..." style="margin: 0;">
+                        <input type="date" id="attDateFilter" onchange="filterAttendance()" style="margin: 0;">
+                    </div>
+                </div>
+
                 <div class="card">
-                    <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">⏰ Rekap Absensi & Lembur Karyawan (HRD & Owner)</h3>
-                    <table>
-                        <thead>
-                            <tr><th>Tanggal</th><th>Nama Karyawan</th><th>Jam Masuk</th><th>Jam Pulang</th><th>Jam Lembur</th></tr>
-                        </thead>
-                        <tbody>
-                            <tr><td>16/09/2026</td><td>Amar</td><td>08:55 WIB</td><td>18:00 WIB</td><td>1 Jam</td></tr>
-                            <tr><td>16/09/2026</td><td>Wina</td><td>09:00 WIB</td><td>17:00 WIB</td><td>-</td></tr>
-                            <tr><td>16/09/2026</td><td>Sri</td><td>08:45 WIB</td><td>17:30 WIB</td><td>0.5 Jam</td></tr>
-                        </tbody>
-                    </table>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal & Hari</th>
+                                    <th>Nama Karyawan</th>
+                                    <th>Jam Masuk (Clock IN)</th>
+                                    <th>Jam Pulang (Clock OUT)</th>
+                                    <th>Status Kehadiran</th>
+                                    <th>Durasi Lembur</th>
+                                    <th>Status Lembur</th>
+                                    <th>Catatan Pekerjaan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceTableBody">
+                                <tr><td colspan="9" style="text-align:center; color:#94a3b8;">Memuat data absensi...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
 
@@ -509,6 +535,113 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODAL FORM ABSEN PUBLIK (KARYAWAN) -->
+    <div class="modal-bg" id="publicAbsenModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="color:#10b981;">⏰ Absensi Mandiri Karyawan</h3>
+                <button onclick="closePublicAbsenModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="publicAbsenForm" onsubmit="submitPublicAbsen(event)">
+                <label style="font-size:12px;">Pilih Identitas Karyawan:</label>
+                <select id="absenEmpSelect" required></select>
+
+                <label style="font-size:12px;">Status Kehadiran:</label>
+                <select id="absenStatusSelect" onchange="toggleAbsenFields()">
+                    <option value="Hadir">Hadir Bekerja</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Sakit">Sakit</option>
+                </select>
+
+                <div id="absenTimeSection">
+                    <label style="font-size:12px;">Aksi Absensi:</label>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                        <button type="button" id="btnClockIn" style="background:#0284c7; padding:12px; font-size:13px;" onclick="setClockType('IN')">📌 Clock IN (Masuk)</button>
+                        <button type="button" id="btnClockOut" style="background:#334155; padding:12px; font-size:13px;" onclick="setClockType('OUT')">🚪 Clock OUT (Pulang)</button>
+                    </div>
+                    <input type="hidden" id="clockType" value="IN">
+
+                    <label style="font-size:12px;">Poin Lembur Pekerjaan (Jika Ada):</label>
+                    <div style="background:#0f172a; padding:10px; border-radius:4px; border:1px solid #334155; margin-bottom:10px;">
+                        <label style="display:flex; align-items:center; gap:8px; font-size:12px; cursor:pointer;">
+                            <input type="checkbox" id="absenIsOwnerInstructed" style="width:auto; margin:0;">
+                            <span>Lembur ini atas PERINTAH/INSTRUKSI OWNER</span>
+                        </label>
+                        <p style="font-size:10px; color:#94a3b8; margin-top:4px;">*Jika tidak dicentang, lembur dianggap sebagai <strong>Inisiatif Mandiri (Poin Promosi Jabatan)</strong>.</p>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Catatan Pekerjaan / Alasan Izin:</label>
+                <textarea id="absenNotes" rows="2" placeholder="Contoh: Selesai rakit 2 unit laptop / Izin acara keluarga" required></textarea>
+
+                <button type="submit" style="width:100%; margin-top:10px; background:#10b981; padding:12px; font-size:14px;">💾 Kirim Absensi Sekarang</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EDIT / EDIT OWNER ABSENSI -->
+    <div class="modal-bg" id="editAbsenModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="editAbsenModalTitle" style="color:#38bdf8;">Koreksi Data Absensi & Lembur</h3>
+                <button onclick="closeEditAbsenModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="editAbsenForm" onsubmit="saveEditAbsen(event)">
+                <input type="hidden" id="editAbsenId">
+                
+                <label style="font-size:12px;">Nama Karyawan:</label>
+                <input type="text" id="editAbsenEmpName" readonly style="background:#1e293b; color:#94a3b8;">
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Tanggal Absen:</label>
+                        <input type="date" id="editAbsenDate" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Status Kehadiran:</label>
+                        <select id="editAbsenStatus">
+                            <option value="Hadir">Hadir</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Alpha">Alpha / Tanpa Ket</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Jam Clock IN:</label>
+                        <input type="text" id="editClockIn" placeholder="09:00 WIB">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Jam Clock OUT:</label>
+                        <input type="text" id="editClockOut" placeholder="17:00 WIB">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Durasi Lembur (Jam):</label>
+                        <input type="number" step="0.5" id="editOvertimeHours" placeholder="1.5">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Status Persetujuan Lembur:</label>
+                        <select id="editOvertimeType">
+                            <option value="Owner">Perintah Owner (Resmi Diperhitungkan)</option>
+                            <option value="Inisiatif">Inisiatif Karyawan (Poin Promosi)</option>
+                            <option value="Tidak">Tidak Ada Lembur</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Catatan Pekerjaan:</label>
+                <input type="text" id="editAbsenNotes">
+
+                <button type="submit" style="width:100%; margin-top:15px; background:#22c55e;">💾 Simpan Perubahan Data Absen</button>
+            </form>
         </div>
     </div>
 
@@ -658,7 +791,6 @@
             </div>
             <form id="productForm" onsubmit="saveProduct(event)">
                 <input type="hidden" id="productId">
-                
                 <label style="font-size:12px;">Nama Produk / Sparepart:</label>
                 <input type="text" id="prodName" placeholder="Contoh: SSD NVMe 256GB V-GeN" required>
 
@@ -714,6 +846,7 @@
         let allEmployeesData = [];
         let allAssetsData = [];
         let allProductsData = [];
+        let allAttendanceData = [];
         let selectedEmpId = null;
 
         window.onload = function() {
@@ -725,6 +858,7 @@
             loadEmployees();
             loadAssets();
             loadProducts();
+            loadAttendance();
             updateSidebarVisibility();
         };
 
@@ -872,6 +1006,7 @@
             updateSidebarVisibility();
             if (selectedEmpId) loadEmpChecklists(selectedEmpId);
             loadPublicTransactions();
+            renderAttendanceTable();
         }
 
         // ====================================================
@@ -908,10 +1043,12 @@
         function populateEmployeeDropdowns() {
             const empSelect = document.getElementById('employeeSelect');
             const jobTargetSelect = document.getElementById('newJobTarget');
+            const absenEmpSelect = document.getElementById('absenEmpSelect');
             const commCards = document.getElementById('commissionCardsContainer');
 
             empSelect.innerHTML = `<option value="none">-- Pilih Nama Karyawan --</option>`;
             jobTargetSelect.innerHTML = ``;
+            if (absenEmpSelect) absenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             commCards.innerHTML = ``;
 
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
@@ -929,6 +1066,13 @@
                 optJob.value = emp.id;
                 optJob.innerText = `${emp.name} (${emp.role})`;
                 jobTargetSelect.appendChild(optJob);
+
+                if (absenEmpSelect) {
+                    let optAbsen = document.createElement('option');
+                    optAbsen.value = emp.id;
+                    optAbsen.innerText = `${emp.name} (${emp.role})`;
+                    absenEmpSelect.appendChild(optAbsen);
+                }
 
                 commCards.innerHTML += `
                     <div style="background: #0f172a; padding: 10px; border-radius: 6px;">
@@ -1089,6 +1233,253 @@
         }
 
         // ====================================================
+        // MENU 7: ABSENSI MANDIRI & REKAP LEMBUR
+        // ====================================================
+        function openPublicAbsenModal() {
+            document.getElementById('publicAbsenForm').reset();
+            document.getElementById('clockType').value = "IN";
+            setClockType("IN");
+            document.getElementById('publicAbsenModal').classList.add('active');
+        }
+
+        function closePublicAbsenModal() {
+            document.getElementById('publicAbsenModal').classList.remove('active');
+        }
+
+        function setClockType(type) {
+            document.getElementById('clockType').value = type;
+            const btnIn = document.getElementById('btnClockIn');
+            const btnOut = document.getElementById('btnClockOut');
+
+            if (type === 'IN') {
+                btnIn.style.background = "#0284c7";
+                btnOut.style.background = "#334155";
+            } else {
+                btnIn.style.background = "#334155";
+                btnOut.style.background = "#e11d48";
+            }
+        }
+
+        function toggleAbsenFields() {
+            const status = document.getElementById('absenStatusSelect').value;
+            const timeSec = document.getElementById('absenTimeSection');
+            if (status === 'Hadir') {
+                timeSec.classList.remove('hidden');
+            } else {
+                timeSec.classList.add('hidden');
+            }
+        }
+
+        function submitPublicAbsen(e) {
+            e.preventDefault();
+            const empId = document.getElementById('absenEmpSelect').value;
+            const emp = allEmployeesData.find(e => e.id === empId);
+            if (!emp) {
+                alert("Silakan pilih identitas karyawan!");
+                return;
+            }
+
+            const status = document.getElementById('absenStatusSelect').value;
+            const clockType = document.getElementById('clockType').value;
+            const notes = document.getElementById('absenNotes').value;
+            const isOwnerInstructed = document.getElementById('absenIsOwnerInstructed').checked;
+            
+            const now = new Date();
+            const todayDateStr = now.toISOString().split('T')[0];
+            const timeFormatted = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + " WIB";
+
+            // Cari apakah sudah ada absensi hari ini untuk karyawan tsb
+            db.collection("attendance")
+              .where("employeeId", "==", empId)
+              .where("dateStr", "==", todayDateStr)
+              .get()
+              .then((snapshot) => {
+                  if (!snapshot.empty) {
+                      // Update data absensi yang sudah ada
+                      let docId = snapshot.docs[0].id;
+                      let existing = snapshot.docs[0].data();
+
+                      let updatePayload = { notes: notes };
+
+                      if (status === 'Hadir') {
+                          if (clockType === 'IN') {
+                              updatePayload.clockIn = timeFormatted;
+                          } else {
+                              updatePayload.clockOut = timeFormatted;
+                              // Hitung otomatis perkiraan lembur jika jam pulang > 17:00
+                              let hourNum = now.getHours();
+                              let overtimeCalc = hourNum > 17 ? (hourNum - 17) : 0;
+                              updatePayload.overtimeHours = overtimeCalc;
+                              updatePayload.overtimeType = isOwnerInstructed ? "Owner" : (overtimeCalc > 0 ? "Inisiatif" : "Tidak");
+                          }
+                          updatePayload.status = "Hadir";
+                      } else {
+                          updatePayload.status = status;
+                      }
+
+                      db.collection("attendance").doc(docId).update(updatePayload).then(() => {
+                          alert(`Absensi ${clockType === 'IN' ? 'Clock IN' : 'Clock OUT'} ${emp.name} Berhasil Diperbarui!`);
+                          closePublicAbsenModal();
+                      });
+                  } else {
+                      // Buat record absensi baru hari ini
+                      let newPayload = {
+                          employeeId: empId,
+                          employeeName: emp.name,
+                          dateStr: todayDateStr,
+                          status: status,
+                          clockIn: clockType === 'IN' && status === 'Hadir' ? timeFormatted : '-',
+                          clockOut: clockType === 'OUT' && status === 'Hadir' ? timeFormatted : '-',
+                          overtimeHours: 0,
+                          overtimeType: "Tidak",
+                          notes: notes,
+                          createdAt: Date.now()
+                      };
+
+                      db.collection("attendance").add(newPayload).then(() => {
+                          alert(`Absensi Berhasil Disimpan untuk ${emp.name}!`);
+                          closePublicAbsenModal();
+                      });
+                  }
+              });
+        }
+
+        function loadAttendance() {
+            db.collection("attendance").onSnapshot((snapshot) => {
+                allAttendanceData = [];
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.id = doc.id;
+                    allAttendanceData.push(d);
+                });
+                renderAttendanceTable();
+            });
+        }
+
+        function renderAttendanceTable() {
+            const tbody = document.getElementById('attendanceTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            let searchVal = (document.getElementById('attSearchInput') ? document.getElementById('attSearchInput').value : '').toLowerCase();
+            let dateVal = document.getElementById('attDateFilter') ? document.getElementById('attDateFilter').value : '';
+
+            let filtered = allAttendanceData.filter(att => {
+                let matchesSearch = (att.employeeName || '').toLowerCase().includes(searchVal) ||
+                                  (att.status || '').toLowerCase().includes(searchVal);
+                let matchesDate = !dateVal || att.dateStr === dateVal;
+                return matchesSearch && matchesDate;
+            });
+
+            filtered.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="9" style="text-align:center; color:#94a3b8;">Belum ada data rekap absensi.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(att => {
+                let otBadge = '';
+                if (att.overtimeType === 'Owner' && att.overtimeHours > 0) {
+                    otBadge = `<span class="badge-status badge-active">✔ Perintah Owner (${att.overtimeHours} Jam)</span>`;
+                } else if (att.overtimeType === 'Inisiatif' && att.overtimeHours > 0) {
+                    otBadge = `<span class="badge-status btn-warning">⭐ Inisiatif (${att.overtimeHours} Jam Poin Promosi)</span>`;
+                } else {
+                    otBadge = `<span style="color:#94a3b8;">-</span>`;
+                }
+
+                let isOwner = isOwnerUnlocked;
+                let isHRD = isHrdUnlocked;
+
+                let actionBtns = '';
+                if (isOwner) {
+                    actionBtns = `
+                        <button class="btn-warning" onclick="openEditAbsenModal('${att.id}')">Edit (Owner)</button>
+                        <button class="btn-danger" onclick="deleteAbsen('${att.id}')">Hapus</button>
+                    `;
+                } else if (isHRD) {
+                    actionBtns = `<span style="font-size:11px; color:#94a3b8;">(Akses Edit Khusus Owner)</span>`;
+                } else {
+                    actionBtns = `<span style="font-size:11px; color:#94a3b8;">🔒 Terkunci</span>`;
+                }
+
+                let row = `
+                    <tr>
+                        <td><strong>${att.dateStr || '-'}</strong></td>
+                        <td style="color:#38bdf8; font-weight:bold;">${att.employeeName}</td>
+                        <td style="color:#4ade80;">${att.clockIn || '-'}</td>
+                        <td style="color:#f87171;">${att.clockOut || '-'}</td>
+                        <td><span class="badge-status ${att.status === 'Hadir' ? 'badge-active' : 'badge-inactive'}">${att.status}</span></td>
+                        <td><strong>${att.overtimeHours || 0} Jam</strong></td>
+                        <td>${otBadge}</td>
+                        <td style="font-size:12px;">${att.notes || '-'}</td>
+                        <td>${actionBtns}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        function filterAttendance() {
+            renderAttendanceTable();
+        }
+
+        function openHrdAbsenModal() {
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+            openPublicAbsenModal();
+        }
+
+        function openEditAbsenModal(id) {
+            if (!isOwnerUnlocked) return;
+            const att = allAttendanceData.find(a => a.id === id);
+            if (!att) return;
+
+            document.getElementById('editAbsenId').value = att.id;
+            document.getElementById('editAbsenEmpName').value = att.employeeName;
+            document.getElementById('editAbsenDate').value = att.dateStr || "";
+            document.getElementById('editAbsenStatus').value = att.status || "Hadir";
+            document.getElementById('editClockIn').value = att.clockIn || "";
+            document.getElementById('editClockOut').value = att.clockOut || "";
+            document.getElementById('editOvertimeHours').value = att.overtimeHours || 0;
+            document.getElementById('editOvertimeType').value = att.overtimeType || "Tidak";
+            document.getElementById('editAbsenNotes').value = att.notes || "";
+
+            document.getElementById('editAbsenModal').classList.add('active');
+        }
+
+        function closeEditAbsenModal() {
+            document.getElementById('editAbsenModal').classList.remove('active');
+        }
+
+        function saveEditAbsen(e) {
+            e.preventDefault();
+            if (!isOwnerUnlocked) return;
+
+            const id = document.getElementById('editAbsenId').value;
+            const payload = {
+                dateStr: document.getElementById('editAbsenDate').value,
+                status: document.getElementById('editAbsenStatus').value,
+                clockIn: document.getElementById('editClockIn').value,
+                clockOut: document.getElementById('editClockOut').value,
+                overtimeHours: Number(document.getElementById('editOvertimeHours').value),
+                overtimeType: document.getElementById('editOvertimeType').value,
+                notes: document.getElementById('editAbsenNotes').value
+            };
+
+            db.collection("attendance").doc(id).update(payload).then(() => {
+                alert("Data Absensi Berhasil Diperbarui oleh Owner!");
+                closeEditAbsenModal();
+            });
+        }
+
+        function deleteAbsen(id) {
+            if (!isOwnerUnlocked) return;
+            if (confirm("Yakin ingin menghapus record absensi ini?")) {
+                db.collection("attendance").doc(id).delete().then(() => alert("Record absensi dihapus."));
+            }
+        }
+
+        // ====================================================
         // CRUD DATA ASET USAHA
         // ====================================================
         function loadAssets() {
@@ -1116,6 +1507,7 @@
 
         function renderAssetTable() {
             const tbody = document.getElementById('assetTableBody');
+            if(!tbody) return;
             tbody.innerHTML = "";
 
             let searchVal = document.getElementById('assetSearchInput').value.toLowerCase();
@@ -1252,6 +1644,7 @@
 
         function renderProductTable() {
             const tbody = document.getElementById('productTableBody');
+            if(!tbody) return;
             tbody.innerHTML = "";
 
             let searchVal = document.getElementById('prodSearchInput').value.toLowerCase();
