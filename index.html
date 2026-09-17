@@ -209,7 +209,7 @@
 
             <!-- TAB 2: KPI KARYAWAN -->
             <div id="kpiTab" class="tab-content hidden">
-                <div class="card" style="border-color: #22c55e;">
+                <div class="card" style="border-color: #22c55e; margin-bottom: 20px;">
                     <h3 style="color: #4ade80; font-size: 16px; margin-bottom: 10px;">🎯 Rekap KPI & Capaian Harian Karyawan</h3>
                     <div style="overflow-x: auto;">
                         <table>
@@ -226,6 +226,14 @@
                                 <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Memuat data KPI...</td></tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+
+                <!-- BAGAN RATA-RATA KPI KARYAWAN -->
+                <div class="card" style="border-color: #38bdf8;">
+                    <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 15px;">📊 Bagan Rata-Rata Capaian KPI Karyawan (%)</h3>
+                    <div style="position: relative; height:280px; width:100%;">
+                        <canvas id="publicKpiChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -576,6 +584,7 @@
         let isOwnerUnlocked = false;
         let isHrdUnlocked = false;
         let kpiChartInstance = null;
+        let publicKpiChartInstance = null;
         let financeChartInstance = null;
         let allEmployeesData = [];
         let selectedEmpId = null;
@@ -723,12 +732,10 @@
                 else el.classList.add('hidden');
             });
 
-            // Toggle Lock Notice untuk Kas
             const cashLockNotice = document.getElementById('cashLockNotice');
             if(isAuthorized && cashLockNotice) cashLockNotice.classList.add('hidden');
             else if(cashLockNotice) cashLockNotice.classList.remove('hidden');
 
-            // Toggle Lock Notice untuk Right Card Joblist
             const rightLockNotice = document.getElementById('rightLockNotice');
             if(isAuthorized && rightLockNotice) rightLockNotice.classList.add('hidden');
             else if(rightLockNotice) rightLockNotice.classList.remove('hidden');
@@ -764,6 +771,7 @@
                     renderEmployeeTable();
                     populateEmployeeDropdowns();
                     loadPublicTransactions();
+                    loadDailyKPI();
                 }
             });
         }
@@ -952,7 +960,7 @@
         }
 
         // ==========================================
-        // JOBLIST & CHECKLIST LOGIC (TERHUBUNG)
+        // JOBLIST & CHECKLIST LOGIC
         // ==========================================
         function filterJoblist() {
             const selectEl = document.getElementById('employeeSelect');
@@ -990,8 +998,6 @@
             document.getElementById('joblistContainer').classList.remove('hidden');
 
             document.getElementById('activeEmpChecklistTitle').innerText = `Checklist Tugas Harian ${emp.name}:`;
-            
-            // Set default pilihan form kanan ke karyawan yang sedang dipilih
             document.getElementById('newJobTarget').value = empId;
 
             loadEmpChecklists(empId);
@@ -1066,7 +1072,6 @@
             }
         }
 
-        // FUNGSI INPUT FORM JOBLIST BARU (LANGSUNG MASUK KE CHECKLIST KARYAWAN)
         function saveCustomJob(e) {
             e.preventDefault();
             if(!isHrdUnlocked && !isOwnerUnlocked) return;
@@ -1108,16 +1113,35 @@
             }).then(() => alert(`KPI Harian ${emp ? emp.name : ''} tersimpan (${percent}% tercapai).`));
         }
 
+        // ==========================================
+        // REKAP KPI & CHARTS DINAMIS
+        // ==========================================
         function loadDailyKPI() {
             db.collection("kpi_logs").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('kpiTableBody');
                 tbody.innerHTML = "";
                 if(snapshot.empty) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Belum ada rekap KPI.</td></tr>`;
+                    renderPublicKpiChart({});
                     return;
                 }
                 let docsArr = [];
-                snapshot.forEach(doc => { let d = doc.data(); d.id = doc.id; docsArr.push(d); });
+                let kpiStats = {};
+
+                snapshot.forEach(doc => { 
+                    let d = doc.data(); 
+                    d.id = doc.id; 
+                    docsArr.push(d); 
+
+                    // Hitung akumulasi untuk grafik rata-rata
+                    let name = d.employeeName || 'Unknown';
+                    if (!kpiStats[name]) {
+                        kpiStats[name] = { total: 0, count: 0 };
+                    }
+                    kpiStats[name].total += (d.percentage || 0);
+                    kpiStats[name].count += 1;
+                });
+
                 docsArr.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 docsArr.forEach(data => {
@@ -1134,6 +1158,61 @@
                         </td>
                     </tr>`;
                 });
+
+                renderPublicKpiChart(kpiStats);
+            });
+        }
+
+        function renderPublicKpiChart(kpiStats) {
+            const ctx = document.getElementById('publicKpiChart').getContext('2d');
+            if (publicKpiChartInstance) publicKpiChartInstance.destroy();
+
+            let activeEmps = allEmployeesData.filter(e => e.status === 'Aktif');
+            let labels = [];
+            let averages = [];
+
+            if (activeEmps.length > 0) {
+                activeEmps.forEach(emp => {
+                    labels.push(emp.name);
+                    let stat = kpiStats[emp.name];
+                    let avg = stat && stat.count > 0 ? Math.round(stat.total / stat.count) : 0;
+                    averages.push(avg);
+                });
+            } else {
+                labels = Object.keys(kpiStats);
+                averages = labels.map(name => Math.round(kpiStats[name].total / kpiStats[name].count));
+            }
+
+            publicKpiChartInstance = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Rata-Rata Capaian KPI (%)',
+                        data: averages,
+                        backgroundColor: ['#38bdf8', '#ec4899', '#eab308', '#22c55e', '#a855f7'],
+                        borderRadius: 6
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: '#334155' }
+                        },
+                        x: {
+                            ticks: { color: '#f8fafc', font: { weight: 'bold' } },
+                            grid: { display: false }
+                        }
+                    },
+                    plugins: {
+                        legend: { labels: { color: '#f8fafc' } }
+                    }
+                }
             });
         }
 
