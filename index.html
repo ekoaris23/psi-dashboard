@@ -725,11 +725,11 @@
         </div>
     </div>
 
-    <!-- MODAL FORM ABSEN PUBLIK (KARYAWAN) -->
+    <!-- MODAL FORM ABSEN PUBLIK (KARYAWAN - REALTIME) -->
     <div class="modal-bg" id="publicAbsenModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3 style="color:#10b981;">⏰ Absensi Mandiri Karyawan</h3>
+                <h3 style="color:#10b981;">⏰ Absensi Mandiri Karyawan (Real-time)</h3>
                 <button onclick="closePublicAbsenModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
             </div>
             <form id="publicAbsenForm" onsubmit="submitPublicAbsen(event)">
@@ -765,6 +765,67 @@
                 <textarea id="absenNotes" rows="2" placeholder="Contoh: Selesai rakit 2 unit laptop / Izin acara keluarga" required></textarea>
 
                 <button type="submit" style="width:100%; margin-top:10px; background:#10b981; padding:12px; font-size:14px;">💾 Kirim Absensi Sekarang</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL FORM INPUT MANUAL ABSEN HRD (BISA BEBAS PILIH TANGGAL & JAM SUSULAN) -->
+    <div class="modal-bg" id="hrdManualAbsenModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 style="color:#0284c7;">📝 Input Manual Absen Susulan (Akses HRD)</h3>
+                <button onclick="closeHrdManualAbsenModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="hrdManualAbsenForm" onsubmit="submitHrdManualAbsen(event)">
+                <label style="font-size:12px;">Pilih Identitas Karyawan:</label>
+                <select id="hrdAbsenEmpSelect" required></select>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Tanggal Absen:</label>
+                        <input type="date" id="hrdAbsenDate" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Status Kehadiran:</label>
+                        <select id="hrdAbsenStatus">
+                            <option value="Hadir">Hadir</option>
+                            <option value="Izin">Izin</option>
+                            <option value="Sakit">Sakit</option>
+                            <option value="Alpha">Alpha</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Jam Masuk (Clock IN):</label>
+                        <input type="time" id="hrdClockIn" value="09:00">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Jam Pulang (Clock OUT):</label>
+                        <input type="time" id="hrdClockOut" value="17:00">
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Durasi Lembur (Jam):</label>
+                        <input type="number" step="0.5" id="hrdOvertimeHours" value="0" placeholder="0">
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Tipe Lembur:</label>
+                        <select id="hrdOvertimeType">
+                            <option value="Tidak">Tidak Ada Lembur</option>
+                            <option value="Owner">Perintah Owner (Resmi)</option>
+                            <option value="Inisiatif">Inisiatif Mandiri (Poin Promosi)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Catatan / Keterangan Pekerjaan:</label>
+                <textarea id="hrdAbsenNotes" rows="2" placeholder="Contoh: Input susulan absen kemarin / Tugas lapangan" required></textarea>
+
+                <button type="submit" style="width:100%; margin-top:10px; background:#0284c7; padding:12px; font-size:14px;">💾 Simpan Absensi Susulan</button>
             </form>
         </div>
     </div>
@@ -1480,11 +1541,13 @@
             const empSelect = document.getElementById('employeeSelect');
             const jobTargetSelect = document.getElementById('newJobTarget');
             const absenEmpSelect = document.getElementById('absenEmpSelect');
+            const hrdAbsenEmpSelect = document.getElementById('hrdAbsenEmpSelect');
             const commCards = document.getElementById('commissionCardsContainer');
 
             empSelect.innerHTML = `<option value="none">-- Pilih Nama Karyawan --</option>`;
             jobTargetSelect.innerHTML = ``;
             if (absenEmpSelect) absenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
+            if (hrdAbsenEmpSelect) hrdAbsenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             commCards.innerHTML = ``;
 
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
@@ -1508,6 +1571,13 @@
                     optAbsen.value = emp.id;
                     optAbsen.innerText = `${emp.name} (${emp.role})`;
                     absenEmpSelect.appendChild(optAbsen);
+                }
+
+                if (hrdAbsenEmpSelect) {
+                    let optHrdAbsen = document.createElement('option');
+                    optHrdAbsen.value = emp.id;
+                    optHrdAbsen.innerText = `${emp.name} (${emp.role})`;
+                    hrdAbsenEmpSelect.appendChild(optHrdAbsen);
                 }
 
                 commCards.innerHTML += `
@@ -1672,6 +1742,69 @@
 
         function closePublicAbsenModal() { document.getElementById('publicAbsenModal').classList.remove('active'); }
 
+        // MODAL ABSEN MANUAL KHUSUS HRD (BISA BEBAS ISI TANGGAL & JAM SUSULAN)
+        function openHrdAbsenModal() {
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+            document.getElementById('hrdManualAbsenForm').reset();
+            
+            // Default Tanggal Hari Ini
+            const todayStr = new Date().toISOString().split('T')[0];
+            document.getElementById('hrdAbsenDate').value = todayStr;
+            
+            document.getElementById('hrdManualAbsenModal').classList.add('active');
+        }
+
+        function closeHrdManualAbsenModal() { document.getElementById('hrdManualAbsenModal').classList.remove('active'); }
+
+        function submitHrdManualAbsen(e) {
+            e.preventDefault();
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+
+            const empId = document.getElementById('hrdAbsenEmpSelect').value;
+            const emp = allEmployeesData.find(e => e.id === empId);
+            if (!emp) { alert("Silakan pilih identitas karyawan!"); return; }
+
+            const dateStr = document.getElementById('hrdAbsenDate').value;
+            const status = document.getElementById('hrdAbsenStatus').value;
+            const clockInVal = document.getElementById('hrdClockIn').value;
+            const clockOutVal = document.getElementById('hrdClockOut').value;
+            const overtimeHours = Number(document.getElementById('hrdOvertimeHours').value);
+            const overtimeType = document.getElementById('hrdOvertimeType').value;
+            const notes = document.getElementById('hrdAbsenNotes').value;
+
+            const clockInStr = clockInVal ? `${clockInVal} WIB` : '-';
+            const clockOutStr = clockOutVal ? `${clockOutVal} WIB` : '-';
+
+            db.collection("attendance").where("employeeId", "==", empId).where("dateStr", "==", dateStr).get()
+              .then((snapshot) => {
+                  let payload = {
+                      employeeId: empId,
+                      employeeName: emp.name,
+                      dateStr: dateStr,
+                      status: status,
+                      clockIn: status === 'Hadir' ? clockInStr : '-',
+                      clockOut: status === 'Hadir' ? clockOutStr : '-',
+                      overtimeHours: overtimeHours,
+                      overtimeType: overtimeType,
+                      notes: notes
+                  };
+
+                  if (!snapshot.empty) {
+                      let docId = snapshot.docs[0].id;
+                      db.collection("attendance").doc(docId).update(payload).then(() => {
+                          alert(`Absensi susulan ${emp.name} tanggal ${dateStr} berhasil diperbarui!`);
+                          closeHrdManualAbsenModal();
+                      });
+                  } else {
+                      payload.createdAt = Date.now();
+                      db.collection("attendance").add(payload).then(() => {
+                          alert(`Absensi susulan ${emp.name} tanggal ${dateStr} berhasil disimpan!`);
+                          closeHrdManualAbsenModal();
+                      });
+                  }
+              });
+        }
+
         function setClockType(type) {
             document.getElementById('clockType').value = type;
             const btnIn = document.getElementById('btnClockIn');
@@ -1826,7 +1959,6 @@
         }
 
         function filterAttendance() { renderAttendanceTable(); }
-        function openHrdAbsenModal() { if (!isHrdUnlocked && !isOwnerUnlocked) return; openPublicAbsenModal(); }
 
         function openEditAbsenModal(id) {
             if (!isOwnerUnlocked) return;
