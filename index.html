@@ -79,7 +79,7 @@
         .badge-inactive { background: #ef4444; color: white; }
         .tag-job { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px; }
 
-        /* PAGINATION & FILTER CONTAINER STYLES */
+        /* PAGINASI & FILTER CONTAINER STYLES */
         .filter-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-top: 12px; }
         .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 10px; border-top: 1px solid #334155; flex-wrap: wrap; gap: 10px; }
         .pagination-btns { display: flex; gap: 5px; align-items: center; }
@@ -132,7 +132,7 @@
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Absensi & Lembur <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Jadwal, Absensi, Lembur, & Kasbon <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
             
             <!-- MENU OWNER ONLY (9, 10) -->
@@ -440,23 +440,56 @@
                                 <tr>
                                     <th>Nama Produk</th>
                                     <th>Kategori</th>
-                                    <th>Harga Modal</th>
-                                    <th>Harga Jual</th>
+                                    <th class="owner-col hidden" style="color:#fbbf24;">Harga Modal (Owner)</th>
+                                    <th>Harga Jual per Pcs</th>
                                     <th>Stok</th>
+                                    <th>Total Harga Jual</th>
                                     <th>Status Stok</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="productTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:#94a3b8;">Memuat data katalog produk...</td></tr>
+                                <tr><td colspan="8" style="text-align:center; color:#94a3b8;">Memuat data katalog produk...</td></tr>
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- TAB 7: ABSENSI DAN LEMBUR -->
+            <!-- TAB 7: JADWAL, ABSENSI, LEMBUR, & KASBON -->
             <div id="attendanceTab" class="tab-content hidden">
+
+                <!-- MODUL 1: INPUT & SETTING JADWAL KERJA KARYAWAN (PALING ATAS) -->
+                <div class="card" style="margin-bottom: 20px; border-color: #0284c7;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px;">
+                        <div>
+                            <h3 style="color: #38bdf8; font-size: 16px;">📅 Setting & Input Jadwal Kerja Karyawan (HRD & Owner)</h3>
+                            <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Atur shift, jam masuk, dan jam pulang rutin karyawan di bawah ini.</p>
+                        </div>
+                        <button class="btn-hrd" onclick="openScheduleModal()">+ Input Jadwal Baru</button>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari / Tanggal</th>
+                                    <th>Nama Karyawan</th>
+                                    <th>Shift / Status Shift</th>
+                                    <th>Jam Masuk Jadwal</th>
+                                    <th>Jam Pulang Jadwal</th>
+                                    <th>Keterangan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody">
+                                <tr><td colspan="7" style="text-align:center; color:#94a3b8;">Memuat jadwal kerja karyawan...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- MODUL 2: REKAP ABSENSI, LEMBUR, & KASBON -->
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <h3 style="color: #38bdf8; font-size: 16px;">⏰ Rekap Absensi & Lembur Karyawan (HRD & Owner)</h3>
@@ -535,7 +568,7 @@
                         </table>
                     </div>
 
-                    <!-- PAGINASI TABLE ABSENSI (10 DATA PER HALAMAN) -->
+                    <!-- PAGINASI TABLE ABSENSI -->
                     <div class="pagination-container">
                         <span id="attPaginationInfo" style="font-size:12px; color:#94a3b8;">Menampilkan 0 dari 0 data</span>
                         <div class="pagination-btns" id="attPaginationBtns"></div>
@@ -583,7 +616,7 @@
                 </div>
             </div>
 
-            <!-- TAB 9: DASHBOARD OWNER (EXECUTIVE CONTROL HUB) -->
+            <!-- TAB 9: DASHBOARD OWNER -->
             <div id="ownerDashboardTab" class="tab-content hidden">
                 <div id="ownerFullContent">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
@@ -606,7 +639,7 @@
                         <div class="card" style="border-color: #38bdf8;">
                             <h3>📈 ESTIMASI LABA BERSIH HARI INI</h3>
                             <div class="amount" id="dashTodayProfit" style="color: #38bdf8;">Rp 0</div>
-                            <span style="font-size: 10px; color: #94a3b8;">*Omset dikurangi pengeluaran harian</span>
+                            <span style="font-size: 10px; color: #94a3b8;">*Omset dikurangi modal produk & pengeluaran</span>
                         </div>
                         <div class="card">
                             <h3>💳 KAS OPERASIONAL (BANK JAGO)</h3>
@@ -648,7 +681,7 @@
                                     <strong style="color:#4ade80;" id="dashValuationAsset">Rp 0</strong>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed #334155; padding-bottom:5px;">
-                                    <span>Total Valuasi Stok Produk:</span>
+                                    <span>Total Valuasi Stok Produk (Harga Modal):</span>
                                     <strong style="color:#38bdf8;" id="dashValuationProduct">Rp 0</strong>
                                 </div>
                                 <div style="display:flex; justify-content:space-between; margin-bottom:10px; border-bottom:1px dashed #334155; padding-bottom:5px;">
@@ -719,6 +752,53 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODAL FORM INPUT JADWAL KERJA (HRD & OWNER) -->
+    <div class="modal-bg" id="scheduleFormModal">
+        <div class="modal-card" style="border-color: #0284c7;">
+            <div class="modal-header">
+                <h3 style="color:#38bdf8;">📅 Input / Setting Jadwal Kerja Karyawan</h3>
+                <button onclick="closeScheduleModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="scheduleForm" onsubmit="saveSchedule(event)">
+                <input type="hidden" id="scheduleId">
+                <label style="font-size:12px;">Pilih Identitas Karyawan:</label>
+                <select id="schedEmpSelect" required></select>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Hari / Tanggal Jadwal:</label>
+                        <input type="date" id="schedDate" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Shift Kerja:</label>
+                        <select id="schedShift">
+                            <option value="Shift Regular (Pagi - Sore)">Shift Regular (Pagi - Sore)</option>
+                            <option value="Shift Siang - Malam">Shift Siang - Malam</option>
+                            <option value="Shift Middle">Shift Middle</option>
+                            <option value="Libur Rutin">Libur Rutin</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Jam Masuk Jadwal:</label>
+                        <input type="time" id="schedIn" value="09:00" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Jam Pulang Jadwal:</label>
+                        <input type="time" id="schedOut" value="17:00" required>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Keterangan Shift / Catatan:</label>
+                <input type="text" id="schedNotes" placeholder="Contoh: Shift Operasional Toko / Piket Studio">
+
+                <button type="submit" style="width:100%; margin-top:10px; background:#0284c7; padding:12px; font-size:14px;">💾 Simpan Jadwal Kerja</button>
+            </form>
         </div>
     </div>
 
@@ -1145,12 +1225,12 @@
 
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
-                        <label style="font-size:12px;">Harga Modal (Rp):</label>
-                        <input type="number" id="prodCost" required>
+                        <label style="font-size:12px; color:#fbbf24;">Harga Modal (Khusus Akses Owner) (Rp):</label>
+                        <input type="number" id="prodCost" placeholder="Contoh: 45000" required>
                     </div>
                     <div>
-                        <label style="font-size:12px;">Harga Jual Konsumen (Rp):</label>
-                        <input type="number" id="prodPrice" required>
+                        <label style="font-size:12px;">Harga Jual per Pcs (Rp):</label>
+                        <input type="number" id="prodPrice" placeholder="Contoh: 75000" required>
                     </div>
                 </div>
 
@@ -1193,6 +1273,7 @@
         let allEmployeesData = [];
         let allAssetsData = [];
         let allProductsData = [];
+        let allSchedulesData = [];
         let allAttendanceData = [];
         let allKasbonData = [];
         let allTransactionsData = [];
@@ -1215,6 +1296,7 @@
             loadEmployees();
             loadAssets();
             loadProducts();
+            loadSchedules();
             loadAttendance();
             loadKasbon();
             loadRadarData();
@@ -1309,13 +1391,22 @@
         }
 
         function exportProductsToExcel() {
-            let exportData = allProductsData.map(item => ({
-                "Nama Produk": item.name || "",
-                "Kategori": item.category || "",
-                "Harga Modal (Rp)": item.cost || 0,
-                "Harga Jual (Rp)": item.price || 0,
-                "Stok": item.stock || 0
-            }));
+            let exportData = allProductsData.map(item => {
+                let price = item.price || 0;
+                let stock = item.stock || 0;
+                let totalPrice = price * stock;
+                let row = {
+                    "Nama Produk": item.name || "",
+                    "Kategori": item.category || "",
+                    "Harga Jual per Pcs (Rp)": price,
+                    "Stok": stock,
+                    "Total Harga Jual (Rp)": totalPrice
+                };
+                if (isOwnerUnlocked) {
+                    row["Harga Modal (Rp)"] = item.cost || 0;
+                }
+                return row;
+            });
             exportToExcel(exportData, "Katalog_Produk_Paramount_Star");
         }
 
@@ -1447,6 +1538,7 @@
             document.getElementById(tabId).classList.remove('hidden');
             if (element) element.classList.add('active');
 
+            if (tabId === 'productTab') renderProductTable();
             if (tabId === 'payrollTab') renderPayrollTable();
             if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) renderExecutiveOwnerDashboard();
             if (tabId === 'radarFinanceTab' && isOwnerUnlocked) renderRadarTable();
@@ -1520,6 +1612,7 @@
                 if(show) col.classList.remove('hidden');
                 else col.classList.add('hidden');
             });
+            renderProductTable();
         }
 
         function toggleHrdOwnerElements() {
@@ -1541,6 +1634,8 @@
             updateSidebarVisibility();
             if (selectedEmpId) loadEmpChecklists(selectedEmpId);
             loadPublicTransactions();
+            renderProductTable();
+            renderSchedulesTable();
             renderAttendanceTable();
             renderPayrollTable();
         }
@@ -1581,6 +1676,7 @@
             const absenEmpSelect = document.getElementById('absenEmpSelect');
             const hrdAbsenEmpSelect = document.getElementById('hrdAbsenEmpSelect');
             const kasbonEmpSelect = document.getElementById('kasbonEmpSelect');
+            const schedEmpSelect = document.getElementById('schedEmpSelect');
             const commCards = document.getElementById('commissionCardsContainer');
 
             empSelect.innerHTML = `<option value="none">-- Pilih Nama Karyawan --</option>`;
@@ -1588,6 +1684,7 @@
             if (absenEmpSelect) absenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             if (hrdAbsenEmpSelect) hrdAbsenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             if (kasbonEmpSelect) kasbonEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
+            if (schedEmpSelect) schedEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             commCards.innerHTML = ``;
 
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
@@ -1625,6 +1722,13 @@
                     optKasbon.value = emp.id;
                     optKasbon.innerText = `${emp.name} (${emp.role})`;
                     kasbonEmpSelect.appendChild(optKasbon);
+                }
+
+                if (schedEmpSelect) {
+                    let optSched = document.createElement('option');
+                    optSched.value = emp.id;
+                    optSched.innerText = `${emp.name} (${emp.role})`;
+                    schedEmpSelect.appendChild(optSched);
                 }
 
                 commCards.innerHTML += `
@@ -1774,6 +1878,119 @@
         }
 
         function closeDetailModal() { document.getElementById('empDetailModal').classList.remove('active'); }
+
+        // ====================================================
+        // SETTING JADWAL KERJA KARYAWAN (HRD & OWNER)
+        // ====================================================
+        function loadSchedules() {
+            db.collection("schedules").onSnapshot((snapshot) => {
+                allSchedulesData = [];
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.id = doc.id;
+                    allSchedulesData.push(d);
+                });
+                renderSchedulesTable();
+            });
+        }
+
+        function renderSchedulesTable() {
+            const tbody = document.getElementById('scheduleTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            allSchedulesData.sort((a, b) => (b.dateStr || '').localeCompare(a.dateStr || ''));
+
+            if (allSchedulesData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Belum ada jadwal kerja karyawan yang diinputkan.</td></tr>`;
+                return;
+            }
+
+            allSchedulesData.forEach(sch => {
+                let actionBtns = (isHrdUnlocked || isOwnerUnlocked) ? `
+                    <button class="btn-warning" onclick="editSchedule('${sch.id}')">Edit</button>
+                    <button class="btn-danger" onclick="deleteSchedule('${sch.id}')">Hapus</button>
+                ` : `<span style="font-size:11px; color:#94a3b8;">🔒 Terkunci</span>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><strong>${sch.dateStr || '-'}</strong></td>
+                        <td style="color:#38bdf8; font-weight:bold;">${sch.employeeName}</td>
+                        <td><span class="tag-job" style="background:#0284c7; color:white;">${sch.shift}</span></td>
+                        <td style="color:#4ade80;">${sch.timeIn} WIB</td>
+                        <td style="color:#f87171;">${sch.timeOut} WIB</td>
+                        <td style="font-size:12px;">${sch.notes || '-'}</td>
+                        <td>${actionBtns}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openScheduleModal() {
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+            document.getElementById('scheduleForm').reset();
+            document.getElementById('scheduleId').value = "";
+            document.getElementById('schedDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('scheduleFormModal').classList.add('active');
+        }
+
+        function closeScheduleModal() { document.getElementById('scheduleFormModal').classList.remove('active'); }
+
+        function saveSchedule(e) {
+            e.preventDefault();
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+
+            const id = document.getElementById('scheduleId').value;
+            const empId = document.getElementById('schedEmpSelect').value;
+            const emp = allEmployeesData.find(e => e.id === empId);
+            if (!emp) { alert("Silakan pilih karyawan!"); return; }
+
+            const payload = {
+                employeeId: empId,
+                employeeName: emp.name,
+                dateStr: document.getElementById('schedDate').value,
+                shift: document.getElementById('schedShift').value,
+                timeIn: document.getElementById('schedIn').value,
+                timeOut: document.getElementById('schedOut').value,
+                notes: document.getElementById('schedNotes').value
+            };
+
+            if (id) {
+                db.collection("schedules").doc(id).update(payload).then(() => {
+                    alert("Jadwal kerja berhasil diperbarui!");
+                    closeScheduleModal();
+                });
+            } else {
+                payload.createdAt = Date.now();
+                db.collection("schedules").add(payload).then(() => {
+                    alert("Jadwal kerja baru berhasil disimpan!");
+                    closeScheduleModal();
+                });
+            }
+        }
+
+        function editSchedule(id) {
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+            const sch = allSchedulesData.find(s => s.id === id);
+            if (!sch) return;
+
+            document.getElementById('scheduleId').value = sch.id;
+            document.getElementById('schedEmpSelect').value = sch.employeeId || "";
+            document.getElementById('schedDate').value = sch.dateStr || "";
+            document.getElementById('schedShift').value = sch.shift || "Shift Regular (Pagi - Sore)";
+            document.getElementById('schedIn').value = sch.timeIn || "09:00";
+            document.getElementById('schedOut').value = sch.timeOut || "17:00";
+            document.getElementById('schedNotes').value = sch.notes || "";
+
+            document.getElementById('scheduleFormModal').classList.add('active');
+        }
+
+        function deleteSchedule(id) {
+            if (!isHrdUnlocked && !isOwnerUnlocked) return;
+            if (confirm("Hapus jadwal kerja ini?")) {
+                db.collection("schedules").doc(id).delete().then(() => alert("Jadwal kerja dihapus."));
+            }
+        }
 
         // ====================================================
         // KASBON KARYAWAN LOGIC
@@ -2157,7 +2374,7 @@
         }
 
         // ====================================================
-        // PAYROLL & SLIP GAJI OTOMATIS + POTONGAN KASBON
+        // PAYROLL & SLIP GAJI OTOMATIS
         // ====================================================
         function renderPayrollTable() {
             const tbody = document.getElementById('payrollTableBody');
@@ -2231,7 +2448,7 @@
                         <td><span class="badge-status btn-warning">⭐ ${initiativeOvertimeHours} Jam Promosi</span></td>
                         <td style="color:#38bdf8; font-weight:bold; font-size:14px; ${blurStyle}">Rp ${Math.round(totalTakeHomePay).toLocaleString('id-ID')}</td>
                         <td>
-                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${kasbonTotal}, ${ownerOvertimeHours}, ${initiativeOvertimeHours}, ${workingDays})">🧾 Cetak Slip Gaji</button>
+                            <button class="btn-info" onclick="generateSlipGaji('${emp.id}', ${baseSalary}, ${Math.round(commTotal)}, ${overtimeBonus}, ${kasbonTotal}, ${ownerOvertimeHours}, ${initiativeHours}, ${workingDays})">🧾 Cetak Slip Gaji</button>
                         </td>
                     </tr>
                 `;
@@ -2309,7 +2526,7 @@
         function closeSlipModal() { document.getElementById('slipModal').classList.remove('active'); }
 
         // ====================================================
-        // DATA ASET USAHA & PRODUK
+        // DATA ASET USAHA & KATALOG PRODUK
         // ====================================================
         function loadAssets() {
             db.collection("assets").onSnapshot((snapshot) => {
@@ -2475,21 +2692,27 @@
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Tidak ada data produk/sparepart ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Tidak ada data produk/sparepart ditemukan.</td></tr>`;
                 return;
             }
 
             filtered.forEach(prd => {
                 let stockBadge = prd.stock > 5 ? 'badge-active' : (prd.stock > 0 ? 'btn-warning' : 'badge-inactive');
                 let stockStatus = prd.stock > 5 ? 'Tersedia' : (prd.stock > 0 ? 'Stok Menipis' : 'Habis');
-                
+                let sellPrice = prd.price || 0;
+                let stock = prd.stock || 0;
+                let totalSellPrice = sellPrice * stock;
+
+                let ownerCostTd = isOwnerUnlocked ? `<td class="owner-col" style="color:#fbbf24; font-weight:bold;">Rp ${(prd.cost || 0).toLocaleString('id-ID')}</td>` : '<td class="owner-col hidden"></td>';
+
                 tbody.innerHTML += `
                     <tr>
                         <td style="color:#38bdf8; font-weight:bold;">${prd.name}</td>
                         <td><span class="tag-job" style="background:#334155; color:white;">${prd.category}</span></td>
-                        <td style="color:#94a3b8;">Rp ${(prd.cost || 0).toLocaleString('id-ID')}</td>
-                        <td style="color:#4ade80; font-weight:bold;">Rp ${(prd.price || 0).toLocaleString('id-ID')}</td>
-                        <td><strong>${prd.stock} Pcs</strong></td>
+                        ${ownerCostTd}
+                        <td style="color:#4ade80; font-weight:bold;">Rp ${sellPrice.toLocaleString('id-ID')}</td>
+                        <td><strong>${stock} Pcs</strong></td>
+                        <td style="color:#38bdf8; font-weight:bold;">Rp ${totalSellPrice.toLocaleString('id-ID')}</td>
                         <td><span class="badge-status ${stockBadge}">${stockStatus}</span></td>
                         <td>
                             <button class="btn-warning" onclick="editProduct('${prd.id}')">Edit</button>
@@ -2966,6 +3189,10 @@
                 }
             });
 
+            // HITUNG TOTAL MODAL DARI PRODUK UNTUK OMSET HARI INI JIKA ADA
+            let totalProdCostVal = 0;
+            allProductsData.forEach(prd => totalProdCostVal += ((prd.stock || 0) * (prd.cost || 0)));
+
             document.getElementById('dashTodayOmset').innerText = `Rp ${todayIncome.toLocaleString('id-ID')}`;
             document.getElementById('dashTodayProfit').innerText = `Rp ${(todayIncome - todayExpense).toLocaleString('id-ID')}`;
 
@@ -2973,9 +3200,7 @@
             allAssetsData.forEach(ast => totalAssetVal += (parseQty(ast.quantity) * (ast.price || 0)));
             document.getElementById('dashValuationAsset').innerText = `Rp ${totalAssetVal.toLocaleString('id-ID')}`;
 
-            let totalProdVal = 0;
-            allProductsData.forEach(prd => totalProdVal += ((prd.stock || 0) * (prd.cost || 0)));
-            document.getElementById('dashValuationProduct').innerText = `Rp ${totalProdVal.toLocaleString('id-ID')}`;
+            document.getElementById('dashValuationProduct').innerText = `Rp ${totalProdCostVal.toLocaleString('id-ID')}`;
             document.getElementById('dashTotalProductCount').innerText = `${allProductsData.length} Jenis Produk`;
 
             // RENDER CHARTS
