@@ -385,13 +385,14 @@
                                     <th>Kategori</th>
                                     <th>Kondisi</th>
                                     <th>Jumlah Unit</th>
-                                    <th>Estimasi Nilai Unit</th>
+                                    <th>Estimasi Harga / Unit</th>
+                                    <th>Estimasi Total Harga Unit</th>
                                     <th>Penanggung Jawab</th>
                                     <th>Aksi</th>
                                 </tr>
                             </thead>
                             <tbody id="assetTableBody">
-                                <tr><td colspan="7" style="text-align:center; color:#94a3b8;">Memuat data aset usaha...</td></tr>
+                                <tr><td colspan="8" style="text-align:center; color:#94a3b8;">Memuat data aset usaha...</td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -853,10 +854,10 @@
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
                     <div>
                         <label style="font-size:12px;">Jumlah Unit:</label>
-                        <input type="text" id="assetQuantity" placeholder="Contoh: 2 Unit" required>
+                        <input type="text" id="assetQuantity" placeholder="Contoh: 2" required>
                     </div>
                     <div>
-                        <label style="font-size:12px;">Estimasi Nilai Unit (Rp):</label>
+                        <label style="font-size:12px;">Estimasi Harga / Unit (Rp):</label>
                         <input type="number" id="assetPrice" placeholder="Contoh: 1200000" required>
                     </div>
                 </div>
@@ -952,6 +953,13 @@
             updateSidebarVisibility();
         };
 
+        // HELPER PARSE JUMLAH UNIT
+        function parseQty(qtyStr) {
+            if (!qtyStr) return 1;
+            let num = parseInt(String(qtyStr).replace(/[^0-9]/g, ''), 10);
+            return isNaN(num) || num <= 0 ? 1 : num;
+        }
+
         // HELPER EXPORT EXCEL
         function exportToExcel(dataArray, filename) {
             if (!dataArray || dataArray.length === 0) {
@@ -964,7 +972,7 @@
             XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
         }
 
-        // FUNGI EXPORT PER MENU
+        // FUNGSI EXPORT PER MENU
         function exportJoblistToExcel() {
             let exportData = allJoblistsData.map(item => {
                 let emp = allEmployeesData.find(e => e.id === item.employeeId);
@@ -1018,14 +1026,20 @@
         }
 
         function exportAssetsToExcel() {
-            let exportData = allAssetsData.map(item => ({
-                "Nama Aset": item.name || "",
-                "Kategori": item.category || "",
-                "Kondisi": item.condition || "",
-                "Jumlah Unit": item.quantity || "",
-                "Nilai Per Unit (Rp)": item.price || 0,
-                "Penanggung Jawab": item.pic || ""
-            }));
+            let exportData = allAssetsData.map(item => {
+                let qtyNum = parseQty(item.quantity);
+                let unitPrice = item.price || 0;
+                let totalPrice = qtyNum * unitPrice;
+                return {
+                    "Nama Aset": item.name || "",
+                    "Kategori": item.category || "",
+                    "Kondisi": item.condition || "",
+                    "Jumlah Unit": item.quantity || "1",
+                    "Estimasi Harga / Unit (Rp)": unitPrice,
+                    "Estimasi Total Harga Unit (Rp)": totalPrice,
+                    "Penanggung Jawab": item.pic || ""
+                };
+            });
             exportToExcel(exportData, "Inventaris_Aset_Paramount_Star");
         }
 
@@ -1919,9 +1933,15 @@
                 allAssetsData = [];
                 if (snapshot.empty) {
                     const initialAssets = [
-                        { name: "Blower & Solder Station Quick", category: "Peralatan Servis", condition: "Sangat Baik", quantity: "2 Unit", price: 1500000, pic: "Amar (Area Servis)" },
-                        { name: "Mikroskop Binokuler Servis", category: "Peralatan Servis", condition: "Baik", quantity: "1 Unit", price: 2800000, pic: "Amar (Area Servis)" },
-                        { name: "PC Editing & Content Studio", category: "Peralatan Kantor", condition: "Baik", quantity: "1 Unit", price: 8500000, pic: "Wina (Studio)" }
+                        { name: "Lenovo X220", category: "Peralatan Servis", condition: "Sangat Baik", quantity: "1", price: 2200000, pic: "Wina (Area Content)" },
+                        { name: "Etalase Besar", category: "Furniture", condition: "Baik", quantity: "1", price: 1900000, pic: "Office" },
+                        { name: "Kursi Bakso", category: "Furniture", condition: "Sangat Baik", quantity: "3", price: 78000, pic: "Office" },
+                        { name: "Lenovo X250", category: "Peralatan Kantor", condition: "Baik", quantity: "1", price: 3200000, pic: "Bapak" },
+                        { name: "Lenovo L440", category: "Peralatan Kantor", condition: "Baik", quantity: "1", price: 2700000, pic: "Sri (Meja Sri)" },
+                        { name: "TD Wall fan 16\"", category: "Peralatan Kantor", condition: "Sangat Baik", quantity: "1", price: 180000, pic: "Office (Dinding)" },
+                        { name: "Etalase kecil", category: "Furniture", condition: "Sangat Baik", quantity: "1", price: 250000, pic: "Office" },
+                        { name: "Meja", category: "Furniture", condition: "Baik", quantity: "4", price: 700000, pic: "Wina, Amar, Sri, Roby (Office & Bc)" },
+                        { name: "Blower & Solder Station Quick", category: "Peralatan Servis", condition: "Sangat Baik", quantity: "2 Unit", price: 1500000, pic: "Amar (Area Servis)" }
                     ];
                     initialAssets.forEach(ast => {
                         db.collection("assets").add({ ...ast, createdAt: Date.now() });
@@ -1954,18 +1974,23 @@
             });
 
             if (filtered.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Tidak ada data aset usaha ditemukan.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Tidak ada data aset usaha ditemukan.</td></tr>`;
                 return;
             }
 
             filtered.forEach(ast => {
+                let qtyNum = parseQty(ast.quantity);
+                let unitPrice = ast.price || 0;
+                let totalPrice = qtyNum * unitPrice;
+
                 let row = `
                     <tr>
                         <td style="color:#38bdf8; font-weight:bold;">${ast.name}</td>
                         <td><span class="tag-job" style="background:#334155; color:white;">${ast.category}</span></td>
                         <td><span class="badge-status ${ast.condition === 'Sangat Baik' || ast.condition === 'Baik' ? 'badge-active' : 'badge-inactive'}">${ast.condition}</span></td>
                         <td><strong>${ast.quantity}</strong></td>
-                        <td style="color:#4ade80; font-weight:bold;">Rp ${(ast.price || 0).toLocaleString('id-ID')}</td>
+                        <td style="color:#94a3b8;">Rp ${unitPrice.toLocaleString('id-ID')}</td>
+                        <td style="color:#4ade80; font-weight:bold;">Rp ${totalPrice.toLocaleString('id-ID')}</td>
                         <td>${ast.pic || '-'}</td>
                         <td>
                             <button class="btn-warning" onclick="editAsset('${ast.id}')">Edit</button>
