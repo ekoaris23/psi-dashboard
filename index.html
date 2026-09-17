@@ -6,6 +6,8 @@
     <title>PSI Operational System</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- SheetJS CDN (Untuk Export Excel) -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <!-- Firebase SDK (CDN Compat Version) -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
@@ -41,6 +43,8 @@
         h1 { color: #38bdf8; font-size: 18px; }
         button { background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         button:hover { background: #0369a1; }
+        .btn-excel { background: #16a34a !important; color: white !important; font-size: 11px !important; padding: 6px 12px !important; }
+        .btn-excel:hover { background: #15803d !important; }
         .btn-hrd { background: #0284c7; }
         .btn-owner { background: #059669; }
         .btn-absen { background: #10b981; animation: pulse 2s infinite; }
@@ -141,11 +145,14 @@
 
             <!-- TAB 1: JOBLIST HARIAN -->
             <div id="joblistTab" class="tab-content">
-                <div class="card" style="margin-bottom: 15px; border-color: #38bdf8;">
-                    <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
-                    <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
-                        <option value="none">-- Pilih Nama Karyawan --</option>
-                    </select>
+                <div class="card" style="margin-bottom: 15px; border-color: #38bdf8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div style="flex-grow: 1;">
+                        <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
+                        <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
+                            <option value="none">-- Pilih Nama Karyawan --</option>
+                        </select>
+                    </div>
+                    <button class="btn-excel" onclick="exportJoblistToExcel()">📊 Export Excel Joblist</button>
                 </div>
 
                 <div class="grid">
@@ -217,7 +224,10 @@
             <!-- TAB 2: KPI KARYAWAN -->
             <div id="kpiTab" class="tab-content hidden">
                 <div class="card" style="border-color: #22c55e; margin-bottom: 20px;">
-                    <h3 style="color: #4ade80; font-size: 16px; margin-bottom: 10px;">🎯 Rekap KPI & Capaian Harian Karyawan</h3>
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                        <h3 style="color: #4ade80; font-size: 16px;">🎯 Rekap KPI & Capaian Harian Karyawan</h3>
+                        <button class="btn-excel" onclick="exportKpiToExcel()">📊 Export Excel KPI</button>
+                    </div>
                     <div style="overflow-x: auto;">
                         <table>
                             <thead>
@@ -274,7 +284,10 @@
                     </div>
 
                     <div class="card" style="grid-column: span 1;">
-                        <h3 style="color: #38bdf8; font-size: 16px; margin-bottom: 10px;">📊 Riwayat Arus Kas & Estimasi Komisi (Publik)</h3>
+                        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 10px;">
+                            <h3 style="color: #38bdf8; font-size: 16px;">📊 Riwayat Arus Kas & Estimasi Komisi (Publik)</h3>
+                            <button class="btn-excel" onclick="exportTransactionsToExcel()">📊 Export Excel Transaksi</button>
+                        </div>
                         <div style="overflow-x: auto;">
                             <table>
                                 <thead>
@@ -302,7 +315,10 @@
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <h3 style="color: #38bdf8; font-size: 16px;">👥 Sistem Management Data Karyawan (HRIS)</h3>
-                        <button onclick="openEmployeeModal()" style="background:#22c55e;">+ Tambah Karyawan Baru</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-excel" onclick="exportEmployeesToExcel()">📊 Export Excel Karyawan</button>
+                            <button onclick="openEmployeeModal()" style="background:#22c55e;">+ Tambah Karyawan Baru</button>
+                        </div>
                     </div>
                     
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 15px;">
@@ -342,7 +358,10 @@
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <h3 style="color: #38bdf8; font-size: 16px;">📦 Inventaris Aset Usaha (HRD & Owner)</h3>
-                        <button onclick="openAssetModal()" style="background:#22c55e;">+ Tambah Aset Baru</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-excel" onclick="exportAssetsToExcel()">📊 Export Excel Aset</button>
+                            <button onclick="openAssetModal()" style="background:#22c55e;">+ Tambah Aset Baru</button>
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 15px;">
@@ -384,7 +403,10 @@
                 <div class="card" style="margin-bottom: 15px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <h3 style="color: #38bdf8; font-size: 16px;">🏷️ Katalog Produk & Sparepart (HRD & Owner)</h3>
-                        <button onclick="openProductModal()" style="background:#22c55e;">+ Tambah Produk Baru</button>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-excel" onclick="exportProductsToExcel()">📊 Export Excel Produk</button>
+                            <button onclick="openProductModal()" style="background:#22c55e;">+ Tambah Produk Baru</button>
+                        </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-top: 15px;">
@@ -427,6 +449,7 @@
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <h3 style="color: #38bdf8; font-size: 16px;">⏰ Rekap Absensi & Lembur Karyawan (HRD & Owner)</h3>
                         <div style="display: flex; gap: 8px;">
+                            <button class="btn-excel" onclick="exportAttendanceToExcel()">📊 Export Excel Absensi</button>
                             <button onclick="openHrdAbsenModal()" class="btn-hrd">+ Input Manual Absen (HRD)</button>
                         </div>
                     </div>
@@ -469,9 +492,12 @@
                             <h3 style="color: #38bdf8; font-size: 16px;">💵 Payroll & Penggajian Karyawan Terintegrasi</h3>
                             <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">📅 Jadwal Penggajian Rutin: <strong>Setiap Tanggal 25 Setiap Bulan</strong></p>
                         </div>
-                        <span style="font-size: 11px; background: #0284c7; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold;">
-                            Formula Lembur: (Gaji Pokok / Hari Kerja Bulan Ini / 8 Jam)
-                        </span>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <button class="btn-excel" onclick="exportPayrollToExcel()">📊 Export Excel Payroll</button>
+                            <span style="font-size: 11px; background: #0284c7; padding: 4px 8px; border-radius: 4px; color: white; font-weight: bold;">
+                                Formula Lembur: (Gaji Pokok / Hari Kerja / 8 Jam)
+                            </span>
+                        </div>
                     </div>
                 </div>
 
@@ -909,6 +935,8 @@
         let allProductsData = [];
         let allAttendanceData = [];
         let allTransactionsData = [];
+        let allJoblistsData = [];
+        let allKpiLogsData = [];
         let selectedEmpId = null;
 
         window.onload = function() {
@@ -924,6 +952,172 @@
             updateSidebarVisibility();
         };
 
+        // HELPER EXPORT EXCEL
+        function exportToExcel(dataArray, filename) {
+            if (!dataArray || dataArray.length === 0) {
+                alert("Tidak ada data untuk dieksport!");
+                return;
+            }
+            const worksheet = XLSX.utils.json_to_sheet(dataArray);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+            XLSX.writeFile(workbook, `${filename}_${new Date().toISOString().split('T')[0]}.xlsx`);
+        }
+
+        // FUNGI EXPORT PER MENU
+        function exportJoblistToExcel() {
+            let exportData = allJoblistsData.map(item => {
+                let emp = allEmployeesData.find(e => e.id === item.employeeId);
+                return {
+                    "Nama Karyawan": emp ? emp.name : "Karyawan",
+                    "Deskripsi Tugas": item.text || "",
+                    "Frekuensi": item.freq || "Setiap Hari",
+                    "Prioritas": item.priority || "Normal"
+                };
+            });
+            exportToExcel(exportData, "Joblist_Harian_Paramount_Star");
+        }
+
+        function exportKpiToExcel() {
+            let exportData = allKpiLogsData.map(item => ({
+                "Tanggal & Waktu": item.timeStr || "",
+                "Nama Karyawan": item.employeeName || "",
+                "Capaian (%)": item.percentage + "%",
+                "Rincian Checklist": (item.details || "").replace(/<br>/g, " | ")
+            }));
+            exportToExcel(exportData, "Rekap_KPI_Paramount_Star");
+        }
+
+        function exportTransactionsToExcel() {
+            let exportData = allTransactionsData.map(item => ({
+                "Waktu Transaksi": item.timeStr || "",
+                "Jenis": (item.type || "").toUpperCase(),
+                "Kategori": item.category || "",
+                "Keterangan": item.desc || "",
+                "Nominal (Rp)": item.amount || 0
+            }));
+            exportToExcel(exportData, "Arus_Kas_Paramount_Star");
+        }
+
+        function exportEmployeesToExcel() {
+            let exportData = allEmployeesData.map(item => ({
+                "NIK": item.nik || "",
+                "Nama Lengkap": item.name || "",
+                "Jabatan": item.role || "",
+                "Status Kontrak": item.contract || "",
+                "No. WhatsApp": item.wa || "",
+                "Status Kerja": item.status || "",
+                "Tanggal Masuk": item.joinDate || "",
+                "Alamat": item.address || "",
+                "Kontak Darurat": item.emergency || "",
+                "Bank": item.bankName || "",
+                "No. Rekening": item.bankAcc || "",
+                "Gaji Pokok (Rp)": item.baseSalary || 0
+            }));
+            exportToExcel(exportData, "Data_Karyawan_Paramount_Star");
+        }
+
+        function exportAssetsToExcel() {
+            let exportData = allAssetsData.map(item => ({
+                "Nama Aset": item.name || "",
+                "Kategori": item.category || "",
+                "Kondisi": item.condition || "",
+                "Jumlah Unit": item.quantity || "",
+                "Nilai Per Unit (Rp)": item.price || 0,
+                "Penanggung Jawab": item.pic || ""
+            }));
+            exportToExcel(exportData, "Inventaris_Aset_Paramount_Star");
+        }
+
+        function exportProductsToExcel() {
+            let exportData = allProductsData.map(item => ({
+                "Nama Produk": item.name || "",
+                "Kategori": item.category || "",
+                "Harga Modal (Rp)": item.cost || 0,
+                "Harga Jual (Rp)": item.price || 0,
+                "Stok": item.stock || 0
+            }));
+            exportToExcel(exportData, "Katalog_Produk_Paramount_Star");
+        }
+
+        function exportAttendanceToExcel() {
+            let exportData = allAttendanceData.map(item => ({
+                "Tanggal": item.dateStr || "",
+                "Nama Karyawan": item.employeeName || "",
+                "Clock IN": item.clockIn || "",
+                "Clock OUT": item.clockOut || "",
+                "Status Kehadiran": item.status || "",
+                "Durasi Lembur (Jam)": item.overtimeHours || 0,
+                "Tipe Lembur": item.overtimeType || "Tidak",
+                "Catatan Pekerjaan": item.notes || ""
+            }));
+            exportToExcel(exportData, "Rekap_Absensi_Lembur_Paramount_Star");
+        }
+
+        function exportPayrollToExcel() {
+            const workingDays = getWorkingDaysInCurrentMonth();
+            let activeEmps = allEmployeesData.filter(e => e.status === 'Aktif');
+
+            let exportData = activeEmps.map(emp => {
+                let baseSalary = emp.baseSalary || 1800000;
+                let hourlyOvertimeRate = (baseSalary / workingDays) / 8;
+
+                let commTotal = 0;
+                allTransactionsData.forEach(data => {
+                    if (data.type === 'masuk') {
+                        let empNameUpper = emp.name.toUpperCase();
+                        let isSri = empNameUpper.includes('SRI');
+                        let isAmar = empNameUpper.includes('AMAR');
+                        let isWina = empNameUpper.includes('WINA');
+
+                        if(data.category === 'Jasa Service Internal') {
+                            if(isSri) commTotal += data.amount * 0.01;
+                            if(isAmar) commTotal += data.amount * 0.05;
+                            if(isWina) commTotal += data.amount * 0.05;
+                        } else if(data.category === 'Pembelian Produk') {
+                            if(isSri) commTotal += data.amount * 0.01;
+                        } else if(data.category === 'Jasa Service Vendor') {
+                            if(isSri) commTotal += data.amount * 0.005;
+                            if(isAmar) commTotal += data.amount * 0.01;
+                            if(isWina) commTotal += data.amount * 0.01;
+                        } else if(data.category === 'Penjualan Affiliate') {
+                            if(isSri) commTotal += data.amount * 0.01;
+                            if(isAmar) commTotal += data.amount * 0.20;
+                            if(isWina) commTotal += data.amount * 0.20;
+                        }
+                    }
+                });
+
+                let ownerOvertimeHours = 0;
+                let initiativeOvertimeHours = 0;
+
+                allAttendanceData.filter(a => a.employeeId === emp.id).forEach(att => {
+                    if (att.overtimeType === 'Owner') {
+                        ownerOvertimeHours += (att.overtimeHours || 0);
+                    } else if (att.overtimeType === 'Inisiatif') {
+                        initiativeOvertimeHours += (att.overtimeHours || 0);
+                    }
+                });
+
+                let overtimeBonus = Math.round(ownerOvertimeHours * hourlyOvertimeRate);
+                let totalTakeHomePay = baseSalary + commTotal + overtimeBonus;
+
+                return {
+                    "Nama Karyawan": emp.name,
+                    "Jabatan": emp.role,
+                    "Hari Kerja Bulan Ini": workingDays,
+                    "Gaji Pokok (Rp)": baseSalary,
+                    "Komisi Transaksi (Rp)": Math.round(commTotal),
+                    "Jam Lembur Resmi": ownerOvertimeHours,
+                    "Bonus Lembur (Rp)": overtimeBonus,
+                    "Jam Lembur Inisiatif": initiativeOvertimeHours,
+                    "Total Gaji / THP (Rp)": Math.round(totalTakeHomePay)
+                };
+            });
+
+            exportToExcel(exportData, "Rekap_Payroll_Gaji_Paramount_Star");
+        }
+
         // RUMUS UNTUK HITUNG JUMLAH HARI KERJA DALAM BULAN INI
         function getWorkingDaysInCurrentMonth() {
             const now = new Date();
@@ -934,11 +1128,11 @@
 
             for (let day = 1; day <= totalDays; day++) {
                 let dayOfWeek = new Date(year, month, day).getDay();
-                if (dayOfWeek !== 0) { // Menghitung Senin - Sabtu (Hari Kerja)
+                if (dayOfWeek !== 0) {
                     workingDays++;
                 }
             }
-            return workingDays > 0 ? workingDays : 26; // Default 26 hari jika tidak terhitung
+            return workingDays > 0 ? workingDays : 26;
         }
 
         // BURGER TOGGLE
@@ -1578,11 +1772,8 @@
 
             activeEmployees.forEach(emp => {
                 let baseSalary = emp.baseSalary || 1800000;
-
-                // Hitung Rate Lembur per Jam: (Gaji Pokok / Jumlah Hari Kerja) / 8 Jam
                 let hourlyOvertimeRate = (baseSalary / workingDays) / 8;
 
-                // 1. Hitung Komisi dari Pemasukan (Menu 3)
                 let commTotal = 0;
                 allTransactionsData.forEach(data => {
                     if (data.type === 'masuk') {
@@ -1609,7 +1800,6 @@
                     }
                 });
 
-                // 2. Hitung Lembur Resmi vs Lembur Inisiatif (Menu 7)
                 let ownerOvertimeHours = 0;
                 let initiativeOvertimeHours = 0;
 
@@ -2041,48 +2231,53 @@
 
         function initChecklists() {
             db.collection("default_checklists").onSnapshot((snapshot) => {
+                allJoblistsData = [];
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.id = doc.id;
+                    allJoblistsData.push(d);
+                });
                 if (selectedEmpId) loadEmpChecklists(selectedEmpId);
             });
         }
 
         function loadEmpChecklists(empId) {
-            db.collection("default_checklists").where("employeeId", "==", empId).onSnapshot((snapshot) => {
-                const container = document.getElementById('dynamicChecklistContainer');
-                container.innerHTML = "";
+            const container = document.getElementById('dynamicChecklistContainer');
+            container.innerHTML = "";
 
-                if (snapshot.empty) {
-                    container.innerHTML = `<p style="font-size:12px; color:#94a3b8;">Belum ada item tugas. HRD/Owner dapat menambahkan melalui form di sebelah kanan.</p>`;
-                    calculateDynamicProgress();
-                    return;
-                }
+            let filtered = allJoblistsData.filter(item => item.employeeId === empId);
 
-                snapshot.forEach(doc => {
-                    let item = doc.data();
-                    let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
-                    let crudBtns = isAuthorized ? `
-                        <div>
-                            <button class="btn-warning" onclick="editChecklistItem('${doc.id}', '${item.text.replace(/'/g, "\\'")}')">Edit</button>
-                            <button class="btn-danger" onclick="deleteChecklistItem('${doc.id}')">Hapus</button>
-                        </div>
-                    ` : '';
-
-                    let div = document.createElement('div');
-                    div.className = 'checkbox-item';
-                    div.innerHTML = `
-                        <div class="checkbox-item-left">
-                            <input type="checkbox" id="check_${doc.id}" onchange="calculateDynamicProgress()">
-                            <label for="check_${doc.id}">
-                                ${item.text} 
-                                ${item.freq ? `<span class="tag-job" style="background:#334155;">${item.freq}</span>` : ''}
-                                ${item.priority ? `<span class="tag-job" style="background:${item.priority === 'Urgent' ? '#ef4444' : '#22c55e'}; color:white;">${item.priority}</span>` : ''}
-                            </label>
-                        </div>
-                        ${crudBtns}
-                    `;
-                    container.appendChild(div);
-                });
+            if (filtered.length === 0) {
+                container.innerHTML = `<p style="font-size:12px; color:#94a3b8;">Belum ada item tugas. HRD/Owner dapat menambahkan melalui form di sebelah kanan.</p>`;
                 calculateDynamicProgress();
+                return;
+            }
+
+            filtered.forEach(item => {
+                let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
+                let crudBtns = isAuthorized ? `
+                    <div>
+                        <button class="btn-warning" onclick="editChecklistItem('${item.id}', '${item.text.replace(/'/g, "\\'")}')">Edit</button>
+                        <button class="btn-danger" onclick="deleteChecklistItem('${item.id}')">Hapus</button>
+                    </div>
+                ` : '';
+
+                let div = document.createElement('div');
+                div.className = 'checkbox-item';
+                div.innerHTML = `
+                    <div class="checkbox-item-left">
+                        <input type="checkbox" id="check_${item.id}" onchange="calculateDynamicProgress()">
+                        <label for="check_${item.id}">
+                            ${item.text} 
+                            ${item.freq ? `<span class="tag-job" style="background:#334155;">${item.freq}</span>` : ''}
+                            ${item.priority ? `<span class="tag-job" style="background:${item.priority === 'Urgent' ? '#ef4444' : '#22c55e'}; color:white;">${item.priority}</span>` : ''}
+                        </label>
+                    </div>
+                    ${crudBtns}
+                `;
+                container.appendChild(div);
             });
+            calculateDynamicProgress();
         }
 
         function calculateDynamicProgress() {
@@ -2156,6 +2351,8 @@
             db.collection("kpi_logs").onSnapshot((snapshot) => {
                 const tbody = document.getElementById('kpiTableBody');
                 tbody.innerHTML = "";
+                allKpiLogsData = [];
+
                 if(snapshot.empty) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#94a3b8;">Belum ada rekap KPI.</td></tr>`;
                     renderPublicKpiChart({});
@@ -2168,6 +2365,7 @@
                     let d = doc.data(); 
                     d.id = doc.id; 
                     docsArr.push(d); 
+                    allKpiLogsData.push(d);
 
                     let name = d.employeeName || 'Unknown';
                     if (!kpiStats[name]) {
