@@ -27,6 +27,7 @@
         .badge-public { background: #334155; color: #cbd5e1; }
         .badge-hrd { background: #0284c7; color: white; }
         .badge-owner { background: #dc2626; color: white; }
+        .badge-spx { background: #ea580c; color: white; }
 
         /* OVERLAY UNTUK HP */
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 95; }
@@ -45,6 +46,8 @@
         button:hover { background: #0369a1; }
         .btn-excel { background: #16a34a !important; color: white !important; font-size: 11px !important; padding: 6px 12px !important; }
         .btn-excel:hover { background: #15803d !important; }
+        .btn-spx { background: #ea580c !important; color: white !important; }
+        .btn-spx:hover { background: #c2410c !important; }
         .btn-hrd { background: #0284c7; }
         .btn-owner { background: #059669; }
         .btn-kasbon { background: #d97706 !important; color: white !important; }
@@ -77,6 +80,8 @@
         .badge-status { padding: 3px 6px; border-radius: 4px; font-size: 11px; font-weight: bold; }
         .badge-active { background: #22c55e; color: white; }
         .badge-inactive { background: #ef4444; color: white; }
+        .badge-warning { background: #f59e0b; color: black; }
+        .badge-orange { background: #ea580c; color: white; }
         .tag-job { font-size: 10px; padding: 2px 6px; border-radius: 3px; font-weight: bold; margin-left: 6px; }
 
         /* PAGINASI & FILTER CONTAINER STYLES */
@@ -123,21 +128,26 @@
             <button class="close-sidebar-btn" onclick="closeSidebarMobile()">✕</button>
         </div>
         <ul class="sidebar-menu">
-            <!-- MENU PUBLIK (1, 2, 3) -->
+            <!-- MENU PUBLIK -->
             <li><a href="#" class="active" onclick="switchTab('joblistTab', this)">📋 1. Joblist Harian <span class="menu-badge badge-public">Publik</span></a></li>
             <li><a href="#" onclick="switchTab('kpiTab', this)">🎯 2. KPI Karyawan <span class="menu-badge badge-public">Publik</span></a></li>
             <li><a href="#" onclick="switchTab('cashTab', this)">📊 3. Arus Kas & Komisi <span class="menu-badge badge-public">Publik</span></a></li>
             
-            <!-- MENU HRD & OWNER (4, 5, 6, 7, 8) -->
+            <!-- MENU HRD & OPERASIONAL -->
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Jadwal, Absensi, Lembur, & Kasbon <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
             
-            <!-- MENU OWNER ONLY (9, 10) -->
-            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 9. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
-            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 10. Radar Keuangan & Utang <span class="menu-badge badge-owner">Owner</span></a></li>
+            <!-- MENU SPX GASKEUN -->
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('spxTab', this)">🚚 8. Paket SPX Gaskeun <span class="menu-badge badge-spx">SPX</span></a></li>
+
+            <!-- MENU PENGGAJIAN (Dapat Diakses Publik / Tergantung Wewenang) -->
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 9. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
+            
+            <!-- MENU OWNER ONLY -->
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 10. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 11. Radar Keuangan & Utang <span class="menu-badge badge-owner">Owner</span></a></li>
         </ul>
     </div>
 
@@ -576,7 +586,90 @@
                 </div>
             </div>
 
-            <!-- TAB 8: PENGGAJIAN DAN SLIP GAJI -->
+            <!-- TAB 8: PAKET SPX GASKEUN (MENU BARU) -->
+            <div id="spxTab" class="tab-content hidden">
+                <div class="card" style="margin-bottom: 20px; border-color: #ea580c;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2 style="color: #ea580c;">🚚 Sistem Manajemen Operasional Paket SPX Gaskeun</h2>
+                            <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Pencatatan pengiriman, status COD/Setoran, dan pengantaran paket Shopee Express</p>
+                        </div>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="btn-excel" onclick="exportSpxToExcel()">📊 Export Excel SPX</button>
+                            <button class="btn-spx" onclick="openSpxModal()">+ Input Paket SPX Baru</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARDS RINGKASAN SPX -->
+                <div class="grid" style="margin-bottom: 20px;">
+                    <div class="card" style="border-color: #ea580c;">
+                        <h3>📦 TOTAL PAKET DITANGANI</h3>
+                        <div class="amount" id="spxTotalCount" style="color: #ea580c;">0 Pcs</div>
+                        <span style="font-size: 10px; color: #94a3b8;">*Jumlah total resi terdaftar</span>
+                    </div>
+                    <div class="card" style="border-color: #22c55e;">
+                        <h3>✅ PAKET TERKIRIM (DELIVERED)</h3>
+                        <div class="amount" id="spxDeliveredCount" style="color: #22c55e;">0 Pcs</div>
+                        <span style="font-size: 10px; color: #94a3b8;">*Paket sukses sampai penerima</span>
+                    </div>
+                    <div class="card" style="border-color: #ef4444;">
+                        <h3>❌ PAKET GAGAL / RETUR</h3>
+                        <div class="amount" id="spxFailedCount" style="color: #ef4444;">0 Pcs</div>
+                        <span style="font-size: 10px; color: #94a3b8;">*Gagal kirim / kembalikan</span>
+                    </div>
+                    <div class="card" style="border-color: #fbbf24;">
+                        <h3>💰 TOTAL NOMINAL SETORAN COD</h3>
+                        <div class="amount" id="spxTotalCod" style="color: #fbbf24;">Rp 0</div>
+                        <span style="font-size: 10px; color: #94a3b8;">*Akumulasi setoran COD BRI/QRIS</span>
+                    </div>
+                </div>
+
+                <!-- FILTER SPX -->
+                <div class="card" style="margin-bottom: 15px;">
+                    <div class="filter-grid">
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Pencarian Resi / Nama / Alamat:</label>
+                            <input type="text" id="spxSearchInput" onkeyup="filterSpxPackages()" placeholder="🔍 Cari Resi / Penerima / Kurir..." style="margin: 0;">
+                        </div>
+                        <div>
+                            <label style="font-size:11px; color:#94a3b8;">Filter Status Paket:</label>
+                            <select id="spxStatusFilter" onchange="filterSpxPackages()" style="margin: 0;">
+                                <option value="all">Semua Status</option>
+                                <option value="Proses Sortir">Proses Sortir / In Hub</option>
+                                <option value="Dalam Pengantaran">Dalam Pengantaran (Out for Delivery)</option>
+                                <option value="Terkirim">Terkirim (Delivered)</option>
+                                <option value="Gagal / Retur">Gagal / Retur</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLE SPX -->
+                <div class="card">
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal & Waktu</th>
+                                    <th>No. Resi SPX</th>
+                                    <th>Penerima & Alamat</th>
+                                    <th>Kurir SPX</th>
+                                    <th>Status Paket</th>
+                                    <th>Nominal COD (Rp)</th>
+                                    <th>Catatan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="spxTableBody">
+                                <tr><td colspan="8" style="text-align:center; color:#94a3b8;">Memuat data paket SPX Gaskeun...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 9: PENGGAJIAN DAN SLIP GAJI -->
             <div id="payrollTab" class="tab-content hidden">
                 <div class="card" style="margin-bottom: 15px; border-color: #38bdf8;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -616,7 +709,7 @@
                 </div>
             </div>
 
-            <!-- TAB 9: DASHBOARD OWNER -->
+            <!-- TAB 10: DASHBOARD OWNER -->
             <div id="ownerDashboardTab" class="tab-content hidden">
                 <div id="ownerFullContent">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
@@ -703,7 +796,7 @@
                 </div>
             </div>
 
-            <!-- TAB 10: RADAR KEUANGAN (MENU RAHASIA) -->
+            <!-- TAB 11: RADAR KEUANGAN (MENU RAHASIA) -->
             <div id="radarFinanceTab" class="tab-content hidden">
                 <div class="card" style="border-color: #ef4444; margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
@@ -752,6 +845,57 @@
                 </div>
             </div>
 
+        </div>
+    </div>
+
+    <!-- MODAL FORM INPUT SPX GASKEUN -->
+    <div class="modal-bg" id="spxFormModal">
+        <div class="modal-card" style="border-color: #ea580c;">
+            <div class="modal-header">
+                <h3 id="spxModalTitle" style="color:#ea580c;">🚚 Input / Edit Paket SPX Gaskeun</h3>
+                <button onclick="closeSpxModal()" style="background:none; border:none; font-size:18px; color:white;">✕</button>
+            </div>
+            <form id="spxForm" onsubmit="saveSpxPackage(event)">
+                <input type="hidden" id="spxId">
+                
+                <label style="font-size:12px;">No. Resi SPX (Shopee Express):</label>
+                <input type="text" id="spxTrackingNo" placeholder="Contoh: SPXID0291823712" required>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Nama Penerima:</label>
+                        <input type="text" id="spxReceiverName" placeholder="Nama Pelanggan" required>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Kurir / Penanggung Jawab:</label>
+                        <select id="spxCourierSelect" required></select>
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Alamat Tujuan Pengiriman:</label>
+                <input type="text" id="spxAddress" placeholder="Alamat lengkap tujuan paket" required>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div>
+                        <label style="font-size:12px;">Status Paket:</label>
+                        <select id="spxStatus">
+                            <option value="Proses Sortir">Proses Sortir / In Hub</option>
+                            <option value="Dalam Pengantaran">Dalam Pengantaran (Out for Delivery)</option>
+                            <option value="Terkirim">Terkirim (Delivered)</option>
+                            <option value="Gagal / Retur">Gagal / Retur</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label style="font-size:12px;">Nominal COD / Tagihan (Rp):</label>
+                        <input type="number" id="spxCodAmount" value="0" placeholder="0 jika non-COD">
+                    </div>
+                </div>
+
+                <label style="font-size:12px;">Catatan Pengiriman / Keterangan:</label>
+                <textarea id="spxNotes" rows="2" placeholder="Contoh: Titip di satpam / COD lunas via BRI"></textarea>
+
+                <button type="submit" style="width:100%; margin-top:10px; background:#ea580c; padding:12px; font-size:14px;">💾 Simpan Data Paket SPX</button>
+            </form>
         </div>
     </div>
 
@@ -900,7 +1044,7 @@
                 <textarea id="kasbonNotes" rows="2" placeholder="Contoh: Pinjaman kebutuhan mendesak / DP Sparepart" required></textarea>
 
                 <p style="font-size:11px; color:#fbbf24; margin-bottom:10px;">
-                    *Nominal kasbon ini akan otomatis mengurangi Total Gaji Diterima di Menu 8 (Penggajian & Slip).
+                    *Nominal kasbon ini akan otomatis mengurangi Total Gaji Diterima di Menu Penggajian & Slip.
                 </p>
 
                 <button type="submit" style="width:100%; margin-top:5px; background:#d97706; padding:12px; font-size:14px;">💾 Simpan Kasbon Karyawan</button>
@@ -1280,6 +1424,7 @@
         let allJoblistsData = [];
         let allKpiLogsData = [];
         let allRadarData = [];
+        let allSpxPackagesData = [];
         let selectedEmpId = null;
 
         // PAGINASI ABSENSI STATE
@@ -1300,6 +1445,7 @@
             loadAttendance();
             loadKasbon();
             loadRadarData();
+            loadSpxPackages();
             updateSidebarVisibility();
         };
 
@@ -1483,6 +1629,20 @@
             exportToExcel(exportData, "Rekap_Payroll_Gaji_Paramount_Star");
         }
 
+        function exportSpxToExcel() {
+            let exportData = allSpxPackagesData.map(item => ({
+                "Waktu Input": item.timeStr || "",
+                "No. Resi SPX": item.trackingNo || "",
+                "Penerima": item.receiverName || "",
+                "Alamat": item.address || "",
+                "Kurir SPX": item.courierName || "",
+                "Status Paket": item.status || "",
+                "Nominal COD (Rp)": item.codAmount || 0,
+                "Catatan": item.notes || ""
+            }));
+            exportToExcel(exportData, "Paket_SPX_Gaskeun_Paramount_Star");
+        }
+
         function getWorkingDaysInCurrentMonth() {
             const now = new Date();
             const year = now.getFullYear();
@@ -1540,6 +1700,7 @@
 
             if (tabId === 'productTab') renderProductTable();
             if (tabId === 'payrollTab') renderPayrollTable();
+            if (tabId === 'spxTab') renderSpxTable();
             if (tabId === 'ownerDashboardTab' && isOwnerUnlocked) renderExecutiveOwnerDashboard();
             if (tabId === 'radarFinanceTab' && isOwnerUnlocked) renderRadarTable();
 
@@ -1637,6 +1798,7 @@
             renderProductTable();
             renderSchedulesTable();
             renderAttendanceTable();
+            renderSpxTable();
             renderPayrollTable();
         }
 
@@ -1677,6 +1839,7 @@
             const hrdAbsenEmpSelect = document.getElementById('hrdAbsenEmpSelect');
             const kasbonEmpSelect = document.getElementById('kasbonEmpSelect');
             const schedEmpSelect = document.getElementById('schedEmpSelect');
+            const spxCourierSelect = document.getElementById('spxCourierSelect');
             const commCards = document.getElementById('commissionCardsContainer');
 
             empSelect.innerHTML = `<option value="none">-- Pilih Nama Karyawan --</option>`;
@@ -1685,6 +1848,7 @@
             if (hrdAbsenEmpSelect) hrdAbsenEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             if (kasbonEmpSelect) kasbonEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
             if (schedEmpSelect) schedEmpSelect.innerHTML = `<option value="">-- Pilih Nama Karyawan --</option>`;
+            if (spxCourierSelect) spxCourierSelect.innerHTML = `<option value="">-- Pilih Kurir / PJ --</option>`;
             commCards.innerHTML = ``;
 
             const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
@@ -1729,6 +1893,13 @@
                     optSched.value = emp.id;
                     optSched.innerText = `${emp.name} (${emp.role})`;
                     schedEmpSelect.appendChild(optSched);
+                }
+
+                if (spxCourierSelect) {
+                    let optSpx = document.createElement('option');
+                    optSpx.value = emp.name;
+                    optSpx.innerText = `${emp.name} (${emp.role})`;
+                    spxCourierSelect.appendChild(optSpx);
                 }
 
                 commCards.innerHTML += `
@@ -1878,6 +2049,152 @@
         }
 
         function closeDetailModal() { document.getElementById('empDetailModal').classList.remove('active'); }
+
+        // ====================================================
+        // MODUL MENU SPX GASKEUN (SHOPEE EXPRESS)
+        // ====================================================
+        function loadSpxPackages() {
+            db.collection("spx_packages").onSnapshot((snapshot) => {
+                allSpxPackagesData = [];
+                if (snapshot.empty) {
+                    const initialSpx = [
+                        { trackingNo: "SPXID0291823712", receiverName: "Budi Santoso", address: "Jln. Raya Jatinangor No. 45", courierName: "ROBI SETIAJI", status: "Terkirim", codAmount: 150000, notes: "Diterima oleh Budi", timeStr: new Date().toLocaleDateString('id-ID'), createdAt: Date.now() },
+                        { trackingNo: "SPXID0291823713", receiverName: "Ahmad Dahlan", address: "Komp. Unpad Sumedang", courierName: "ROBI SETIAJI", status: "Dalam Pengantaran", codAmount: 0, notes: "Diantar hari ini", timeStr: new Date().toLocaleDateString('id-ID'), createdAt: Date.now() }
+                    ];
+                    initialSpx.forEach(spx => db.collection("spx_packages").add(spx));
+                } else {
+                    snapshot.forEach(doc => {
+                        let d = doc.data();
+                        d.id = doc.id;
+                        allSpxPackagesData.push(d);
+                    });
+                    renderSpxTable();
+                }
+            });
+        }
+
+        function filterSpxPackages() { renderSpxTable(); }
+
+        function renderSpxTable() {
+            const tbody = document.getElementById('spxTableBody');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            let searchVal = (document.getElementById('spxSearchInput') ? document.getElementById('spxSearchInput').value : '').toLowerCase();
+            let statusVal = document.getElementById('spxStatusFilter') ? document.getElementById('spxStatusFilter').value : 'all';
+
+            let filtered = allSpxPackagesData.filter(item => {
+                let matchesSearch = (item.trackingNo || '').toLowerCase().includes(searchVal) ||
+                                  (item.receiverName || '').toLowerCase().includes(searchVal) ||
+                                  (item.address || '').toLowerCase().includes(searchVal) ||
+                                  (item.courierName || '').toLowerCase().includes(searchVal);
+                let matchesStatus = statusVal === 'all' || item.status === statusVal;
+                return matchesSearch && matchesStatus;
+            });
+
+            filtered.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+            // KONTROL RINGKASAN
+            let totalCount = allSpxPackagesData.length;
+            let deliveredCount = allSpxPackagesData.filter(i => i.status === 'Terkirim').length;
+            let failedCount = allSpxPackagesData.filter(i => i.status === 'Gagal / Retur').length;
+            let totalCod = allSpxPackagesData.reduce((acc, i) => acc + (i.codAmount || 0), 0);
+
+            if(document.getElementById('spxTotalCount')) document.getElementById('spxTotalCount').innerText = `${totalCount} Pcs`;
+            if(document.getElementById('spxDeliveredCount')) document.getElementById('spxDeliveredCount').innerText = `${deliveredCount} Pcs`;
+            if(document.getElementById('spxFailedCount')) document.getElementById('spxFailedCount').innerText = `${failedCount} Pcs`;
+            if(document.getElementById('spxTotalCod')) document.getElementById('spxTotalCod').innerText = `Rp ${totalCod.toLocaleString('id-ID')}`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Belum ada data paket SPX Gaskeun.</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let badgeColor = 'badge-active';
+                if (item.status === 'Proses Sortir') badgeColor = 'badge-warning';
+                if (item.status === 'Dalam Pengantaran') badgeColor = 'badge-orange';
+                if (item.status === 'Gagal / Retur') badgeColor = 'badge-inactive';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.timeStr || '-'}</td>
+                        <td style="color:#ea580c; font-weight:bold;">${item.trackingNo}</td>
+                        <td><strong>${item.receiverName}</strong><br><span style="font-size:11px; color:#94a3b8;">${item.address}</span></td>
+                        <td style="color:#38bdf8; font-weight:bold;">${item.courierName || '-'}</td>
+                        <td><span class="badge-status ${badgeColor}">${item.status}</span></td>
+                        <td style="color:#4ade80; font-weight:bold;">Rp ${(item.codAmount || 0).toLocaleString('id-ID')}</td>
+                        <td style="font-size:12px;">${item.notes || '-'}</td>
+                        <td>
+                            <button class="btn-warning" onclick="editSpxPackage('${item.id}')">Edit</button>
+                            <button class="btn-danger" onclick="deleteSpxPackage('${item.id}')">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function openSpxModal() {
+            document.getElementById('spxForm').reset();
+            document.getElementById('spxId').value = "";
+            document.getElementById('spxModalTitle').innerText = "🚚 Input Paket SPX Gaskeun Baru";
+            document.getElementById('spxFormModal').classList.add('active');
+        }
+
+        function closeSpxModal() { document.getElementById('spxFormModal').classList.remove('active'); }
+
+        function saveSpxPackage(e) {
+            e.preventDefault();
+
+            const id = document.getElementById('spxId').value;
+            const now = new Date();
+            const payload = {
+                trackingNo: document.getElementById('spxTrackingNo').value,
+                receiverName: document.getElementById('spxReceiverName').value,
+                courierName: document.getElementById('spxCourierSelect').value,
+                address: document.getElementById('spxAddress').value,
+                status: document.getElementById('spxStatus').value,
+                codAmount: Number(document.getElementById('spxCodAmount').value),
+                notes: document.getElementById('spxNotes').value
+            };
+
+            if (id) {
+                db.collection("spx_packages").doc(id).update(payload).then(() => {
+                    alert("Data Paket SPX Berhasil Diperbarui!");
+                    closeSpxModal();
+                });
+            } else {
+                payload.timeStr = now.toLocaleDateString('id-ID') + ' ' + now.toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'});
+                payload.createdAt = Date.now();
+                db.collection("spx_packages").add(payload).then(() => {
+                    alert("Paket SPX Baru Berhasil Disimpan!");
+                    closeSpxModal();
+                });
+            }
+        }
+
+        function editSpxPackage(id) {
+            const item = allSpxPackagesData.find(s => s.id === id);
+            if (!item) return;
+
+            document.getElementById('spxId').value = item.id;
+            document.getElementById('spxTrackingNo').value = item.trackingNo || "";
+            document.getElementById('spxReceiverName').value = item.receiverName || "";
+            document.getElementById('spxCourierSelect').value = item.courierName || "";
+            document.getElementById('spxAddress').value = item.address || "";
+            document.getElementById('spxStatus').value = item.status || "Proses Sortir";
+            document.getElementById('spxCodAmount').value = item.codAmount || 0;
+            document.getElementById('spxNotes').value = item.notes || "";
+
+            document.getElementById('spxModalTitle').innerText = "Edit Paket SPX Gaskeun";
+            document.getElementById('spxFormModal').classList.add('active');
+        }
+
+        function deleteSpxPackage(id) {
+            if (confirm("Hapus paket SPX ini dari sistem?")) {
+                db.collection("spx_packages").doc(id).delete().then(() => alert("Data paket SPX dihapus."));
+            }
+        }
 
         // ====================================================
         // SETTING JADWAL KERJA KARYAWAN
@@ -2381,7 +2698,6 @@
             if (!tbody) return;
             tbody.innerHTML = "";
 
-            // KALAU EMPLOYEES DATA MASIH KOSONG, TAMPILKAN PESAN LOADING / KOSONG
             if (allEmployeesData.length === 0) {
                 tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Sedang memuat data karyawan...</td></tr>`;
                 return;
@@ -2391,7 +2707,7 @@
             const workingDays = getWorkingDaysInCurrentMonth();
 
             if (activeEmployees.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Tidak ada data karyawan dengan status 'Aktif'. Periksa Menu 4.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; color:#94a3b8;">Tidak ada data karyawan dengan status 'Aktif'. Periksa Menu Data Karyawan.</td></tr>`;
                 return;
             }
 
@@ -3179,7 +3495,7 @@
         }
 
         // ====================================================
-        // MENU 9: EXECUTIVE OWNER DASHBOARD REALTIME
+        // EXECUTIVE OWNER DASHBOARD REALTIME
         // ====================================================
         function renderExecutiveOwnerDashboard() {
             if (!isOwnerUnlocked) return;
@@ -3251,7 +3567,7 @@
         }
 
         // ====================================================
-        // MENU 10: RADAR KEUANGAN RAHASIA
+        // RADAR KEUANGAN RAHASIA
         // ====================================================
         function loadRadarData() {
             db.collection("radar_finance").onSnapshot((snapshot) => {
