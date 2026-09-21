@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PSI Operational System - SPX Gaskeun</title>
+    <title>Paramount Star Operational System</title>
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- SheetJS CDN (Untuk Export Excel) -->
@@ -27,7 +27,6 @@
         .badge-public { background: #334155; color: #cbd5e1; }
         .badge-hrd { background: #0284c7; color: white; }
         .badge-owner { background: #dc2626; color: white; }
-        .badge-spx { background: #ea580c; color: white; }
 
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 95; }
         .sidebar-overlay.active { display: block; }
@@ -46,13 +45,16 @@
         .btn-excel { background: #16a34a !important; color: white !important; font-size: 11px !important; padding: 6px 12px !important; }
         .btn-spx { background: #ea580c !important; color: white !important; }
         .btn-spx:hover { background: #c2410c !important; }
+        .btn-hrd { background: #0284c7; }
+        .btn-owner { background: #059669; }
+        .btn-absen { background: #10b981; }
         .btn-danger { background: #ef4444 !important; padding: 4px 8px !important; font-size: 11px !important; }
         .btn-warning { background: #f59e0b !important; color: black !important; padding: 4px 8px !important; font-size: 11px !important; margin-right: 4px; }
         
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .card { background-color: #1e293b; border-radius: 8px; padding: 15px; border: 1px solid #334155; }
         .card h3 { color: #94a3b8; font-size: 13px; margin-bottom: 5px; }
-        .card .amount { font-size: 22px; font-weight: bold; color: #ea580c; }
+        .card .amount { font-size: 20px; font-weight: bold; color: #4ade80; }
         
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; font-size: 13px; }
@@ -64,12 +66,11 @@
         /* MODAL STYLES */
         .modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 200; justify-content: center; align-items: center; padding: 15px; }
         .modal-bg.active { display: flex; }
-        .modal-card { background: #1e293b; width: 100%; max-width: 500px; border-radius: 8px; border: 1px solid #ea580c; padding: 20px; max-height: 90vh; overflow-y: auto; }
+        .modal-card { background: #1e293b; width: 100%; max-width: 500px; border-radius: 8px; border: 1px solid #38bdf8; padding: 20px; max-height: 90vh; overflow-y: auto; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 10px; margin-bottom: 15px; }
 
-        /* LIST KURIR SPECIFIC */
         .courier-chip-container { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 10px; }
-        .courier-chip { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px 14px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 180px; }
+        .courier-chip { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; gap: 10px; min-width: 170px; }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -83,7 +84,7 @@
 
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebarMobile()"></div>
 
-    <!-- SIDEBAR -->
+    <!-- SIDEBAR NAVIGATION -->
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div>
@@ -93,96 +94,193 @@
             <button class="close-sidebar-btn" onclick="closeSidebarMobile()">✕</button>
         </div>
         <ul class="sidebar-menu">
-            <li><a href="#">📋 1. Joblist Harian <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#">🎯 2. KPI Karyawan <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#">📊 3. Arus Kas & Komisi <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#" class="active">🚚 8. Paket SPX Gaskeun <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#">💵 9. Penggajian & Slip <span class="menu-badge badge-public">Publik</span></a></li>
+            <li><a href="#" class="active" onclick="switchTab('joblistTab', this)">📋 1. Joblist Harian <span class="menu-badge badge-public">Publik</span></a></li>
+            <li><a href="#" onclick="switchTab('kpiTab', this)">🎯 2. KPI Karyawan <span class="menu-badge badge-public">Publik</span></a></li>
+            <li><a href="#" onclick="switchTab('cashTab', this)">📊 3. Arus Kas & Komisi <span class="menu-badge badge-public">Publik</span></a></li>
+            
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Jadwal, Absensi, Lembur, & Kasbon <span class="menu-badge badge-hrd">HRD</span></a></li>
+            
+            <!-- MENU 8: PAKET SPX GASKEUN (PUBLIK) -->
+            <li><a href="#" onclick="switchTab('spxTab', this)">🚚 8. Paket SPX Gaskeun <span class="menu-badge badge-public">Publik</span></a></li>
+
+            <li><a href="#" onclick="switchTab('payrollTab', this)">💵 9. Penggajian & Slip <span class="menu-badge badge-public">Publik</span></a></li>
+            
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 10. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 11. Radar Keuangan & Utang <span class="menu-badge badge-owner">Owner</span></a></li>
         </ul>
     </div>
 
-    <!-- MAIN CONTENT -->
+    <!-- MAIN WRAPPER -->
     <div class="main-wrapper" id="mainWrapper">
         <div class="top-navbar">
             <button class="burger-btn" onclick="toggleSidebar()">☰</button>
-            <div style="font-weight: bold; color: #ea580c;">PAKET SPX GASKEUN (PUBLIK)</div>
+            <div style="display: flex; gap: 8px; align-items: center;">
+                <button id="hrdAuthBtn" class="btn-hrd" onclick="toggleHrdView()">Unlock HRD</button>
+                <button id="ownerAuthBtn" class="btn-owner" onclick="togglePrivateView()">Unlock Owner</button>
+            </div>
         </div>
 
         <div class="content-body">
-            
-            <div class="card" style="margin-bottom: 20px; border-color: #ea580c;">
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
-                    <div>
-                        <h2 style="color: #ea580c;">🚚 Sistem Rekap Paket SPX Gaskeun</h2>
-                        <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Pencatatan total kiriman harian dan rincian paket per kurir</p>
+
+            <!-- TAB 1: JOBLIST HARIAN -->
+            <div id="joblistTab" class="tab-content">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">📋 1. Joblist Harian Karyawan</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Checklist tugas operasional harian.</p>
+                </div>
+            </div>
+
+            <!-- TAB 2: KPI KARYAWAN -->
+            <div id="kpiTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#22c55e;">🎯 2. Capaian KPI Karyawan</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Rekap kinerja harian karyawan.</p>
+                </div>
+            </div>
+
+            <!-- TAB 3: ARUS KAS -->
+            <div id="cashTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">📊 3. Arus Kas & Komisi</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Riwayat pemasukan, pengeluaran, dan potensi komisi.</p>
+                </div>
+            </div>
+
+            <!-- TAB 4: DATA KARYAWAN -->
+            <div id="employeeTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">👥 4. Data Karyawan (HRD)</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Manajemen data SDM dan kontrak kerja.</p>
+                </div>
+            </div>
+
+            <!-- TAB 5: ASET USAHA -->
+            <div id="assetTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">📦 5. Data Aset Usaha</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Inventaris perlengkapan dan peralatan kerja.</p>
+                </div>
+            </div>
+
+            <!-- TAB 6: PRODUK -->
+            <div id="productTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">🏷️ 6. Data Produk & Sparepart</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Katalog sparepart dan stok produk.</p>
+                </div>
+            </div>
+
+            <!-- TAB 7: ABSENSI -->
+            <div id="attendanceTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">⏰ 7. Jadwal, Absensi & Lembur</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Sistem presensi harian karyawan.</p>
+                </div>
+            </div>
+
+            <!-- TAB 8: PAKET SPX GASKEUN (PUBLIK) -->
+            <div id="spxTab" class="tab-content hidden">
+                <div class="card" style="margin-bottom: 20px; border-color: #ea580c;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div>
+                            <h2 style="color: #ea580c;">🚚 Paket SPX Gaskeun (Rekap Harian)</h2>
+                            <p style="font-size: 12px; color: #94a3b8; margin-top: 4px;">Pencatatan total kiriman harian dan rincian paket per kurir</p>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button class="btn-excel" onclick="exportSpxToExcel()">📊 Export Excel</button>
+                            <button class="btn-spx" onclick="openSpxModal()">+ Input Kiriman Harian</button>
+                        </div>
                     </div>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn-excel" onclick="exportSpxToExcel()">📊 Export Excel</button>
-                        <button class="btn-spx" onclick="openSpxModal()">+ Input Kiriman Harian</button>
+                </div>
+
+                <!-- DATABASE KURIR SPX -->
+                <div class="card" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="color: #38bdf8; font-size: 14px;">👥 Database Kurir SPX Gaskeun</h3>
+                        <button class="btn-spx" style="font-size: 11px; padding: 4px 10px;" onclick="openCourierModal()">+ Tambah Kurir</button>
+                    </div>
+                    <div class="courier-chip-container" id="courierContainer">
+                        <p style="color:#94a3b8; font-size:12px;">Memuat data kurir...</p>
+                    </div>
+                </div>
+
+                <!-- SUMMARY HARIAN & RINCIAN KURIR -->
+                <div class="grid" style="margin-bottom: 20px;">
+                    <div class="card" style="border-color: #22c55e;">
+                        <h3>📦 TOTAL PAKET TERKIRIM HARIAN</h3>
+                        <div class="amount" id="todayTotalDelivered" style="color: #22c55e; font-size: 26px;">0 Pcs</div>
+                        <span style="font-size: 10px; color: #94a3b8;" id="currentDateLabel">*Tanggal Hari Ini</span>
+                    </div>
+
+                    <div class="card" style="grid-column: span 2;">
+                        <h3 style="color: #fbbf24; margin-bottom: 10px;">📋 RINCIAN PAKET PER KURIR (HARI INI)</h3>
+                        <div id="courierBreakdownList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
+                            <span style="color:#94a3b8; font-size:12px;">Belum ada data input untuk hari ini.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BAGAN TREN HARIAN -->
+                <div class="card" style="margin-bottom: 20px; border-color: #38bdf8;">
+                    <h3 style="color: #38bdf8; font-size: 14px; margin-bottom: 15px;">📊 Grafik Tren Total Kiriman Paket Harian</h3>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="spxDailyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- RIWAYAT TABLE -->
+                <div class="card">
+                    <h3 style="color: #f8fafc; font-size: 14px; margin-bottom: 10px;">📜 Riwayat Rekap Kiriman SPX</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Nama Kurir</th>
+                                    <th>Jumlah Paket Terkirim</th>
+                                    <th>Catatan / Keterangan</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="spxTableBody">
+                                <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Memuat data kiriman...</td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
 
-            <!-- MODUL 1: DATABASE KURIR SPX -->
-            <div class="card" style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <h3 style="color: #38bdf8; font-size: 15px;">👥 Database Kurir SPX Gaskeun</h3>
-                    <button class="btn-spx" style="font-size: 11px; padding: 4px 10px;" onclick="openCourierModal()">+ Tambah Kurir</button>
-                </div>
-                <div class="courier-chip-container" id="courierContainer">
-                    <p style="color:#94a3b8; font-size:12px;">Memuat data kurir...</p>
+            <!-- TAB 9: PENGGAJIAN -->
+            <div id="payrollTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#38bdf8;">💵 9. Penggajian & Slip Gaji</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Rincian penggajian karyawan.</p>
                 </div>
             </div>
 
-            <!-- MODUL 2: SUMMARY KIRIMAN HARIAN & RINCIAN PER KURIR -->
-            <div class="grid" style="margin-bottom: 20px;">
-                <div class="card" style="border-color: #22c55e;">
-                    <h3>📦 TOTAL PAKET TERKIRIM HARIAN</h3>
-                    <div class="amount" id="todayTotalDelivered" style="color: #22c55e;">0 Pcs</div>
-                    <span style="font-size: 10px; color: #94a3b8;" id="currentDateLabel">*Tanggal Hari Ini</span>
-                </div>
-
-                <div class="card" style="grid-column: span 2;">
-                    <h3 style="color: #fbbf24; margin-bottom: 10px;">📋 RINCIAN PAKET PER KURIR (HARI INI)</h3>
-                    <div id="courierBreakdownList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px;">
-                        <span style="color:#94a3b8; font-size:12px;">Belum ada data input untuk hari ini.</span>
-                    </div>
+            <!-- TAB 10: DASHBOARD OWNER -->
+            <div id="ownerDashboardTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#4ade80;">👑 10. Executive Control Dashboard</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Executive dashboard khusus owner.</p>
                 </div>
             </div>
 
-            <!-- MODUL 3: BAGAN/CHART TOTAL KIRIMAN HARIAN -->
-            <div class="card" style="margin-bottom: 20px; border-color: #38bdf8;">
-                <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 15px;">📊 Grafik Tren Total Kiriman Paket Harian</h3>
-                <div style="position: relative; height: 260px; width: 100%;">
-                    <canvas id="spxDailyChart"></canvas>
-                </div>
-            </div>
-
-            <!-- MODUL 4: RIWAYAT / REKAP HARIAN TABLE -->
-            <div class="card">
-                <h3 style="color: #f8fafc; font-size: 15px; margin-bottom: 10px;">📜 Riwayat Rekap Kiriman SPX</h3>
-                <div style="overflow-x: auto;">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Tanggal</th>
-                                <th>Nama Kurir</th>
-                                <th>Jumlah Paket Terkirim</th>
-                                <th>Catatan / Keterangan</th>
-                                <th>Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody id="spxTableBody">
-                            <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Memuat data kiriman...</td></tr>
-                        </tbody>
-                    </table>
+            <!-- TAB 11: RADAR KEUANGAN -->
+            <div id="radarFinanceTab" class="tab-content hidden">
+                <div class="card">
+                    <h2 style="color:#ef4444;">🔐 11. Radar Keuangan & Utang</h2>
+                    <p style="font-size:12px; color:#94a3b8; margin-top:5px;">Catatan piutang, kewajiban, dan investor.</p>
                 </div>
             </div>
 
         </div>
     </div>
 
-    <!-- MODAL INPUT/EDIT KURIR -->
+    <!-- MODAL INPUT KURIR -->
     <div class="modal-bg" id="courierModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -199,7 +297,7 @@
         </div>
     </div>
 
-    <!-- MODAL INPUT/EDIT KIRIMAN HARIAN -->
+    <!-- MODAL INPUT KIRIMAN HARIAN -->
     <div class="modal-bg" id="spxFormModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -239,6 +337,11 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        const PIN_HRD = "0000";
+        const PIN_KOMISARIS = "admin123";
+        let isHrdUnlocked = false;
+        let isOwnerUnlocked = false;
+
         let allCouriers = [];
         let allSpxRecords = [];
         let chartInstance = null;
@@ -250,7 +353,22 @@
             
             loadCouriers();
             loadSpxRecords();
+            updateSidebarVisibility();
         };
+
+        // NAVIGASI TAB UTAMA (AMAN DARI CRASH)
+        function switchTab(tabId, element) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
+
+            const targetTab = document.getElementById(tabId);
+            if(targetTab) targetTab.classList.remove('hidden');
+            if(element) element.classList.add('active');
+
+            if(tabId === 'spxTab') renderSpxDashboard();
+
+            if (window.innerWidth <= 768) closeSidebarMobile();
+        }
 
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
@@ -263,6 +381,52 @@
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('sidebar').classList.add('collapsed');
             document.getElementById('sidebarOverlay').classList.remove('active');
+        }
+
+        function toggleHrdView() {
+            const btn = document.getElementById('hrdAuthBtn');
+            if (!isHrdUnlocked) {
+                let pin = prompt("Masukkan PIN HRD:");
+                if (pin === PIN_HRD) {
+                    isHrdUnlocked = true;
+                    btn.innerText = "Lock HRD";
+                    btn.style.background = "#dc2626";
+                } else if (pin !== null) alert("PIN HRD Salah!");
+            } else {
+                isHrdUnlocked = false;
+                btn.innerText = "Unlock HRD";
+                btn.style.background = "#0284c7";
+            }
+            updateSidebarVisibility();
+        }
+
+        function togglePrivateView() {
+            const btn = document.getElementById('ownerAuthBtn');
+            if (!isOwnerUnlocked) {
+                let pin = prompt("Masukkan PIN Owner:");
+                if (pin === PIN_KOMISARIS) {
+                    isOwnerUnlocked = true;
+                    btn.innerText = "Lock Owner";
+                    btn.style.background = "#dc2626";
+                } else if (pin !== null) alert("PIN Owner Salah!");
+            } else {
+                isOwnerUnlocked = false;
+                btn.innerText = "Unlock Owner";
+                btn.style.background = "#059669";
+            }
+            updateSidebarVisibility();
+        }
+
+        function updateSidebarVisibility() {
+            document.querySelectorAll('.hrd-menu-item').forEach(el => {
+                if (isHrdUnlocked || isOwnerUnlocked) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
+
+            document.querySelectorAll('.owner-menu-item').forEach(el => {
+                if (isOwnerUnlocked) el.classList.remove('hidden');
+                else el.classList.add('hidden');
+            });
         }
 
         // ==========================================
@@ -292,6 +456,8 @@
         function renderCouriers() {
             const container = document.getElementById('courierContainer');
             const select = document.getElementById('spxCourierSelect');
+            if(!container || !select) return;
+
             container.innerHTML = "";
             select.innerHTML = `<option value="">-- Pilih Kurir --</option>`;
 
@@ -359,25 +525,26 @@
                 }
             });
 
-            // Update Ringkasan Hari Ini
-            document.getElementById('todayTotalDelivered').innerText = `${todayTotal} Pcs`;
+            const totalEl = document.getElementById('todayTotalDelivered');
+            if (totalEl) totalEl.innerText = `${todayTotal} Pcs`;
 
-            // Update Rincian Per Kurir
             const breakdownContainer = document.getElementById('courierBreakdownList');
-            breakdownContainer.innerHTML = "";
+            if (breakdownContainer) {
+                breakdownContainer.innerHTML = "";
+                let courierKeys = Object.keys(courierTodayMap);
 
-            let courierKeys = Object.keys(courierTodayMap);
-            if (courierKeys.length === 0) {
-                breakdownContainer.innerHTML = `<span style="color:#94a3b8; font-size:12px;">Belum ada catatan paket terkirim hari ini.</span>`;
-            } else {
-                courierKeys.forEach(courier => {
-                    breakdownContainer.innerHTML += `
-                        <div style="background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid #ea580c;">
-                            <span style="font-size:11px; color:#94a3b8;">${courier}</span>
-                            <div style="font-weight:bold; font-size:16px; color:#4ade80;">${courierTodayMap[courier]} Pcs</div>
-                        </div>
-                    `;
-                });
+                if (courierKeys.length === 0) {
+                    breakdownContainer.innerHTML = `<span style="color:#94a3b8; font-size:12px;">Belum ada catatan paket terkirim hari ini.</span>`;
+                } else {
+                    courierKeys.forEach(courier => {
+                        breakdownContainer.innerHTML += `
+                            <div style="background:#0f172a; padding:10px; border-radius:6px; border-left:3px solid #ea580c;">
+                                <span style="font-size:11px; color:#94a3b8;">${courier}</span>
+                                <div style="font-weight:bold; font-size:16px; color:#4ade80;">${courierTodayMap[courier]} Pcs</div>
+                            </div>
+                        `;
+                    });
+                }
             }
 
             renderSpxTable();
@@ -386,6 +553,7 @@
 
         function renderSpxTable() {
             const tbody = document.getElementById('spxTableBody');
+            if (!tbody) return;
             tbody.innerHTML = "";
 
             let sorted = [...allSpxRecords].sort((a,b) => (b.date || '').localeCompare(a.date || ''));
@@ -411,19 +579,19 @@
             });
         }
 
-        // BAGAN/CHART TOTAL KIRIMAN HARIAN
         function renderSpxChart() {
-            const ctx = document.getElementById('spxDailyChart').getContext('2d');
+            const chartCanvas = document.getElementById('spxDailyChart');
+            if (!chartCanvas) return;
+            const ctx = chartCanvas.getContext('2d');
             if (chartInstance) chartInstance.destroy();
 
-            // Akumulasi total per tanggal
             let dateMap = {};
             allSpxRecords.forEach(rec => {
                 dateMap[rec.date] = (dateMap[rec.date] || 0) + Number(rec.count || 0);
             });
 
             let sortedDates = Object.keys(dateMap).sort();
-            let chartLabels = sortedDates.slice(-7); // Ambil 7 hari terakhir
+            let chartLabels = sortedDates.slice(-7);
             let chartData = chartLabels.map(d => dateMap[d]);
 
             chartInstance = new Chart(ctx, {
@@ -453,7 +621,6 @@
             });
         }
 
-        // CRUD SPX RECORD
         function openSpxModal() {
             document.getElementById('spxForm').reset();
             document.getElementById('spxRecordId').value = "";
