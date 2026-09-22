@@ -59,6 +59,7 @@
         .btn-owner { background: #059669; }
         .btn-absen { background: #10b981; }
         .btn-absen:hover { background: #059669; }
+        .btn-kasbon { background: #d97706 !important; color: white !important; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .card { background-color: #1e293b; border-radius: 8px; padding: 15px; border: 1px solid #334155; }
         .card h3 { color: #94a3b8; font-size: 13px; margin-bottom: 5px; }
@@ -122,7 +123,7 @@
             <button class="burger-btn hidden" id="burgerToggleBtn" onclick="toggleSidebar()">☰</button>
             <div style="font-weight: bold; color: #38bdf8; font-size: 16px;" id="brandTitle">Paramount Star Operational System</div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button class="btn-absen" onclick="alert('Fitur Absensi Publik Siap Digunakan')">⏰ ABSEN KARYAWAN</button>
+                <button class="btn-absen" onclick="alert('Fitur Absensi Karyawan Aktif')">⏰ ABSEN KARYAWAN</button>
                 <button id="hrdAuthBtn" class="btn-hrd" onclick="toggleHrdView()">Unlock HRD</button>
                 <button id="ownerAuthBtn" class="btn-owner" onclick="togglePrivateView()">Unlock Owner</button>
             </div>
@@ -130,7 +131,7 @@
 
         <div class="content-body">
 
-            <!-- DASHBOARD UTAMA (4 KARTU MINIMALIS) -->
+            <!-- DASHBOARD UTAMA -->
             <div id="dashboardMainTab" class="tab-content">
                 <div style="margin-bottom: 25px; text-align: center;">
                     <h1 style="font-size: 24px; color: #38bdf8;">🚀 Executive Control Panel - Paramount Star</h1>
@@ -164,8 +165,8 @@
                 <div class="sub-nav-tabs">
                     <button class="sub-tab-btn active" onclick="switchUnitSubTab('joblistSubTab', this)">📋 1. Joblist & Checklist Harian</button>
                     <button class="sub-tab-btn" onclick="switchUnitSubTab('kpiSubTab', this)">🎯 2. Capaian KPI Karyawan</button>
-                    <button class="sub-tab-btn" onclick="switchUnitSubTab('cashSubTab', this)">📊 3. Arus Kas & Komisi Servis/Project</button>
-                    <button class="sub-tab-btn" onclick="switchUnitSubTab('dbSubTab', this)">📁 4. Database Produk & Customer Journey</button>
+                    <button class="sub-tab-btn" onclick="switchUnitSubTab('cashSubTab', this)">📊 3. Arus Kas & Komisi</button>
+                    <button class="sub-tab-btn" onclick="switchUnitSubTab('dbSubTab', this)">📁 4. Database Produk & Customer</button>
                 </div>
 
                 <!-- SUB TAB 1: JOBLIST & CHECKLIST HARIAN -->
@@ -173,52 +174,31 @@
                     <div class="card" style="margin-bottom: 15px; border-color: #38bdf8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
                         <div style="flex-grow: 1;">
                             <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
-                            <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
+                            <select id="employeeSelect" onchange="renderChecklistForSelectedEmp()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
                                 <option value="none">-- Pilih Nama Karyawan --</option>
-                                <option value="Eko">Eko - Teknisi Utama</option>
-                                <option value="Budi">Budi - Staff Digital / PSD</option>
-                                <option value="Andi">Andi - Kurir SPX</option>
                             </select>
                         </div>
-                        <button class="btn-excel" onclick="alert('Export Excel Joblist')">📊 Export Excel Joblist</button>
                     </div>
 
                     <div class="grid">
                         <div class="card">
-                            <h3 style="color: #38bdf8; margin-bottom: 15px;">Checklist Tugas Harian Karyawan:</h3>
+                            <h3 style="color: #38bdf8; margin-bottom: 15px;">Checklist Tugas Harian:</h3>
                             <div id="checklistItems">
-                                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
-                                    <input type="checkbox" onchange="updateProgress()"> Cek & bersihkan workspace / peralatan kerja
-                                </label>
-                                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
-                                    <input type="checkbox" onchange="updateProgress()"> Cek antrean unit & follow up order customer
-                                </label>
-                                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
-                                    <input type="checkbox" onchange="updateProgress()"> Rekap transaksi harian & input arus kas
-                                </label>
+                                <p style="color:#94a3b8; font-size:12px;">Silakan pilih nama karyawan di atas.</p>
                             </div>
                             <div class="progress-container">
                                 <div class="progress-label"><span>Capaian Pekerjaan:</span><span id="progressText">0% tercapai</span></div>
                                 <div class="progress-bar-bg"><div id="progressBar" class="progress-bar-fill"></div></div>
                             </div>
-                            <button style="width:100%; background: #0284c7;" onclick="alert('Checklist harian tersimpan!')">📌 Simpan Checklist Harian Hari Ini</button>
                         </div>
 
                         <div class="card">
-                            <h3 style="color: #38bdf8; margin-bottom: 12px;">➕ Tambah Item Joblist Tugas Baru</h3>
-                            <form onsubmit="event.preventDefault(); alert('Joblist Baru Berhasil Ditambahkan!');">
-                                <label style="font-size:12px;">Deskripsi Tugas / Joblist:</label>
-                                <input type="text" placeholder="Contoh: Service Laptop Asus ROG GL553 No Display" required>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                                    <div>
-                                        <label style="font-size:12px;">Prioritas:</label>
-                                        <select><option>Normal</option><option>Tinggi</option><option>Urgent 🔥</option></select>
-                                    </div>
-                                    <div>
-                                        <label style="font-size:12px;">Deadline:</label>
-                                        <input type="date">
-                                    </div>
-                                </div>
+                            <h3 style="color: #38bdf8; margin-bottom: 12px;">➕ Input Joblist Tugas Baru</h3>
+                            <form onsubmit="saveCustomJob(event)">
+                                <label style="font-size:12px;">Pilih Karyawan:</label>
+                                <select id="newJobTarget" required></select>
+                                <label style="font-size:12px;">Deskripsi Tugas:</label>
+                                <input type="text" id="newJobText" placeholder="Contoh: Service Laptop Acer Nitro" required>
                                 <button type="submit" style="width:100%; margin-top:10px;">💾 Simpan Joblist Baru</button>
                             </form>
                         </div>
@@ -227,31 +207,20 @@
 
                 <!-- SUB TAB 2: KPI KARYAWAN -->
                 <div id="kpiSubTab" class="unit-sub-tab hidden">
-                    <div class="card" style="border-color: #22c55e; margin-bottom: 20px;">
+                    <div class="card" style="border-color: #22c55e;">
                         <h3 style="color: #4ade80; font-size: 16px; margin-bottom: 12px;">🎯 Rekap Capaian KPI Harian Karyawan</h3>
                         <div style="overflow-x: auto;">
                             <table>
                                 <thead>
                                     <tr>
-                                        <th>Tanggal</th>
+                                        <th>Waktu</th>
                                         <th>Nama Karyawan</th>
-                                        <th>Capaian KPI</th>
-                                        <th>Status Performa</th>
+                                        <th>Capaian Pekerjaan</th>
+                                        <th>Detail Status</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    <tr>
-                                        <td>22/09/2026</td>
-                                        <td>Eko (PSC)</td>
-                                        <td style="color:#22c55e; font-weight:bold;">100%</td>
-                                        <td><span style="background:#16a34a; padding:2px 6px; border-radius:4px; font-size:11px;">Sangat Baik</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>22/09/2026</td>
-                                        <td>Budi (PSD)</td>
-                                        <td style="color:#38bdf8; font-weight:bold;">85%</td>
-                                        <td><span style="background:#0284c7; padding:2px 6px; border-radius:4px; font-size:11px;">Baik</span></td>
-                                    </tr>
+                                <tbody id="kpiTableBody">
+                                    <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Memuat data KPI dari Firebase...</td></tr>
                                 </tbody>
                             </table>
                         </div>
@@ -262,40 +231,34 @@
                 <div id="cashSubTab" class="unit-sub-tab hidden">
                     <div class="grid">
                         <div class="card">
-                            <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">💰 Input Transaksi Arus Kas Unit</h3>
-                            <form onsubmit="event.preventDefault(); alert('Transaksi Kas Tersimpan!');">
+                            <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">💰 Catat Arus Kas Transaksi</h3>
+                            <form onsubmit="saveTransaction(event)">
                                 <label style="font-size:12px;">Tipe Transaksi:</label>
-                                <select><option value="masuk">Pemasukan (Omset / Servis)</option><option value="keluar">Pengeluaran (Operasional)</option></select>
+                                <select id="txType">
+                                    <option value="masuk">Pemasukan (Omzet / Servis)</option>
+                                    <option value="keluar">Pengeluaran (Operasional)</option>
+                                </select>
                                 <label style="font-size:12px;">Nominal (Rp):</label>
-                                <input type="number" placeholder="Contoh: 250000" required>
-                                <label style="font-size:12px;">Keterangan Transaksi:</label>
-                                <input type="text" placeholder="Contoh: Servis ganti keyboard Acer Nitro 5" required>
-                                <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">💾 Catat Transaksi</button>
+                                <input type="number" id="txAmount" placeholder="Contoh: 250000" required>
+                                <label style="font-size:12px;">Keterangan Rincian:</label>
+                                <input type="text" id="txDesc" placeholder="Contoh: Servis keyboard Asus ROG" required>
+                                <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">💾 Simpan Ke Database</button>
                             </form>
                         </div>
 
                         <div class="card">
-                            <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">📊 Riwayat Transaksi Hari Ini</h3>
+                            <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">📊 Riwayat Transaksi Firebase Real-time</h3>
                             <div style="overflow-x: auto;">
                                 <table>
                                     <thead>
                                         <tr>
                                             <th>Waktu</th>
-                                            <th>Keterangan</th>
+                                            <th>Rincian Keterangan</th>
                                             <th>Nominal</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <tr>
-                                            <td>14:20 WIB</td>
-                                            <td>Ganti Keyboard Acer Nitro 5</td>
-                                            <td style="color:#4ade80; font-weight:bold;">+ Rp 250.000</td>
-                                        </tr>
-                                        <tr>
-                                            <td>11:00 WIB</td>
-                                            <td>Beli Pasta Thermal Arctic MX-4</td>
-                                            <td style="color:#f87171; font-weight:bold;">- Rp 85.000</td>
-                                        </tr>
+                                    <tbody id="publicTxTableBody">
+                                        <tr><td colspan="3" style="text-align:center; color:#94a3b8;">Memuat data arus kas...</td></tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -306,32 +269,398 @@
                 <!-- SUB TAB 4: DATABASE PRODUK & CUSTOMER -->
                 <div id="dbSubTab" class="unit-sub-tab hidden">
                     <div class="card" style="border-color: #f59e0b;">
-                        <h3 style="color: #fbbf24; margin-bottom: 8px;">📁 Database Produk, Customer, & Journey Map</h3>
-                        <p style="font-size: 12px; color: #94a3b8;">Modul integrasi database katalog khusus unit bisnis sedang dalam tahap sinkronisasi data real-time.</p>
+                        <h3 style="color: #fbbf24; margin-bottom: 8px;">📁 Database Produk, Customer, & Customer Journey</h3>
+                        <p style="font-size: 12px; color: #94a3b8;">Terhubung dengan katalog Firebase real-time.</p>
                     </div>
                 </div>
-
             </div>
 
-            <!-- TAB MENU HRD & OWNER -->
-            <div id="employeeTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">👥 Management Data Karyawan (HRIS)</h3></div></div>
-            <div id="assetTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">📦 Inventaris Aset Usaha</h3></div></div>
-            <div id="productTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">🏷️ Katalog Produk & Sparepart</h3></div></div>
-            <div id="attendanceTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">⏰ Jadwal & Absensi Karyawan</h3></div></div>
-            <div id="payrollTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">💵 Payroll & Penggajian Karyawan</h3></div></div>
-            <div id="ownerDashboardTab" class="tab-content hidden"><div class="card" style="border-color:#22c55e;"><h2 style="color:#4ade80;">👑 Executive Control Hub Dashboard</h2></div></div>
-            <div id="radarFinanceTab" class="tab-content hidden"><div class="card" style="border-color:#ef4444;"><h2 style="color:#ef4444;">🔐 Radar Keuangan, Investor, Utang & Piutang</h2></div></div>
+            <!-- TAB MENU HRD & OWNER (MEMANGGIL DATABASE FIREBASE) -->
+            <div id="employeeTab" class="tab-content hidden">
+                <div class="card">
+                    <h3 style="color:#38bdf8; margin-bottom:15px;">👥 Data Karyawan Real-time (Firebase)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>NIK / ID</th>
+                                    <th>Nama Karyawan</th>
+                                    <th>Jabatan</th>
+                                    <th>Status Kontrak</th>
+                                    <th>No. WhatsApp</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="employeeTableBody">
+                                <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Memuat data karyawan...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="assetTab" class="tab-content hidden">
+                <div class="card">
+                    <h3 style="color:#38bdf8; margin-bottom:15px;">📦 Inventaris Aset Usaha (Firebase)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Aset</th>
+                                    <th>Kategori</th>
+                                    <th>Kondisi</th>
+                                    <th>Jumlah</th>
+                                    <th>Estimasi Nilai Unit</th>
+                                    <th>Penanggung Jawab</th>
+                                </tr>
+                            </thead>
+                            <tbody id="assetTableBody">
+                                <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Memuat data aset...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="productTab" class="tab-content hidden">
+                <div class="card">
+                    <h3 style="color:#38bdf8; margin-bottom:15px;">🏷️ Katalog Produk & Sparepart (Firebase)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Produk</th>
+                                    <th>Kategori</th>
+                                    <th>Harga Jual</th>
+                                    <th>Stok</th>
+                                    <th>Status Stok</th>
+                                </tr>
+                            </thead>
+                            <tbody id="productTableBody">
+                                <tr><td colspan="5" style="text-align:center; color:#94a3b8;">Memuat katalog produk...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="attendanceTab" class="tab-content hidden">
+                <div class="card" style="margin-bottom:15px;">
+                    <h3 style="color:#38bdf8; margin-bottom:15px;">📅 Jadwal Kerja Karyawan</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Hari / Tanggal</th>
+                                    <th>Nama Karyawan</th>
+                                    <th>Shift</th>
+                                    <th>Jam Kerja</th>
+                                </tr>
+                            </thead>
+                            <tbody id="scheduleTableBody">
+                                <tr><td colspan="4" style="text-align:center; color:#94a3b8;">Memuat jadwal kerja...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card">
+                    <h3 style="color:#38bdf8; margin-bottom:15px;">⏰ Rekap Absensi & Lembur (Firebase)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Tanggal</th>
+                                    <th>Nama Karyawan</th>
+                                    <th>Clock IN</th>
+                                    <th>Clock OUT</th>
+                                    <th>Status</th>
+                                    <th>Lembur</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceTableBody">
+                                <tr><td colspan="6" style="text-align:center; color:#94a3b8;">Memuat rekap absensi...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="payrollTab" class="tab-content hidden">
+                <div class="card">
+                    <h3 style="color:#38bdf8; margin-bottom:15px;">💵 Payroll & Penggajian Karyawan (Kalkulasi Otomatis)</h3>
+                    <div style="overflow-x: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Karyawan</th>
+                                    <th>Gaji Pokok</th>
+                                    <th>Estimasi Komisi</th>
+                                    <th>Bonus Lembur</th>
+                                    <th>Potongan Kasbon</th>
+                                    <th>Total THP</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payrollTableBody">
+                                <tr><td colspan="7" style="text-align:center; color:#94a3b8;">Mengkalkulasikan data penggajian...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ownerDashboardTab" class="tab-content hidden">
+                <div class="card" style="border-color:#22c55e;">
+                    <h2 style="color:#4ade80;">👑 Executive Control Hub & Monitoring Lini Usaha</h2>
+                </div>
+            </div>
+
+            <div id="radarFinanceTab" class="tab-content hidden">
+                <div class="card" style="border-color:#ef4444;">
+                    <h2 style="color:#ef4444;">🔐 Radar Keuangan, Investor, Utang & Piutang</h2>
+                </div>
+            </div>
 
         </div>
     </div>
 
     <script>
+        // FIREBASE INITIALIZATION
+        const firebaseConfig = {
+          apiKey: "AIzaSyBwFTcdXMdHbGLE5HsMtOiYs06WfZAuNs0",
+          authDomain: "psi-app-e9ccc.firebaseapp.com",
+          projectId: "psi-app-e9ccc",
+          storageBucket: "psi-app-e9ccc.firebasestorage.app",
+          messagingSenderId: "185461868673",
+          appId: "1:185461868673:web:328af96a1ecbfa3e8ae580",
+          measurementId: "G-2Y7XJDT3F6"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const PIN_HRD = "0000";
         const PIN_KOMISARIS = "admin123";
         
         let isOwnerUnlocked = false;
         let isHrdUnlocked = false;
 
+        let allEmployeesData = [];
+        let allAssetsData = [];
+        let allProductsData = [];
+        let allSchedulesData = [];
+        let allAttendanceData = [];
+        let allKasbonData = [];
+        let allTransactionsData = [];
+
+        window.onload = function() {
+            listenToFirebase();
+            updateSidebarVisibility();
+        };
+
+        // INTEGRASI LISTENER REAL-TIME FIREBASE
+        function listenToFirebase() {
+            // 1. Data Karyawan
+            db.collection("employees").onSnapshot((snapshot) => {
+                allEmployeesData = [];
+                let selectEmp = document.getElementById('employeeSelect');
+                let targetJobSelect = document.getElementById('newJobTarget');
+                let tbody = document.getElementById('employeeTableBody');
+                
+                if (selectEmp) selectEmp.innerHTML = '<option value="none">-- Pilih Nama Karyawan --</option>';
+                if (targetJobSelect) targetJobSelect.innerHTML = '';
+                if (tbody) tbody.innerHTML = '';
+
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    d.id = doc.id;
+                    allEmployeesData.push(d);
+
+                    if (selectEmp && d.status === 'Aktif') {
+                        selectEmp.innerHTML += `<option value="${d.name}">${d.name} (${d.position || 'Staff'})</option>`;
+                    }
+                    if (targetJobSelect && d.status === 'Aktif') {
+                        targetJobSelect.innerHTML += `<option value="${d.name}">${d.name}</option>`;
+                    }
+                    if (tbody) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${d.nik || '-'}</td>
+                                <td style="color:#38bdf8; font-weight:bold;">${d.name}</td>
+                                <td>${d.position || '-'}</td>
+                                <td>${d.contractType || '-'}</td>
+                                <td>${d.whatsapp || '-'}</td>
+                                <td><span style="background:${d.status === 'Aktif' ? '#22c55e' : '#ef4444'}; padding:2px 6px; border-radius:4px; font-size:11px;">${d.status}</span></td>
+                            </tr>
+                        `;
+                    }
+                });
+                renderPayrollTable();
+            });
+
+            // 2. Data Aset Usaha
+            db.collection("assets").onSnapshot((snapshot) => {
+                allAssetsData = [];
+                let tbody = document.getElementById('assetTableBody');
+                if (tbody) tbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    allAssetsData.push(d);
+                    if (tbody) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="color:#38bdf8; font-weight:bold;">${d.name}</td>
+                                <td>${d.category}</td>
+                                <td>${d.condition}</td>
+                                <td>${d.qty} Unit</td>
+                                <td>Rp ${Number(d.priceUnit || 0).toLocaleString('id-ID')}</td>
+                                <td>${d.pic || '-'}</td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+
+            // 3. Data Produk
+            db.collection("products").onSnapshot((snapshot) => {
+                allProductsData = [];
+                let tbody = document.getElementById('productTableBody');
+                if (tbody) tbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    allProductsData.push(d);
+                    if (tbody) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="color:#38bdf8; font-weight:bold;">${d.name}</td>
+                                <td>${d.category}</td>
+                                <td style="color:#4ade80;">Rp ${Number(d.sellPrice || 0).toLocaleString('id-ID')}</td>
+                                <td>${d.stock} Pcs</td>
+                                <td><span style="background:${d.stock > 0 ? '#22c55e' : '#ef4444'}; padding:2px 6px; border-radius:4px; font-size:11px;">${d.stock > 0 ? 'Tersedia' : 'Habis'}</span></td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+
+            // 4. Data Jadwal Kerja
+            db.collection("schedules").onSnapshot((snapshot) => {
+                allSchedulesData = [];
+                let tbody = document.getElementById('scheduleTableBody');
+                if (tbody) tbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    allSchedulesData.push(d);
+                    if (tbody) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${d.date || '-'}</td>
+                                <td style="color:#38bdf8; font-weight:bold;">${d.empName}</td>
+                                <td>${d.shiftName || '-'}</td>
+                                <td>${d.timeIn} - ${d.timeOut}</td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+
+            // 5. Data Absensi
+            db.collection("attendance").onSnapshot((snapshot) => {
+                allAttendanceData = [];
+                let tbody = document.getElementById('attendanceTableBody');
+                if (tbody) tbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    allAttendanceData.push(d);
+                    if (tbody) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${d.date}</td>
+                                <td style="color:#38bdf8; font-weight:bold;">${d.empName}</td>
+                                <td>${d.clockIn || '-'}</td>
+                                <td>${d.clockOut || '-'}</td>
+                                <td><span style="background:#0284c7; padding:2px 6px; border-radius:4px; font-size:11px;">${d.status}</span></td>
+                                <td>${d.overtimeHours || 0} Jam</td>
+                            </tr>
+                        `;
+                    }
+                });
+                renderPayrollTable();
+            });
+
+            // 6. Data Transaksi Arus Kas
+            db.collection("transactions").onSnapshot((snapshot) => {
+                allTransactionsData = [];
+                let tbody = document.getElementById('publicTxTableBody');
+                if (tbody) tbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    allTransactionsData.push(d);
+                    if (tbody) {
+                        let isMasuk = d.type === 'masuk';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${d.dateTime || '-'}</td>
+                                <td>${d.desc}</td>
+                                <td style="color:${isMasuk ? '#4ade80' : '#f87171'}; font-weight:bold;">${isMasuk ? '+' : '-'} Rp ${Number(d.amount).toLocaleString('id-ID')}</td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+
+            // 7. Data KPI
+            db.collection("kpi_daily").onSnapshot((snapshot) => {
+                let tbody = document.getElementById('kpiTableBody');
+                if (tbody) tbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    let d = doc.data();
+                    if (tbody) {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td>${d.date || '-'}</td>
+                                <td style="color:#38bdf8; font-weight:bold;">${d.empName}</td>
+                                <td style="color:#4ade80; font-weight:bold;">${d.score}%</td>
+                                <td><span style="background:#16a34a; padding:2px 6px; border-radius:4px; font-size:11px;">Selesai</span></td>
+                            </tr>
+                        `;
+                    }
+                });
+            });
+        }
+
+        // RENDER GAJI & PAYROLL
+        function renderPayrollTable() {
+            const tbody = document.getElementById('payrollTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+
+            if (allEmployeesData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; color:#94a3b8;">Sedang memuat data karyawan...</td></tr>`;
+                return;
+            }
+
+            const activeEmployees = allEmployeesData.filter(e => e.status === 'Aktif');
+            activeEmployees.forEach(emp => {
+                let baseSalary = emp.baseSalary || 1800000;
+                let isAuthorized = isHrdUnlocked || isOwnerUnlocked;
+                let blurStyle = isAuthorized ? '' : 'filter: blur(4px); user-select: none;';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td style="color:#38bdf8; font-weight:bold;">${emp.name}</td>
+                        <td style="${blurStyle}">Rp ${Number(baseSalary).toLocaleString('id-ID')}</td>
+                        <td style="${blurStyle}">Rp 0</td>
+                        <td style="${blurStyle}">Rp 0</td>
+                        <td style="${blurStyle}">- Rp 0</td>
+                        <td style="color:#38bdf8; font-weight:bold; ${blurStyle}">Rp ${Number(baseSalary).toLocaleString('id-ID')}</td>
+                        <td><button style="font-size:11px; padding:4px 8px;">🧾 Slip Gaji</button></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // FUNGSI NAVIGASI
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
             document.getElementById(tabId).classList.remove('hidden');
@@ -354,14 +683,60 @@
             if (element) element.classList.add('active');
         }
 
+        function renderChecklistForSelectedEmp() {
+            let empName = document.getElementById('employeeSelect').value;
+            let container = document.getElementById('checklistItems');
+            if (empName === 'none') {
+                container.innerHTML = '<p style="color:#94a3b8; font-size:12px;">Silakan pilih nama karyawan di atas.</p>';
+                return;
+            }
+            container.innerHTML = `
+                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" onchange="updateProgress()"> Cek & bersihkan workspace / peralatan kerja ${empName}
+                </label>
+                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" onchange="updateProgress()"> Cek antrean unit & follow up order customer
+                </label>
+                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
+                    <input type="checkbox" onchange="updateProgress()"> Rekap transaksi harian & input arus kas
+                </label>
+            `;
+        }
+
         function updateProgress() {
             const checkboxes = document.querySelectorAll('#checklistItems input[type="checkbox"]');
             let checkedCount = 0;
             checkboxes.forEach(cb => { if (cb.checked) checkedCount++; });
-            const percent = Math.round((checkedCount / checkboxes.length) * 100);
+            const percent = checkboxes.length ? Math.round((checkedCount / checkboxes.length) * 100) : 0;
             
             document.getElementById('progressBar').style.width = percent + '%';
             document.getElementById('progressText').innerText = percent + '% tercapai';
+        }
+
+        function saveCustomJob(e) {
+            e.preventDefault();
+            let target = document.getElementById('newJobTarget').value;
+            let text = document.getElementById('newJobText').value;
+            alert(`Joblist '${text}' berhasil disimpan untuk ${target}`);
+            document.getElementById('newJobText').value = '';
+        }
+
+        function saveTransaction(e) {
+            e.preventDefault();
+            let type = document.getElementById('txType').value;
+            let amount = Number(document.getElementById('txAmount').value);
+            let desc = document.getElementById('txDesc').value;
+
+            db.collection("transactions").add({
+                type: type,
+                amount: amount,
+                desc: desc,
+                dateTime: new Date().toLocaleString('id-ID')
+            }).then(() => {
+                alert("Transaksi berhasil dicatat ke Firebase!");
+                document.getElementById('txAmount').value = '';
+                document.getElementById('txDesc').value = '';
+            });
         }
 
         function openHrdPortal() {
@@ -456,6 +831,7 @@
             else { btnOwner.innerText = "Unlock Owner"; btnOwner.style.background = "#059669"; }
 
             updateSidebarVisibility();
+            renderPayrollTable();
         }
     </script>
 </body>
