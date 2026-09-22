@@ -105,14 +105,14 @@
             <li><a href="#" onclick="openUnitPortal('PSD')">🎨 Paramount Star Digital</a></li>
             <li><a href="#" onclick="openUnitPortal('SPX')">🚚 SPX Gaskeun</a></li>
             
-            <!-- MENU HRD & OWNER -->
+            <!-- MENU HRD (MENU 4 HINGGA 8) -->
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Jadwal & Absensi <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
             
-            <!-- MENU OWNER ONLY -->
+            <!-- MENU OWNER ONLY (MENU 9 DAN 10) -->
             <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 9. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
             <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 10. Radar Keuangan <span class="menu-badge badge-owner">Owner</span></a></li>
         </ul>
@@ -122,7 +122,6 @@
     <div class="main-wrapper" id="mainWrapper">
         <div class="top-navbar">
             <button class="burger-btn hidden" id="burgerToggleBtn" onclick="toggleSidebar()">☰</button>
-            <!-- LOGO JUDUL BISA DIKLIK KEMBALI KE DASHBOARD -->
             <div class="brand-title" id="brandTitle" onclick="switchTab('dashboardMainTab')">Paramount Star Operational System</div>
             <div style="display: flex; gap: 8px; align-items: center;">
                 <button class="btn-absen" onclick="alert('Fitur Absensi Karyawan Aktif')">⏰ ABSEN KARYAWAN</button>
@@ -277,7 +276,7 @@
                 </div>
             </div>
 
-            <!-- TAB MENU HRD & OWNER (MEMANGGIL DATABASE FIREBASE) -->
+            <!-- TAB MENU HRD & OWNER (DATABASE FIREBASE) -->
             <div id="employeeTab" class="tab-content hidden">
                 <div class="card">
                     <h3 style="color:#38bdf8; margin-bottom:15px;">👥 Data Karyawan Real-time (Firebase)</h3>
@@ -768,12 +767,14 @@
             document.getElementById('sidebarOverlay').classList.remove('active');
         }
 
+        // VISIBILITAS SIDEBAR UNTUK AKSES HRD DAN OWNER
         function updateSidebarVisibility() {
             const burgerBtn = document.getElementById('burgerToggleBtn');
             const mainWrapper = document.getElementById('mainWrapper');
             const sidebar = document.getElementById('sidebar');
 
-            if (isOwnerUnlocked) {
+            // Tampilkan Sidebar jika HRD / Owner Aktif
+            if (isHrdUnlocked || isOwnerUnlocked) {
                 burgerBtn.classList.remove('hidden');
                 mainWrapper.classList.add('with-sidebar');
                 sidebar.classList.remove('collapsed');
@@ -783,11 +784,13 @@
                 sidebar.classList.add('collapsed');
             }
 
+            // Tampilkan Menu 4 sampai 8 untuk HRD & Owner
             document.querySelectorAll('.hrd-menu-item').forEach(item => {
                 if (isHrdUnlocked || isOwnerUnlocked) item.classList.remove('hidden');
                 else item.classList.add('hidden');
             });
 
+            // Tampilkan Menu 9 dan 10 HANYA untuk Owner
             document.querySelectorAll('.owner-menu-item').forEach(item => {
                 if (isOwnerUnlocked) item.classList.remove('hidden');
                 else item.classList.add('hidden');
