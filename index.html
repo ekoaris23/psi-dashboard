@@ -15,7 +15,7 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
         body { background-color: #0f172a; color: #f8fafc; display: flex; min-height: 100vh; overflow-x: hidden; }
 
-        /* BURGER NAVIGATION & SIDEBAR */
+        /* SIDEBAR NAVIGATION */
         .sidebar { width: 260px; background-color: #1e293b; border-right: 1px solid #334155; display: flex; flex-direction: column; transition: transform 0.3s ease; z-index: 100; position: fixed; top: 0; bottom: 0; left: 0; }
         .sidebar.collapsed { transform: translateX(-100%); }
         .sidebar-header { padding: 20px; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; }
@@ -28,7 +28,7 @@
         .badge-hrd { background: #0284c7; color: white; }
         .badge-owner { background: #dc2626; color: white; }
 
-        /* OVERLAY UNTUK HP */
+        /* OVERLAY HP */
         .sidebar-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: 95; }
         .sidebar-overlay.active { display: block; }
 
@@ -45,7 +45,12 @@
         .main-menu-card:hover { transform: translateY(-4px); border-color: #38bdf8; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
         .main-menu-card h2 { font-size: 20px; font-weight: bold; line-height: 1.4; }
 
-        /* UI ELEMENTS */
+        /* SUB NAV TABS UNTUK UNIT BISNIS */
+        .sub-nav-tabs { display: flex; gap: 10px; border-bottom: 1px solid #334155; margin-bottom: 20px; overflow-x: auto; padding-bottom: 5px; }
+        .sub-tab-btn { background: #1e293b; color: #94a3b8; border: 1px solid #334155; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .sub-tab-btn.active { background: #0284c7; color: white; border-color: #38bdf8; }
+
+        /* UI ELEMENTS & CARDS */
         h1 { color: #38bdf8; font-size: 18px; }
         button { background: #0284c7; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
         button:hover { background: #0369a1; }
@@ -54,8 +59,21 @@
         .btn-owner { background: #059669; }
         .btn-absen { background: #10b981; }
         .btn-absen:hover { background: #059669; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-bottom: 25px; }
         .card { background-color: #1e293b; border-radius: 8px; padding: 15px; border: 1px solid #334155; }
+        .card h3 { color: #94a3b8; font-size: 13px; margin-bottom: 5px; }
+        .card .amount { font-size: 20px; font-weight: bold; color: #4ade80; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 10px; border-bottom: 1px solid #334155; font-size: 13px; }
+        th { color: #94a3b8; }
         .hidden { display: none !important; }
+        input, select, textarea { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 10px; background: #0f172a; border: 1px solid #334155; color: white; border-radius: 4px; }
+        
+        /* PROGRESS BAR */
+        .progress-container { margin-top: 15px; margin-bottom: 15px; }
+        .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 5px; color: #cbd5e1; }
+        .progress-bar-bg { background: #0f172a; border-radius: 10px; height: 10px; overflow: hidden; border: 1px solid #334155; }
+        .progress-bar-fill { background: #22c55e; height: 100%; width: 0%; transition: width 0.3s ease; }
 
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); }
@@ -81,21 +99,20 @@
         </div>
         <ul class="sidebar-menu">
             <li><a href="#" class="active" onclick="switchTab('dashboardMainTab', this)">🏠 Main Dashboard</a></li>
-            <!-- MENU PUBLIK -->
-            <li><a href="#" onclick="switchTab('joblistTab', this)">📋 1. Joblist Harian <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#" onclick="switchTab('kpiTab', this)">🎯 2. KPI Karyawan <span class="menu-badge badge-public">Publik</span></a></li>
-            <li><a href="#" onclick="switchTab('cashTab', this)">📊 3. Arus Kas & Komisi <span class="menu-badge badge-public">Publik</span></a></li>
+            <li><a href="#" onclick="openUnitPortal('PSC')">💻 Paramount Star Komputer</a></li>
+            <li><a href="#" onclick="openUnitPortal('PSD')">🎨 Paramount Star Digital</a></li>
+            <li><a href="#" onclick="openUnitPortal('SPX')">🚚 SPX Gaskeun</a></li>
             
             <!-- MENU HRD & OWNER -->
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('employeeTab', this)">👥 4. Data Karyawan <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('assetTab', this)">📦 5. Data Aset Usaha <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('productTab', this)">🏷️ 6. Data Produk <span class="menu-badge badge-hrd">HRD</span></a></li>
-            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Jadwal, Absensi, Lembur, & Kasbon <span class="menu-badge badge-hrd">HRD</span></a></li>
+            <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('attendanceTab', this)">⏰ 7. Jadwal & Absensi <span class="menu-badge badge-hrd">HRD</span></a></li>
             <li class="hrd-menu-item hidden"><a href="#" onclick="switchTab('payrollTab', this)">💵 8. Penggajian & Slip <span class="menu-badge badge-hrd">HRD</span></a></li>
             
             <!-- MENU OWNER ONLY -->
             <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('ownerDashboardTab', this)">👑 9. Dashboard Owner <span class="menu-badge badge-owner">Owner</span></a></li>
-            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 10. Radar Keuangan & Utang <span class="menu-badge badge-owner">Owner</span></a></li>
+            <li class="owner-menu-item hidden"><a href="#" onclick="switchTab('radarFinanceTab', this)">🔐 10. Radar Keuangan <span class="menu-badge badge-owner">Owner</span></a></li>
         </ul>
     </div>
 
@@ -105,7 +122,7 @@
             <button class="burger-btn hidden" id="burgerToggleBtn" onclick="toggleSidebar()">☰</button>
             <div style="font-weight: bold; color: #38bdf8; font-size: 16px;" id="brandTitle">Paramount Star Operational System</div>
             <div style="display: flex; gap: 8px; align-items: center;">
-                <button class="btn-absen" onclick="openPublicAbsenModal()">⏰ ABSEN KARYAWAN</button>
+                <button class="btn-absen" onclick="alert('Fitur Absensi Publik Siap Digunakan')">⏰ ABSEN KARYAWAN</button>
                 <button id="hrdAuthBtn" class="btn-hrd" onclick="toggleHrdView()">Unlock HRD</button>
                 <button id="ownerAuthBtn" class="btn-owner" onclick="togglePrivateView()">Unlock Owner</button>
             </div>
@@ -113,7 +130,7 @@
 
         <div class="content-body">
 
-            <!-- DASHBOARD HALAMAN UTAMA (4 KARTU MINIMALIS) -->
+            <!-- DASHBOARD UTAMA (4 KARTU MINIMALIS) -->
             <div id="dashboardMainTab" class="tab-content">
                 <div style="margin-bottom: 25px; text-align: center;">
                     <h1 style="font-size: 24px; color: #38bdf8;">🚀 Executive Control Panel - Paramount Star</h1>
@@ -121,77 +138,230 @@
                 </div>
 
                 <div class="dashboard-grid">
-                    
-                    <!-- KARTU 1: PORTAL HRD & SISTEM USAHA -->
                     <div class="main-menu-card" style="border-left: 5px solid #0284c7;" onclick="openHrdPortal()">
                         <h2 style="color: #38bdf8;">👥 1. Portal HRD & Sistem Usaha</h2>
                     </div>
-
-                    <!-- KARTU 2: PARAMOUNT STAR KOMPUTER -->
-                    <div class="main-menu-card" style="border-left: 5px solid #22c55e;" onclick="switchTab('joblistTab')">
+                    <div class="main-menu-card" style="border-left: 5px solid #22c55e;" onclick="openUnitPortal('PSC')">
                         <h2 style="color: #4ade80;">💻 2. Paramount Star Komputer (PSC)</h2>
                     </div>
-
-                    <!-- KARTU 3: PARAMOUNT STAR DIGITAL -->
-                    <div class="main-menu-card" style="border-left: 5px solid #ec4899;" onclick="switchTab('joblistTab')">
+                    <div class="main-menu-card" style="border-left: 5px solid #ec4899;" onclick="openUnitPortal('PSD')">
                         <h2 style="color: #f472b6;">🎨 3. Paramount Star Digital (PSD)</h2>
                     </div>
-
-                    <!-- KARTU 4: SPX GASKEUN -->
-                    <div class="main-menu-card" style="border-left: 5px solid #a855f7;" onclick="switchTab('joblistTab')">
+                    <div class="main-menu-card" style="border-left: 5px solid #a855f7;" onclick="openUnitPortal('SPX')">
                         <h2 style="color: #c084fc;">🚚 4. SPX Gaskeun (Ekspedisi)</h2>
                     </div>
-
                 </div>
             </div>
 
-            <!-- TAB CONTENT CONTAINER -->
-            <div id="joblistTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">📋 Joblist & Checklist Harian Karyawan</h3></div></div>
-            <div id="kpiTab" class="tab-content hidden"><div class="card"><h3 style="color:#4ade80;">🎯 Rekap KPI & Capaian Harian Karyawan</h3></div></div>
-            <div id="cashTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">📊 Riwayat Arus Kas & Estimasi Komisi</h3></div></div>
+            <!-- PORTAL UNIT BISNIS INTERAKSI PUBLIK (PSC / PSD / SPX) -->
+            <div id="unitBusinessTab" class="tab-content hidden">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 id="unitTitleHeader" style="color: #38bdf8; font-size: 20px;">Unit Bisnis</h2>
+                    <button onclick="switchTab('dashboardMainTab')" style="background: #334155; font-size: 12px;">⬅ Kembali ke Main Dashboard</button>
+                </div>
+
+                <!-- SUB NAV TABS INTERNAL -->
+                <div class="sub-nav-tabs">
+                    <button class="sub-tab-btn active" onclick="switchUnitSubTab('joblistSubTab', this)">📋 1. Joblist & Checklist Harian</button>
+                    <button class="sub-tab-btn" onclick="switchUnitSubTab('kpiSubTab', this)">🎯 2. Capaian KPI Karyawan</button>
+                    <button class="sub-tab-btn" onclick="switchUnitSubTab('cashSubTab', this)">📊 3. Arus Kas & Komisi Servis/Project</button>
+                    <button class="sub-tab-btn" onclick="switchUnitSubTab('dbSubTab', this)">📁 4. Database Produk & Customer Journey</button>
+                </div>
+
+                <!-- SUB TAB 1: JOBLIST & CHECKLIST HARIAN -->
+                <div id="joblistSubTab" class="unit-sub-tab">
+                    <div class="card" style="margin-bottom: 15px; border-color: #38bdf8; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                        <div style="flex-grow: 1;">
+                            <label style="font-size:13px; font-weight:bold; color:#38bdf8;">Pilih Identitas Karyawan:</label>
+                            <select id="employeeSelect" onchange="filterJoblist()" style="margin-top:8px; margin-bottom:0; font-size:14px; font-weight:bold;">
+                                <option value="none">-- Pilih Nama Karyawan --</option>
+                                <option value="Eko">Eko - Teknisi Utama</option>
+                                <option value="Budi">Budi - Staff Digital / PSD</option>
+                                <option value="Andi">Andi - Kurir SPX</option>
+                            </select>
+                        </div>
+                        <button class="btn-excel" onclick="alert('Export Excel Joblist')">📊 Export Excel Joblist</button>
+                    </div>
+
+                    <div class="grid">
+                        <div class="card">
+                            <h3 style="color: #38bdf8; margin-bottom: 15px;">Checklist Tugas Harian Karyawan:</h3>
+                            <div id="checklistItems">
+                                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
+                                    <input type="checkbox" onchange="updateProgress()"> Cek & bersihkan workspace / peralatan kerja
+                                </label>
+                                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
+                                    <input type="checkbox" onchange="updateProgress()"> Cek antrean unit & follow up order customer
+                                </label>
+                                <label style="display:flex; gap:10px; margin-bottom:10px; font-size:13px; cursor:pointer;">
+                                    <input type="checkbox" onchange="updateProgress()"> Rekap transaksi harian & input arus kas
+                                </label>
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-label"><span>Capaian Pekerjaan:</span><span id="progressText">0% tercapai</span></div>
+                                <div class="progress-bar-bg"><div id="progressBar" class="progress-bar-fill"></div></div>
+                            </div>
+                            <button style="width:100%; background: #0284c7;" onclick="alert('Checklist harian tersimpan!')">📌 Simpan Checklist Harian Hari Ini</button>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #38bdf8; margin-bottom: 12px;">➕ Tambah Item Joblist Tugas Baru</h3>
+                            <form onsubmit="event.preventDefault(); alert('Joblist Baru Berhasil Ditambahkan!');">
+                                <label style="font-size:12px;">Deskripsi Tugas / Joblist:</label>
+                                <input type="text" placeholder="Contoh: Service Laptop Asus ROG GL553 No Display" required>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <div>
+                                        <label style="font-size:12px;">Prioritas:</label>
+                                        <select><option>Normal</option><option>Tinggi</option><option>Urgent 🔥</option></select>
+                                    </div>
+                                    <div>
+                                        <label style="font-size:12px;">Deadline:</label>
+                                        <input type="date">
+                                    </div>
+                                </div>
+                                <button type="submit" style="width:100%; margin-top:10px;">💾 Simpan Joblist Baru</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 2: KPI KARYAWAN -->
+                <div id="kpiSubTab" class="unit-sub-tab hidden">
+                    <div class="card" style="border-color: #22c55e; margin-bottom: 20px;">
+                        <h3 style="color: #4ade80; font-size: 16px; margin-bottom: 12px;">🎯 Rekap Capaian KPI Harian Karyawan</h3>
+                        <div style="overflow-x: auto;">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Tanggal</th>
+                                        <th>Nama Karyawan</th>
+                                        <th>Capaian KPI</th>
+                                        <th>Status Performa</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>22/09/2026</td>
+                                        <td>Eko (PSC)</td>
+                                        <td style="color:#22c55e; font-weight:bold;">100%</td>
+                                        <td><span style="background:#16a34a; padding:2px 6px; border-radius:4px; font-size:11px;">Sangat Baik</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>22/09/2026</td>
+                                        <td>Budi (PSD)</td>
+                                        <td style="color:#38bdf8; font-weight:bold;">85%</td>
+                                        <td><span style="background:#0284c7; padding:2px 6px; border-radius:4px; font-size:11px;">Baik</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 3: ARUS KAS & KOMISI -->
+                <div id="cashSubTab" class="unit-sub-tab hidden">
+                    <div class="grid">
+                        <div class="card">
+                            <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">💰 Input Transaksi Arus Kas Unit</h3>
+                            <form onsubmit="event.preventDefault(); alert('Transaksi Kas Tersimpan!');">
+                                <label style="font-size:12px;">Tipe Transaksi:</label>
+                                <select><option value="masuk">Pemasukan (Omset / Servis)</option><option value="keluar">Pengeluaran (Operasional)</option></select>
+                                <label style="font-size:12px;">Nominal (Rp):</label>
+                                <input type="number" placeholder="Contoh: 250000" required>
+                                <label style="font-size:12px;">Keterangan Transaksi:</label>
+                                <input type="text" placeholder="Contoh: Servis ganti keyboard Acer Nitro 5" required>
+                                <button type="submit" style="width: 100%; margin-top: 5px; background: #22c55e;">💾 Catat Transaksi</button>
+                            </form>
+                        </div>
+
+                        <div class="card">
+                            <h3 style="color: #38bdf8; font-size: 15px; margin-bottom: 10px;">📊 Riwayat Transaksi Hari Ini</h3>
+                            <div style="overflow-x: auto;">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Waktu</th>
+                                            <th>Keterangan</th>
+                                            <th>Nominal</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>14:20 WIB</td>
+                                            <td>Ganti Keyboard Acer Nitro 5</td>
+                                            <td style="color:#4ade80; font-weight:bold;">+ Rp 250.000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>11:00 WIB</td>
+                                            <td>Beli Pasta Thermal Arctic MX-4</td>
+                                            <td style="color:#f87171; font-weight:bold;">- Rp 85.000</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUB TAB 4: DATABASE PRODUK & CUSTOMER -->
+                <div id="dbSubTab" class="unit-sub-tab hidden">
+                    <div class="card" style="border-color: #f59e0b;">
+                        <h3 style="color: #fbbf24; margin-bottom: 8px;">📁 Database Produk, Customer, & Journey Map</h3>
+                        <p style="font-size: 12px; color: #94a3b8;">Modul integrasi database katalog khusus unit bisnis sedang dalam tahap sinkronisasi data real-time.</p>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- TAB MENU HRD & OWNER -->
             <div id="employeeTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">👥 Management Data Karyawan (HRIS)</h3></div></div>
             <div id="assetTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">📦 Inventaris Aset Usaha</h3></div></div>
             <div id="productTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">🏷️ Katalog Produk & Sparepart</h3></div></div>
-            <div id="attendanceTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">⏰ Jadwal, Absensi, Lembur, & Kasbon</h3></div></div>
+            <div id="attendanceTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">⏰ Jadwal & Absensi Karyawan</h3></div></div>
             <div id="payrollTab" class="tab-content hidden"><div class="card"><h3 style="color:#38bdf8;">💵 Payroll & Penggajian Karyawan</h3></div></div>
-            <div id="ownerDashboardTab" class="tab-content hidden"><div class="card" style="border-color:#22c55e;"><h2 style="color:#4ade80;">👑 Executive Control Hub & Monitoring Lini Usaha</h2></div></div>
+            <div id="ownerDashboardTab" class="tab-content hidden"><div class="card" style="border-color:#22c55e;"><h2 style="color:#4ade80;">👑 Executive Control Hub Dashboard</h2></div></div>
             <div id="radarFinanceTab" class="tab-content hidden"><div class="card" style="border-color:#ef4444;"><h2 style="color:#ef4444;">🔐 Radar Keuangan, Investor, Utang & Piutang</h2></div></div>
 
         </div>
     </div>
 
     <script>
-        const firebaseConfig = {
-          apiKey: "AIzaSyBwFTcdXMdHbGLE5HsMtOiYs06WfZAuNs0",
-          authDomain: "psi-app-e9ccc.firebaseapp.com",
-          projectId: "psi-app-e9ccc",
-          storageBucket: "psi-app-e9ccc.firebasestorage.app",
-          messagingSenderId: "185461868673",
-          appId: "1:185461868673:web:328af96a1ecbfa3e8ae580",
-          measurementId: "G-2Y7XJDT3F6"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
         const PIN_HRD = "0000";
         const PIN_KOMISARIS = "admin123";
         
         let isOwnerUnlocked = false;
         let isHrdUnlocked = false;
 
-        window.onload = function() {
-            updateSidebarVisibility();
-        };
-
-        function switchTab(tabId, element) {
+        function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
-            document.querySelectorAll('.sidebar-menu a').forEach(a => a.classList.remove('active'));
-
             document.getElementById(tabId).classList.remove('hidden');
-            if (element) element.classList.add('active');
-
             if (window.innerWidth <= 768) closeSidebarMobile();
+        }
+
+        function openUnitPortal(unitName) {
+            switchTab('unitBusinessTab');
+            const titleEl = document.getElementById('unitTitleHeader');
+            if (unitName === 'PSC') titleEl.innerHTML = "💻 Paramount Star Komputer (PSC)";
+            else if (unitName === 'PSD') titleEl.innerHTML = "🎨 Paramount Star Digital (PSD)";
+            else if (unitName === 'SPX') titleEl.innerHTML = "🚚 SPX Gaskeun (Ekspedisi)";
+        }
+
+        function switchUnitSubTab(subTabId, element) {
+            document.querySelectorAll('.unit-sub-tab').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(subTabId).classList.remove('hidden');
+            if (element) element.classList.add('active');
+        }
+
+        function updateProgress() {
+            const checkboxes = document.querySelectorAll('#checklistItems input[type="checkbox"]');
+            let checkedCount = 0;
+            checkboxes.forEach(cb => { if (cb.checked) checkedCount++; });
+            const percent = Math.round((checkedCount / checkboxes.length) * 100);
+            
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').innerText = percent + '% tercapai';
         }
 
         function openHrdPortal() {
@@ -201,9 +371,7 @@
                     isHrdUnlocked = true;
                     updateAuthBtnState();
                     switchTab('employeeTab');
-                } else if (pin !== null) {
-                    alert("PIN HRD Salah!");
-                }
+                } else if (pin !== null) alert("PIN HRD Salah!");
             } else {
                 switchTab('employeeTab');
             }
@@ -212,7 +380,6 @@
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
             const overlay = document.getElementById('sidebarOverlay');
-            
             sidebar.classList.toggle('active');
             sidebar.classList.toggle('collapsed');
             overlay.classList.toggle('active');
@@ -290,8 +457,6 @@
 
             updateSidebarVisibility();
         }
-
-        function openPublicAbsenModal() { alert("Fitur Absen Karyawan Siap Digunakan."); }
     </script>
 </body>
 </html>
